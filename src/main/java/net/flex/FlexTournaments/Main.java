@@ -19,8 +19,8 @@ public class Main extends JavaPlugin {
         CommandManager.register(new Kit());
         createCustomConfig();
         getConfig().addDefault("kit-no-arguments", "You have to type at least one argument");
+        getConfig().addDefault("kit-not-exists", "Kit doesn't exist");
         saveDefaultConfig();
-        getConfig().set("kit-not-exists", "Kit doesn't exist");
         saveConfig();
     }
 

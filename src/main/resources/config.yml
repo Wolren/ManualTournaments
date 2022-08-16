@@ -1,1 +1,3 @@
 kit-no-arguments: "You have to type at least one argument"
+kit-not-exists: "Kit doesn't exist"
+kit-already-exists: "Kit with this name already exists!"
