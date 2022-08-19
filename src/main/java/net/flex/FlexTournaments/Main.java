@@ -1,6 +1,7 @@
 package net.flex.FlexTournaments;
 
 import net.flex.FlexTournaments.api.CommandManager;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,41 +15,37 @@ public class Main extends JavaPlugin {
     public static Main getPlugin() {
         return getPlugin(Main.class);
     }
-
-    private File aConfigfile;
-
-    private File customConfigFile;
-    private FileConfiguration aConfig;
-
-    private FileConfiguration customConfig;
+    private File KitsConfigfile, customConfigFile;
+    private FileConfiguration KitsConfig, customConfig;
 
     public void onEnable(){
         CommandManager.register(new Kit());
-        this.kitNames = new ArrayList();
-        createaConfig();
+        kitNames = new ArrayList();
+        createKitsConfig();
         createCustomConfig();
-        getConfig().addDefault("kit-no-arguments", "You have to type at least one argument");
-        getConfig().addDefault("kit-not-exists", "Kit doesn't exist");
-        saveDefaultConfig();
-        saveConfig();
+        getConfig().options().copyDefaults(true);
+        FileConfiguration config = YamlConfiguration.loadConfiguration(KitsConfigfile);
+        if (config.getConfigurationSection("Kits") != null) {
+            kitNames.addAll(config.getConfigurationSection("Kits").getKeys(false));
+        }
     }
 
     public void onDisable() {
     }
 
-    public FileConfiguration getaConfig() {
-        return this.aConfig;
+    public FileConfiguration getKitsConfig() {
+        return this.KitsConfig;
     }
 
-    private void createaConfig() {
-        aConfigfile = new File(getDataFolder(), "kits.yml");
-        if (!aConfigfile.exists()) {
-            aConfigfile.getParentFile().mkdirs();
+    private void createKitsConfig() {
+        KitsConfigfile = new File(getDataFolder(), "kits.yml");
+        if (!KitsConfigfile.exists()) {
+            KitsConfigfile.getParentFile().mkdirs();
             saveResource("kits.yml", false);
         }
 
-        aConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(aConfigfile);
+        KitsConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(KitsConfigfile);
     }
 
     private void createCustomConfig() {
@@ -60,5 +57,9 @@ public class Main extends JavaPlugin {
 
         customConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(customConfigFile);
+    }
+
+    public String color(String msg) {
+        return ChatColor.translateAlternateColorCodes('&', msg);
     }
 }

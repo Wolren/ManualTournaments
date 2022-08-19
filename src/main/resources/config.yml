@@ -1,4 +1,8 @@
-kit-no-arguments: "You have to type at least one argument"
-kit-not-exists: "Kit doesn't exist"
-kit-already-exists: "Kit with this name already exists"
 sender-not-a-player: "Sender must be a player"
+wrong-arguments: "Number of arguments is incorrect"
+
+kit-already-exists: "Kit with this name already exists"
+kit-given: "Kit given successfully"
+kit-made: "Kit made successfully"
+kit-not-exists: "Kit doesn't exist"
+kit-removed: "Kit removed successfully"
