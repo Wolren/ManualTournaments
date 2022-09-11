@@ -1,8 +1,20 @@
-sender-not-a-player: "Sender must be a player"
-wrong-arguments: "Number of arguments is incorrect"
+current-kit: ""
+current-arena: "a"
 
+
+arena-create: "You have to define positions for players and spectators using /arena pos1 (arena name) /arena pos2 (arena name) /arena spectator (arena name)"
+arena-created: "Arena created successfully"
+arena-list: "Arenas: "
+arena-pos1: "Position for player 1 set successfully"
+arena-pos2: "Position for player 2 set successfully"
+arena-spectator: "Position for spectator set successfully"
 kit-already-exists: "Kit with this name already exists"
 kit-given: "Kit given successfully"
+kit-list: "Kits: "
 kit-made: "Kit made successfully"
 kit-not-exists: "Kit doesn't exist"
 kit-removed: "Kit removed successfully"
+sender-not-a-player: "Sender must be a player"
+wrong-arguments: "Number of arguments is incorrect"
+
+
