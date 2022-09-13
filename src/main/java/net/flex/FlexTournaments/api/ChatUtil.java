@@ -113,7 +113,7 @@ public final class ChatUtil {
 
     public static boolean sendMessage(CommandSender sender, String message) {
         if (sender instanceof Player) {
-            if (message != null || message != "") {
+            if (message != null || null != "") {
                 sender.sendMessage(fixColor(message));
             }
         } else {
@@ -128,7 +128,6 @@ public final class ChatUtil {
         HashMap<Integer, ItemStack> notStored = playerInventory.removeItem(items);
 
         for(Entry var5 : notStored.entrySet()) {
-            ;
         }
 
     }
