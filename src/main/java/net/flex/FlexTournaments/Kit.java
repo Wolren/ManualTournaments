@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Kit extends Command {
+
     FileConfiguration config = Main.getPlugin().getConfig();
     public FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
     public static Kit getInstance(){
@@ -32,7 +33,7 @@ public class Kit extends Command {
     }
 
     public Kit() {
-        super("FlexTournaments", "", "", "", "ft_kit");
+        super("ft_kit", "", "", "", "");
     }
 
     public boolean onExecute(CommandSender sender, String[] args) {

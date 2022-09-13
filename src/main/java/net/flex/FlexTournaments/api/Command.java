@@ -1,14 +1,18 @@
 package net.flex.FlexTournaments.api;
 
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
 import java.util.Arrays;
 
 public abstract class Command extends org.bukkit.command.Command {
-    private final String name;
+    public static String name;
     private final String usage;
     private final String desc;
     private final String permission;
+    private CommandExecutor executor;
+    private TabCompleter completer;
 
     public Command(String name, String desc, String usage, String permission, String... aliases) {
         super(name, desc, usage, Arrays.asList(aliases));

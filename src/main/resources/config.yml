@@ -1,5 +1,22 @@
-current-kit: ""
+countdown-time: 10
+teleport-countdown-time: 3
+kill-on-fight-end: true
+#if kill-on-fight is false people will be teleported to location below, you can specify it manually or using /ft_settings endspawn
+fight-end-spawn:
+  x:
+  y:
+  z:
+  yaw:
+  pitch:
+
+current-kit: "a"
 current-arena: "a"
+fight-winners: "Congratulations to: "
+fight-winners2: " for winning the fight!"
+team1: "Red"
+team2: "Blue"
+team1-prefix: "Red "
+team2-prefix: "Blue "
 
 
 arena-create: "You have to define positions for players and spectators using /arena pos1 (arena name) /arena pos2 (arena name) /arena spectator (arena name)"
@@ -8,6 +25,10 @@ arena-list: "Arenas: "
 arena-pos1: "Position for player 1 set successfully"
 arena-pos2: "Position for player 2 set successfully"
 arena-spectator: "Position for spectator set successfully"
+fight-duplicates: "There can't be any duplicates in player names"
+fight-good-luck: "Good luck :)"
+fight-will-start: "Fight will start in "
+fight-will-start-seconds: " seconds"
 kit-already-exists: "Kit with this name already exists"
 kit-given: "Kit given successfully"
 kit-list: "Kits: "
@@ -16,5 +37,3 @@ kit-not-exists: "Kit doesn't exist"
 kit-removed: "Kit removed successfully"
 sender-not-a-player: "Sender must be a player"
 wrong-arguments: "Number of arguments is incorrect"
-
-

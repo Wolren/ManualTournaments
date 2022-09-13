@@ -1,13 +1,17 @@
 package net.flex.FlexTournaments;
 
 import net.flex.FlexTournaments.api.Command;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 public class Arena extends Command {
@@ -16,7 +20,7 @@ public class Arena extends Command {
     private final FileConfiguration ArenasConfig = Main.getPlugin().ArenaConfig;
 
     public Arena() {
-        super("FlexTournaments", "", "", "", "ft_arena");
+        super("ft_arena", "", "", "", "");
     }
 
     public boolean onExecute(CommandSender sender, String[] args) {
@@ -45,15 +49,15 @@ public class Arena extends Command {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("arena-create"))));
                 } else if (args[0].equals("pos1") & Main.getPlugin().arenaNames.contains(args[1])) {
                     String pathing = path + "pos1.";
-                    getLocation(pathing, player);
+                    getLocation(pathing, player, ArenasConfig);
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("arena-pos1"))));
                 } else if (args[0].equals("pos2") & Main.getPlugin().arenaNames.contains(args[1])) {
                     String pathing = path + "pos2.";
-                    getLocation(pathing, player);
+                    getLocation(pathing, player, ArenasConfig);
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("arena-pos2"))));
                 } else if ((args[0].equals("spec") || args[0].equals("spectator")) & Main.getPlugin().arenaNames.contains(args[1])) {
                     String pathing = path + "spectator.";
-                    getLocation(pathing, player);
+                    getLocation(pathing, player, ArenasConfig);
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("arena-spectator"))));
                 }
             } else {
@@ -70,7 +74,7 @@ public class Arena extends Command {
         return false;
     }
 
-    private void getLocation(String pathing, Player player) {
+    public static void getLocation(String pathing, Player player, FileConfiguration cfg) {
         double x = player.getLocation().getX();
         double y = player.getLocation().getY();
         double z = player.getLocation().getZ();
@@ -78,12 +82,22 @@ public class Arena extends Command {
         float pitch =  player.getLocation().getPitch();
         String world = Objects.requireNonNull(player.getLocation().getWorld()).getName();
 
-        ArenasConfig.set(pathing + "x", x);
-        ArenasConfig.set(pathing + "y", y);
-        ArenasConfig.set(pathing + "z", z);
-        ArenasConfig.set(pathing + "yaw", yaw);
-        ArenasConfig.set(pathing + "pitch", pitch);
-        ArenasConfig.set(pathing + "world", world);
+        cfg.set(pathing + "x", x);
+        cfg.set(pathing + "y", y);
+        cfg.set(pathing + "z", z);
+        cfg.set(pathing + "yaw", yaw);
+        cfg.set(pathing + "pitch", pitch);
+        cfg.set(pathing + "world", world);
+    }
+
+    public static Location pathing(String path, FileConfiguration cfg) {
+        World world = Bukkit.getWorld(Objects.requireNonNull(cfg.get(path + "world")).toString());
+        double x = cfg.getDouble(path + "x");
+        double y = cfg.getDouble(path + "y");
+        double z = cfg.getDouble(path + "z");
+        float yaw = (float) cfg.getDouble(path + "yaw");
+        float pitch = (float) cfg.getDouble(path + "pitch");
+        return new Location(world, x, y, z, yaw, pitch);
     }
 
     private void checkArena(Player player, String arenaName) {

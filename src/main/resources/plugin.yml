@@ -4,3 +4,5 @@ name: FlexTournaments
 version: 1.0
 author: Wildbot
 description: FlexTournaments
+commands:
+  ft_kit:

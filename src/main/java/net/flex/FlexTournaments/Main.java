@@ -38,6 +38,8 @@ public class Main extends JavaPlugin {
         CommandManager.register(new Arena());
         CommandManager.register(new Fight());
         CommandManager.register(new Settings());
+        Objects.requireNonNull(getCommand("ft_kit")).setTabCompleter(new KitTab());
+        this.getServer().getPluginManager().registerEvents(new MyListener(), this);
     }
 
     public void onDisable() {
