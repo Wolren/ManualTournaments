@@ -1,9 +1,11 @@
 package net.flex.FlexTournaments;
 
-import net.flex.FlexTournaments.api.Command;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,6 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,11 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class Kit extends Command {
+public class Kit implements TabCompleter, CommandExecutor {
 
-    FileConfiguration config = Main.getPlugin().getConfig();
     public FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
-    public static Kit getInstance(){
+    FileConfiguration config = Main.getPlugin().getConfig();
+
+    public static Kit getInstance() {
         try {
             return Kit.class.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -32,55 +37,70 @@ public class Kit extends Command {
         }
     }
 
-    public Kit() {
-        super("ft_kit", "", "", "", "");
-    }
-
-    public boolean onExecute(CommandSender sender, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         try {
             KitsConfig.load(Main.getPlugin().KitsConfigfile);
         } catch (IOException | InvalidConfigurationException e) {
             throw new RuntimeException(e);
         }
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sender-not-a-player"))));
+            sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
             Player player = ((Player) sender).getPlayer();
             assert player != null;
             if (args.length == 0) {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("wrong-arguments"))));
+                Main.getPlugin();
+                player.sendMessage(Main.conf("wrong-arguments"));
             } else if (args.length == 1) {
-                if (Main.getPlugin().kitNames != null & !Main.getPlugin().kitNames.contains(args[0]) & !args[0].equals("list")) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("kit-not-exists"))));
-                } else if (args[0].equals("list")) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("kit-list"))) + ChatColor.translateAlternateColorCodes('&', Main.getPlugin().kitNames.toString()));
+                if (args[0].equals("list")) {
+                    player.sendMessage(Main.conf("kit-list") + Main.getPlugin().kitNames.toString());
+                } else if (args[0].equals("unbreakable")) {
+                    ItemStack[] inv = player.getInventory().getContents();
+                    for (ItemStack im : inv) {
+                        if (im != null) {
+                            if (im.getType().getMaxDurability() != 0) {
+                                ItemMeta unb = im.getItemMeta();
+                                assert unb != null;
+                                unb.setUnbreakable(true);
+                                im.setItemMeta(unb);
+                            }
+                        }
+                    }
                 } else if (Main.getPlugin().kitNames.contains(args[0])) {
                     String kitName = args[0];
                     giveKit(player, kitName);
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("kit-given"))));
+                    player.sendMessage(Main.conf("kit-given"));
+                } else {
+                    player.sendMessage(Main.conf("kit-not-exists"));
                 }
-            } else if (args.length == 2 & args[0].equals("create")) {
+            } else if (args.length == 2) {
                 String kitName = args[1];
-                createKit(player, kitName);
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("kit-made"))));
-            } else if (args.length == 2 & (args[0].equals("delete") || args[0].equals("remove"))) {
-                if (Main.getPlugin().kitNames.contains(args[1])) {
-                    String kitName = args[1];
-                    KitsConfig.set("Kits." + kitName, null);
-                    try {
-                       Main.getPlugin().getKitsConfig().save(Main.getPlugin().KitsConfigfile);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                if (args[0].equals("create")) {
+                    if (Main.getPlugin().kitNames.contains(args[1])) {
+                        createKit(player, kitName);
+                        player.sendMessage(Main.conf("kit-made"));
+                    } else player.sendMessage(Main.conf("kit-already-exists"));
+                } else if (Main.getPlugin().kitNames.contains(args[1])) {
+                    if (args[0].equals("remove")) {
+                        KitsConfig.set("Kits." + kitName, null);
+                        Main.getPlugin().kitNames.remove(kitName);
+                        player.sendMessage(Main.conf("kit-removed"));
+                    } else if (args[0].equals("give")) {
+                        giveKit(player, kitName);
+                        player.sendMessage(Main.conf("kit-given"));
                     }
-                    Main.getPlugin().kitNames.remove(kitName);
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("kit-removed"))));
+                } else {
+                    player.sendMessage(Main.conf("kit-not-exists"));
                 }
             } else {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("wrong-arguments"))));
+                player.sendMessage(Main.conf("wrong-arguments"));
+            }
+            try {
+                Main.getPlugin().getKitsConfig().save(Main.getPlugin().KitsConfigfile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
-
-
         return false;
     }
 
@@ -108,7 +128,7 @@ public class Kit extends Command {
         String path = "Kits." + kitName + ".";
         PlayerInventory inv = player.getInventory();
         if (Main.getPlugin().kitNames.contains(kitName)) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(Main.getPlugin().getConfig().getString("kit-already-exists"))));
+            player.sendMessage(Main.conf("kit-already-exists"));
         } else {
             Main.getPlugin().kitNames.add(kitName);
             for (int i = 0; i < 36; i++) {
@@ -118,26 +138,26 @@ public class Kit extends Command {
 
                 String pathing = path + "items." + i;
                 getType(pathing, is);
-                }
             }
+        }
 
-            for (ItemStack armor : inv.getArmorContents()) {
-                if (armor != null) {
-                    String pathing = path + "armor." + armor.getType().toString().toUpperCase();
-                    KitsConfig.set(pathing, inv.getArmorContents());
-                    getType(pathing, armor);
-                    }
-                }
-            ItemStack offhand = inv.getItemInOffHand();
+        for (ItemStack armor : inv.getArmorContents()) {
+            if (armor != null) {
+                String pathing = path + "armor." + armor.getType().toString().toUpperCase();
+                KitsConfig.set(pathing, inv.getArmorContents());
+                getType(pathing, armor);
+            }
+        }
+        ItemStack offhand = inv.getItemInOffHand();
         String oathing = path + "offhand." + offhand.getType().toString().toUpperCase();
         KitsConfig.set(oathing, offhand);
         getType(oathing, offhand);
 
         try {
             Main.getPlugin().getKitsConfig().save(Main.getPlugin().KitsConfigfile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setIntType(Player player, ConfigurationSection s, String path) {
@@ -248,7 +268,7 @@ public class Kit extends Command {
         String path = "Kits." + kitName + ".";
         player.getInventory().clear();
         player.setHealth(20.0);
-        for(PotionEffect effect : player.getActivePotionEffects()) {
+        for (PotionEffect effect : player.getActivePotionEffects()) {
             player.removePotionEffect(effect.getType());
         }
         player.setFoodLevel(20);
@@ -260,5 +280,23 @@ public class Kit extends Command {
         ConfigurationSection c = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "offhand");
         setOffHandType(player, c, path);
         player.updateInventory();
+    }
+
+    @Nullable
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] args) {
+        if (args.length == 1) {
+            return new ArrayList<>(List.of("create", "give", "list", "remove", "unbreakable"));
+        } else if (args.length == 2) {
+            List<String> b = new ArrayList<>();
+            if (args[0].equals("create")) {
+                b.add("[name]");
+            } else if (args[0].equals("remove") || args[0].equals("give")) {
+                b.addAll(Main.getPlugin().kitNames);
+            }
+
+            return b;
+        }
+
+        return List.of();
     }
 }

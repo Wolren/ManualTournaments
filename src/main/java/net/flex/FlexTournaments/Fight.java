@@ -1,7 +1,9 @@
 package net.flex.FlexTournaments;
 
-import net.flex.FlexTournaments.api.Command;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,10 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Fight extends Command {
-    public Fight() {
-        super("ft_fight", "", "", "", "");
-    }
+public class Fight implements CommandExecutor {
 
     private static final FileConfiguration config = Main.getPlugin().getConfig();
     private final FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
@@ -33,17 +33,14 @@ public class Fight extends Command {
         board = manager.getNewScoreboard();
     }
 
-    public static Team teamA = board.registerNewTeam((ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("team1")))));
-    public static Team teamB = board.registerNewTeam((ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("team2")))));
+    public static Team teamA = board.registerNewTeam(Main.conf("team1"));
+    public static Team teamB = board.registerNewTeam(Main.conf("team2"));
     List<String> distinctElements = new java.util.ArrayList<>(List.of());
-
-    public static ArrayList<UUID> players = new ArrayList<>();
-
     public static ArrayList<UUID> team1 = new ArrayList<>();
-
     public static ArrayList<UUID> team2 = new ArrayList<>();
+    public static ArrayList<Player> temporary = new ArrayList<>();
 
-    public boolean onExecute(CommandSender sender, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         try {
             KitsConfig.load(Main.getPlugin().KitsConfigfile);
             ArenasConfig.load(Main.getPlugin().ArenaConfigFile);
@@ -51,22 +48,23 @@ public class Fight extends Command {
             throw new RuntimeException(e);
         }
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("sender-not-a-player"))));
+            sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
             Player player = ((Player) sender).getPlayer();
             assert player != null;
             if (args.length == 0 || args.length == 1) {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("wrong-arguments"))));
+                player.sendMessage(Main.conf("wrong-arguments"));
             } else if (args.length <= 20) {
                 if (args.length % 2 == 0) {
                     distinctElements.clear();
-                    teamA.setPrefix((ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("team1-prefix")))));
-                    teamB.setPrefix((ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("team2-prefix")))));
+                    team1.clear();
+                    team2.clear();
+                    teamA.setPrefix(Main.conf("team1-prefix"));
+                    teamB.setPrefix(Main.conf("team2-prefix"));
                     for (int i = 0; i < args.length; i++) {
                         if (!args[i].equals("null")) {
                             Player fighter = Bukkit.getPlayer(args[i]);
                             if (fighter != null) {
-                                players.add(fighter.getUniqueId());
                                 distinctElements.add(Objects.requireNonNull(fighter).toString());
                                 if (i < (args.length / 2)) {
                                     teamA.addPlayer(fighter);
@@ -94,8 +92,12 @@ public class Fight extends Command {
                                     (new BukkitRunnable() {
                                         int i = config.getInt("countdown-time");
                                         public void run() {
+                                            player.setWalkSpeed(0);
+                                            temporary.add(fighter);
                                             if (this.i == 0) {
+                                                player.setWalkSpeed(0.2f);
                                                 fighter.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+                                                temporary.clear();
                                                 this.cancel();
                                             } else {
                                                 fighter.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
@@ -115,10 +117,10 @@ public class Fight extends Command {
 
                             public void run() {
                                 if (this.i == 0) {
-                                    Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("fight-good-luck"))));
+                                    Bukkit.broadcastMessage(Main.conf("fight-good-luck"));
                                     this.cancel();
                                 } else {
-                                    Bukkit.broadcastMessage((ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("fight-will-start")))) + this.i + (ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("fight-will-start-seconds")))));
+                                    Bukkit.broadcastMessage(Main.conf("fight-will-start") + this.i + Main.conf("fight-will-start-seconds"));
                                 }
 
                                 --this.i;
@@ -126,13 +128,13 @@ public class Fight extends Command {
                         }).runTaskTimer(Main.getPlugin(), 0L, 20L);
 
                     } else {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("fight-duplicates"))));
+                        player.sendMessage(Main.conf("fight-duplicates"));
                     }
                 } else {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("wrong-arguments"))));
+                    player.sendMessage(Main.conf("wrong-arguments"));
                 }
             } else {
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString("wrong-arguments"))));
+                player.sendMessage(Main.conf("wrong-arguments"));
             }
         }
         return false;

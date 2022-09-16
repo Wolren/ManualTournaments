@@ -5,4 +5,15 @@ version: 1.0
 author: Wildbot
 description: FlexTournaments
 commands:
-  ft_kit:
+  flextournaments_arena:
+    aliases:
+      - ft_arena
+  flextournaments_fight:
+    aliases:
+      - ft_fight
+  flextournaments_kit:
+    aliases:
+      - ft_kit
+  flextournaments_settings:
+    aliases:
+      - ft_settings
