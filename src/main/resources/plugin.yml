@@ -8,12 +8,16 @@ commands:
   flextournaments_arena:
     aliases:
       - ft_arena
+      - fta
   flextournaments_fight:
     aliases:
       - ft_fight
+      - ftf
   flextournaments_kit:
     aliases:
       - ft_kit
+      - ftk
   flextournaments_settings:
     aliases:
       - ft_settings
+      - fts

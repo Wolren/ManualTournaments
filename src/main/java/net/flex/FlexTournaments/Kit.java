@@ -76,7 +76,7 @@ public class Kit implements TabCompleter, CommandExecutor {
             } else if (args.length == 2) {
                 String kitName = args[1];
                 if (args[0].equals("create")) {
-                    if (Main.getPlugin().kitNames.contains(args[1])) {
+                    if (!Main.getPlugin().kitNames.contains(args[1])) {
                         createKit(player, kitName);
                         player.sendMessage(Main.conf("kit-made"));
                     } else player.sendMessage(Main.conf("kit-already-exists"));

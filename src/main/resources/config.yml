@@ -1,7 +1,20 @@
+#Time (in seconds) to prepare before the fight during which players will be frozen (if freeze-on-start is true)
 countdown-time: 10
+#Time after the fight after which winners will be either killed or teleported depending on kill-on-fight option
 teleport-countdown-time: 3
+#If true fighters will be able to drop their items during the fight
+drop-items: false
+#If true fighters will be able to destroy blocks during the fight (you have to set WorldGuard flags to prevent arena from being destroyed separately)
+break-blocks: false
+#If true fighter's items will drop on the ground after their death
+drop-on-death: false
+#If true fighters will be frozen in the beginning of the fight for countdown-time: seconds
+freeze-on-start: true
+#If true friendly fire inside team will be turned on
+friendly-fire: false
+#If true winners will be killed after the fight
 kill-on-fight-end: true
-#if kill-on-fight is false people will be teleported to location below, you can specify it manually or using /ft_settings endspawn
+#If kill_on_fight_end is false fighters will be teleported to location below, you can specify it manually or using /ft_settings endspawn
 fight-end-spawn:
   x:
   y:
@@ -9,10 +22,9 @@ fight-end-spawn:
   yaw:
   pitch:
 
-current-kit: "a"
-current-arena: "a"
-fight-winners: "Congratulations to: "
-fight-winners2: " for winning the fight!"
+current-kit: ""
+current-arena: ""
+fight-winners: "Congratulations to {team winning the fight!"
 team1: "Red"
 team2: "Blue"
 team1-prefix: "Red "
@@ -32,6 +44,10 @@ arena-pos2: "Position for player 2 set successfully"
 arena-removed: "Arena removed successfully"
 arena-set-correctly: "Arena is set correctly"
 arena-spectator: "Position for spectator set successfully"
+config-options: "Only possible options are true and false"
+config-updated-successfully: "Config was updated successfully"
+current-arena-not-set: "You have to set current arena using /ft_settings current_arena before starting the fight"
+current-kit-not-set: "You have to set current kit using /ft_settings current_kit before starting the fight"
 fight-duplicates: "There can't be any duplicates in player names"
 fight-good-luck: "Good luck :)"
 fight-will-start: "Fight will start in "

@@ -56,11 +56,19 @@ public class Fight implements CommandExecutor {
                 player.sendMessage(Main.conf("wrong-arguments"));
             } else if (args.length <= 20) {
                 if (args.length % 2 == 0) {
+                    Objects.requireNonNull(board.getTeam(Main.conf("team1"))).unregister();
+                    Objects.requireNonNull(board.getTeam(Main.conf("team2"))).unregister();
+                    board.registerNewTeam(Main.conf("team1"));
+                    board.registerNewTeam(Main.conf("team2"));
                     distinctElements.clear();
                     team1.clear();
                     team2.clear();
                     teamA.setPrefix(Main.conf("team1-prefix"));
                     teamB.setPrefix(Main.conf("team2-prefix"));
+                    if (config.getBoolean("friendly-fire")) {
+                        teamA.allowFriendlyFire();
+                        teamB.allowFriendlyFire();
+                    }
                     for (int i = 0; i < args.length; i++) {
                         if (!args[i].equals("null")) {
                             Player fighter = Bukkit.getPlayer(args[i]);
@@ -81,23 +89,37 @@ public class Fight implements CommandExecutor {
                             if (!args[i].equals("null")) {
                                 Player fighter = Bukkit.getPlayer(args[i]);
                                 if (fighter != null) {
-                                    String path1 = "Arenas." + config.getString("current-arena") + "." + "pos1" + ".";
-                                    String path2 = "Arenas." + config.getString("current-arena") + "." + "pos2" + ".";
-                                    Kit(fighter);
-                                    if (i < (args.length / 2)) {
-                                        fighter.teleport(Arena.pathing(path1, ArenasConfig));
-                                    } else if (i >= (args.length / 2)) {
-                                        fighter.teleport(Arena.pathing(path2, ArenasConfig));
+                                    if (config.getString("current-arena") != null) {
+                                        String path1 = "Arenas." + config.getString("current-arena") + "." + "pos1" + ".";
+                                        String path2 = "Arenas." + config.getString("current-arena") + "." + "pos2" + ".";
+                                        if (i < (args.length / 2)) {
+                                            fighter.teleport(Arena.pathing(path1, ArenasConfig));
+                                        } else if (i >= (args.length / 2)) {
+                                            fighter.teleport(Arena.pathing(path2, ArenasConfig));
+                                        }
+                                    } else {
+                                        player.sendMessage("current-arena-not-set");
+                                        return false;
+                                    }
+                                    if (Kit(fighter)) {
+                                        Kit(fighter);
+                                    } else {
+                                        player.sendMessage("current-kit-not-set");
+                                        return false;
                                     }
                                     (new BukkitRunnable() {
                                         int i = config.getInt("countdown-time");
                                         public void run() {
-                                            player.setWalkSpeed(0);
-                                            temporary.add(fighter);
+                                            if (config.getBoolean("freeze-on-start")) {
+                                                player.setWalkSpeed(0);
+                                                temporary.add(fighter);
+                                            }
                                             if (this.i == 0) {
-                                                player.setWalkSpeed(0.2f);
+                                                if (config.getBoolean("freeze-on-start")) {
+                                                    player.setWalkSpeed(0.2f);
+                                                    temporary.clear();
+                                                }
                                                 fighter.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-                                                temporary.clear();
                                                 this.cancel();
                                             } else {
                                                 fighter.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
@@ -140,7 +162,10 @@ public class Fight implements CommandExecutor {
         return false;
     }
 
-    private void Kit(Player x) {
-        Kit.getInstance().giveKit(x, Main.getPlugin().getConfig().getString("current-kit"));
+    private boolean Kit(Player x) {
+        if (Main.getPlugin().getConfig().getString("current-kit") != null) {
+            Kit.getInstance().giveKit(x, Main.getPlugin().getConfig().getString("current-kit"));
+            return true;
+        } else return false;
     }
 }

@@ -6,7 +6,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -23,6 +25,12 @@ public class MyListener implements Listener {
     @EventHandler
     private void onDeath(PlayerDeathEvent e) {
         Player p = e.getEntity();
+        if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
+            e.setDroppedExp(0);
+            if (!config.getBoolean("drop-on-death")) {
+                e.getDrops().clear();
+            }
+        }
         if (Fight.team1.contains(p.getUniqueId())) {
             Fight.team1.remove(p.getUniqueId());
             if (Fight.team1.isEmpty() & !Fight.team2.isEmpty()) {
@@ -36,11 +44,13 @@ public class MyListener implements Listener {
                                 a.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
                             }
                             String listString = String.join(", ", a);
-                            Bukkit.getServer().broadcastMessage(Main.conf("fight-winners") + listString + Main.conf("fight-winners2"));
+                            String joined = Objects.requireNonNull(config.getString("fight-winners")).replace("{won-team}", listString);
+                            Bukkit.getServer().broadcastMessage(Main.conf("fight-winners"));
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (Player p1 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team2.contains(p1.getUniqueId())) {
                                         p1.setHealth(0);
+                                        Fight.teamA.unregister();
                                         Fight.teamB.unregister();
                                     }
                                 }
@@ -48,8 +58,11 @@ public class MyListener implements Listener {
                                 String path = "fight-end-spawn.";
                                 for (Player p1 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team2.contains(p1.getUniqueId())) {
-                                        p1.teleport(Arena.pathing(path, config));
-                                        Fight.teamB.unregister();
+                                        if (config.isSet(path)) {
+                                            p1.teleport(Arena.pathing(path, config));
+                                            Fight.teamA.unregister();
+                                            Fight.teamB.unregister();
+                                        }
                                     }
                                 }
                             }
@@ -80,14 +93,18 @@ public class MyListener implements Listener {
                                     if (Fight.team1.contains(p2.getUniqueId())) {
                                         p2.setHealth(0);
                                         Fight.teamA.unregister();
+                                        Fight.teamB.unregister();
                                     }
                                 }
                             } else {
                                 String path = "fight-end-spawn.";
                                 for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team1.contains(p2.getUniqueId())) {
-                                        p2.teleport(Arena.pathing(path, config));
-                                        Fight.teamA.unregister();
+                                        if (config.isSet(path)) {
+                                            p2.teleport(Arena.pathing(path, config));
+                                            Fight.teamA.unregister();
+                                            Fight.teamB.unregister();
+                                        }
                                     }
                                 }
                             }
@@ -103,11 +120,29 @@ public class MyListener implements Listener {
 
     @EventHandler
     private void onMove(PlayerMoveEvent e) {
-        Player player = e.getPlayer();
-        if (Fight.temporary.contains(player)) {
+        Player p = e.getPlayer();
+        if (Fight.temporary.contains(p)) {
             Location from = e.getFrom();
             if (from.getZ() != Objects.requireNonNull(e.getTo()).getZ() && from.getX() != e.getTo().getX()) {
-                player.teleport(e.getFrom());
+                p.teleport(e.getFrom());
+            }
+        }
+    }
+
+    private void onDrop(PlayerDropItemEvent e) {
+        Player p = e.getPlayer();
+        if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
+            if (!config.getBoolean("drop-items")) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    private void onBreak(BlockBreakEvent e) {
+        Player p = e.getPlayer();
+        if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
+            if (!config.getBoolean("break-blocks")) {
+                e.setCancelled(true);
             }
         }
     }
