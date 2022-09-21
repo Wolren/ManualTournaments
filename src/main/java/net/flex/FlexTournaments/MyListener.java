@@ -34,7 +34,7 @@ public class MyListener implements Listener {
         if (Fight.team1.contains(p.getUniqueId())) {
             Fight.team1.remove(p.getUniqueId());
             if (Fight.team1.isEmpty() & !Fight.team2.isEmpty()) {
-                (new BukkitRunnable() {
+                new BukkitRunnable() {
                     int i = config.getInt("teleport-countdown-time");
 
                     public void run() {
@@ -44,8 +44,8 @@ public class MyListener implements Listener {
                                 a.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
                             }
                             String listString = String.join(", ", a);
-                            String joined = Objects.requireNonNull(config.getString("fight-winners")).replace("{won-team}", listString);
-                            Bukkit.getServer().broadcastMessage(Main.conf("fight-winners"));
+                            String replace = Objects.requireNonNull(Main.getPlugin().getConfig().getString("fight-winners")).replace("{team}", listString);
+                            Bukkit.getServer().broadcastMessage(replace);
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (Player p1 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team2.contains(p1.getUniqueId())) {
@@ -71,13 +71,13 @@ public class MyListener implements Listener {
 
                         --this.i;
                     }
-                }).runTaskTimer(Main.getPlugin(), 0L, 20L);
+                }.runTaskTimer(Main.getPlugin(), 0L, 20L);
             }
         }
         if (Fight.team2.contains(p.getUniqueId())) {
             Fight.team2.remove(p.getUniqueId());
             if (Fight.team2.isEmpty() & !Fight.team1.isEmpty()) {
-                (new BukkitRunnable() {
+                new BukkitRunnable() {
                     int i = config.getInt("teleport-countdown-time");
 
                     public void run() {
@@ -87,7 +87,8 @@ public class MyListener implements Listener {
                                 b.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
                             }
                             String listString = String.join(", ", b);
-                            Bukkit.getServer().broadcastMessage(Main.conf("fight-winners") + listString + Main.conf("fight-winners2"));
+                            String replace = Objects.requireNonNull(Main.getPlugin().getConfig().getString("fight-winners")).replace("{team}", listString);
+                            Bukkit.getServer().broadcastMessage(replace);
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team1.contains(p2.getUniqueId())) {
@@ -113,7 +114,7 @@ public class MyListener implements Listener {
 
                         --this.i;
                     }
-                }).runTaskTimer(Main.getPlugin(), 0L, 20L);
+                }.runTaskTimer(Main.getPlugin(), 0L, 20L);
             }
         }
     }

@@ -12,8 +12,8 @@ import java.util.Objects;
 
 public class Main extends JavaPlugin {
     public List<String> kitNames, arenaNames;
-    public File KitsConfigfile, ArenaConfigFile, customConfigFile, FightsConfigFile;
-    public FileConfiguration KitsConfig, ArenaConfig, customConfig, FightsConfig;
+    public File KitsConfigfile, ArenaConfigFile, customConfigFile;
+    public FileConfiguration KitsConfig, ArenaConfig, customConfig;
     public static Main getPlugin() {
         return getPlugin(Main.class);
     }
@@ -81,12 +81,6 @@ public class Main extends JavaPlugin {
             customConfigFile.getParentFile().mkdirs();
             saveResource("config.yml", false);
         }
-    }
-
-    private void createFightsFolder(int i) {
-        FightsConfigFile = new File("fights/fight" + i + ".yml");
-        FightsConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
 
     public static String conf(String s) {

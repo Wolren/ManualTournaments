@@ -1,3 +1,4 @@
+fight-count: 1
 #Time (in seconds) to prepare before the fight during which players will be frozen (if freeze-on-start is true)
 countdown-time: 10
 #Time after the fight after which winners will be either killed or teleported depending on kill-on-fight option
@@ -24,7 +25,7 @@ fight-end-spawn:
 
 current-kit: ""
 current-arena: ""
-fight-winners: "Congratulations to {team winning the fight!"
+fight-winners: "Congratulations to {team} for winning the fight!"
 team1: "Red"
 team2: "Blue"
 team1-prefix: "Red "
