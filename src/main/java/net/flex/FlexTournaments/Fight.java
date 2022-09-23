@@ -23,11 +23,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Fight implements CommandExecutor {
-    File FightsConfigFolder, FightsConfigFile;
-    FileConfiguration FightsConfig;
+    public static File FightsConfigFolder, FightsConfigFile;
+    public static FileConfiguration FightsConfig;
     private static final FileConfiguration config = Main.getPlugin().getConfig();
     private static final ScoreboardManager manager = Bukkit.getScoreboardManager();
     private static final Scoreboard board;
+    public static int o = config.getInt("fight-count");
+
+    public static int l;
 
     static {
         assert manager != null;
@@ -84,10 +87,6 @@ public class Fight implements CommandExecutor {
                         }
                     }
                     if (distinctElements.size() == distinctElements.stream().distinct().toList().size()) {
-                        int o = config.getInt("fight-count");
-                        createFightsFolder(o);
-                        config.set("fight-count", ++o);
-                        FightsConfig.set("ArenaName", config.getString("current-arena"));
                         for (int i = 0; i < args.length; i++) {
                             if (!args[i].equals("null")) {
                                 Player fighter = Bukkit.getPlayer(args[i]);
@@ -137,6 +136,33 @@ public class Fight implements CommandExecutor {
                                 }).runTaskTimer(Main.getPlugin(), 0L, 20L);
                             }
                         }
+                        l = 0;
+                        new BukkitRunnable() {
+
+                            public void run() {
+                                if (MyListener.y != 0) {
+                                    this.cancel();
+                                }
+                                l++;
+                            }
+                        }.runTaskTimer(Main.getPlugin(), 0, 20);
+                        createFightsFolder(o);
+                        config.set("fight-count", ++o);
+                        FightsConfig.set("ArenaName", config.getString("current-arena"));
+                        FightsConfig.set("KitName", config.getString("current-kit"));
+                        ArrayList<String> a = new ArrayList<>();
+                        ArrayList<String> b = new ArrayList<>();
+                        for (UUID uuid : Fight.team1) {
+                            a.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+                        }
+                        String listString = String.join(", ", a);
+                        FightsConfig.set("Team1", listString);
+                        for (UUID uuid : Fight.team2) {
+                            b.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+                        }
+                        String listString2 = String.join(", ", b);
+                        FightsConfig.set("Team2", listString2);
+                        FightsConfig.set("Fight-duration", 0);
                         for (Player online : Bukkit.getOnlinePlayers()) {
                             online.setScoreboard(board);
                         }

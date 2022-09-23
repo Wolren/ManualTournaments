@@ -2,6 +2,7 @@ package net.flex.FlexTournaments;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,12 +13,15 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
 public class MyListener implements Listener {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
+
+    public static int y;
 
     public MyListener() {
     }
@@ -50,6 +54,20 @@ public class MyListener implements Listener {
                                 for (Player p1 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team2.contains(p1.getUniqueId())) {
                                         p1.setHealth(0);
+                                        if (Fight.team1.isEmpty() & Fight.team2.isEmpty()) {
+                                            try {
+                                                Fight.FightsConfig.load(Fight.FightsConfigFile);
+                                            } catch (IOException | InvalidConfigurationException ex) {
+                                                throw new RuntimeException(ex);
+                                            }
+                                            y = Fight.l;
+                                            Fight.FightsConfig.set("Fight-duration", y);
+                                            try {
+                                                Fight.FightsConfig.save(Fight.FightsConfigFile);
+                                            } catch (IOException ex) {
+                                                throw new RuntimeException(ex);
+                                            }
+                                        }
                                         Fight.teamA.unregister();
                                         Fight.teamB.unregister();
                                     }
@@ -60,6 +78,20 @@ public class MyListener implements Listener {
                                     if (Fight.team2.contains(p1.getUniqueId())) {
                                         if (config.isSet(path)) {
                                             p1.teleport(Arena.pathing(path, config));
+                                            if (Fight.team1.isEmpty() & Fight.team2.isEmpty()) {
+                                                try {
+                                                    Fight.FightsConfig.load(Fight.FightsConfigFile);
+                                                } catch (IOException | InvalidConfigurationException ex) {
+                                                    throw new RuntimeException(ex);
+                                                }
+                                                y = Fight.l;
+                                                Fight.FightsConfig.set("Fight-duration", y);
+                                                try {
+                                                    Fight.FightsConfig.save(Fight.FightsConfigFile);
+                                                } catch (IOException ex) {
+                                                    throw new RuntimeException(ex);
+                                                }
+                                            }
                                             Fight.teamA.unregister();
                                             Fight.teamB.unregister();
                                         }
@@ -93,6 +125,20 @@ public class MyListener implements Listener {
                                 for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (Fight.team1.contains(p2.getUniqueId())) {
                                         p2.setHealth(0);
+                                        if (Fight.team1.isEmpty() & Fight.team2.isEmpty()) {
+                                            try {
+                                                Fight.FightsConfig.load(Fight.FightsConfigFile);
+                                            } catch (IOException | InvalidConfigurationException ex) {
+                                                throw new RuntimeException(ex);
+                                            }
+                                            y = Fight.l;
+                                            Fight.FightsConfig.set("Fight-duration", y);
+                                            try {
+                                                Fight.FightsConfig.save(Fight.FightsConfigFile);
+                                            } catch (IOException ex) {
+                                                throw new RuntimeException(ex);
+                                            }
+                                        }
                                         Fight.teamA.unregister();
                                         Fight.teamB.unregister();
                                     }
@@ -103,6 +149,20 @@ public class MyListener implements Listener {
                                     if (Fight.team1.contains(p2.getUniqueId())) {
                                         if (config.isSet(path)) {
                                             p2.teleport(Arena.pathing(path, config));
+                                            if (Fight.team1.isEmpty() & Fight.team2.isEmpty()) {
+                                                try {
+                                                    Fight.FightsConfig.load(Fight.FightsConfigFile);
+                                                } catch (IOException | InvalidConfigurationException ex) {
+                                                    throw new RuntimeException(ex);
+                                                }
+                                                y = Fight.l;
+                                                Fight.FightsConfig.set("Fight-duration", y);
+                                                try {
+                                                    Fight.FightsConfig.save(Fight.FightsConfigFile);
+                                                } catch (IOException ex) {
+                                                    throw new RuntimeException(ex);
+                                                }
+                                            }
                                             Fight.teamA.unregister();
                                             Fight.teamB.unregister();
                                         }
