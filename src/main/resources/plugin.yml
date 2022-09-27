@@ -1,23 +1,26 @@
-api-version: 1.18
-main: net.flex.FlexTournaments.Main
-name: FlexTournaments
+main: net.flex.ManualTournaments.Main
+name: ManualTournaments
 version: 1.0
 author: Wildbot
-description: FlexTournaments
+description: ManualTournaments
 commands:
-  flextournaments_arena:
+  manualtournaments_arena:
     aliases:
-      - ft_arena
-      - fta
-  flextournaments_fight:
+      - mt_arena
+      - mta
+    permission: mt.arena, mt.*
+  manualtournaments_fight:
     aliases:
-      - ft_fight
-      - ftf
-  flextournaments_kit:
+      - mt_fight
+      - mtf
+    permission: mt.fight, mt.*
+  manualtournaments_kit:
     aliases:
-      - ft_kit
-      - ftk
-  flextournaments_settings:
+      - mt_kit
+      - mtk
+    permission: mt.kit, mt.*
+  manualtournaments_settings:
     aliases:
-      - ft_settings
-      - fts
+      - mt_settings
+      - mts
+    permission: mt.settings, mt.*

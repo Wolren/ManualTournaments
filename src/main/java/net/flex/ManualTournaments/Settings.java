@@ -1,10 +1,11 @@
-package net.flex.FlexTournaments;
+package net.flex.ManualTournaments;
 
+import lombok.SneakyThrows;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -12,21 +13,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
 
+    @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        try {
-            config.load(Main.getPlugin().customConfigFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+        config.load(Main.getPlugin().customConfigFile);
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
-            Player player = ((Player) sender).getPlayer();
+            Player player = ((OfflinePlayer) sender).getPlayer();
             assert player != null;
             if (args.length == 0) {
                 player.sendMessage(Main.conf(config.getString("wrong-arguments")));
@@ -136,7 +135,7 @@ public class Settings implements TabCompleter, CommandExecutor {
     @Nullable
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 1) {
-            return List.of("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end");
+            return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end");
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "break_blocks":
@@ -145,13 +144,13 @@ public class Settings implements TabCompleter, CommandExecutor {
                 case "freeze_on_start":
                 case "friendly_fire":
                 case "kill_on_fight_end":
-                    return List.of("true", "false");
+                    return Arrays.asList("true", "false");
                 case "current_arena":
                     return new ArrayList<>(Main.getPlugin().arenaNames);
                 case "current_kit":
                     return new ArrayList<>(Main.getPlugin().kitNames);
             }
         }
-        return List.of();
+        return Arrays.asList();
     }
 }

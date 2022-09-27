@@ -1,4 +1,7 @@
-fight-count: 1
+#If true folder saving info for every fight will be created and the names of next files will be based on fight-count (count-fights has to be true for that!)
+create-fights-folder: false
+count-fights: false
+fight-count: 0
 #Time (in seconds) to prepare before the fight during which players will be frozen (if freeze-on-start is true)
 countdown-time: 10
 #Time after the fight after which winners will be either killed or teleported depending on kill-on-fight option
@@ -15,7 +18,7 @@ freeze-on-start: true
 friendly-fire: false
 #If true winners will be killed after the fight
 kill-on-fight-end: true
-#If kill_on_fight_end is false fighters will be teleported to location below, you can specify it manually or using /ft_settings endspawn
+#If kill_on_fight_end is false fighters will be teleported to location below, you can specify it manually or using /mt_settings endspawn
 fight-end-spawn:
   x:
   y:
@@ -23,15 +26,19 @@ fight-end-spawn:
   yaw:
   pitch:
 
+
+#Set these two below using /mt_settings current_kit/arena
 current-kit: ""
 current-arena: ""
 fight-winners: "Congratulations to {team} for winning the fight!"
+#Team names (for now they don't do anything)
 team1: "Red"
 team2: "Blue"
+#Prefix visible on tab and nickname
 team1-prefix: "Red "
 team2-prefix: "Blue "
 
-
+#Language section
 arena-already-exists: "Arena with this name already exists"
 arena-create: "You have to define positions for players and spectators using /arena pos1 (arena name) /arena pos2 (arena name) /arena spectator (arena name)"
 arena-lacks-pos1: "Arena lacks pos1"
@@ -47,8 +54,8 @@ arena-set-correctly: "Arena is set correctly"
 arena-spectator: "Position for spectator set successfully"
 config-options: "Only possible options are true and false"
 config-updated-successfully: "Config was updated successfully"
-current-arena-not-set: "You have to set current arena using /ft_settings current_arena before starting the fight"
-current-kit-not-set: "You have to set current kit using /ft_settings current_kit before starting the fight"
+current-arena-not-set: "You have to set current arena using /mt_settings current_arena before starting the fight"
+current-kit-not-set: "You have to set current kit using /mt_settings current_kit before starting the fight"
 fight-duplicates: "There can't be any duplicates in player names"
 fight-good-luck: "Good luck :)"
 fight-will-start: "Fight will start in "

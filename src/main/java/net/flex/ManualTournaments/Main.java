@@ -1,5 +1,6 @@
-package net.flex.FlexTournaments;
+package net.flex.ManualTournaments;
 
+import org.bstats.bukkit.Metrics;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,14 +12,21 @@ import java.util.List;
 import java.util.Objects;
 
 public class Main extends JavaPlugin {
-    public List<String> kitNames, arenaNames;
-    public File KitsConfigfile, ArenaConfigFile, customConfigFile;
-    public FileConfiguration KitsConfig, ArenaConfig, customConfig;
-    public static Main getPlugin() {
+    List<String> kitNames, arenaNames;
+    File KitsConfigfile, ArenaConfigFile, customConfigFile;
+    FileConfiguration KitsConfig, ArenaConfig, customConfig;
+
+    static Main getPlugin() {
         return getPlugin(Main.class);
     }
 
-    public void onEnable(){
+    static String conf(String s) {
+        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
+    }
+
+    public void onEnable() {
+        int pluginId = 16516;
+        new Metrics(this, pluginId);
         kitNames = new ArrayList<>();
         arenaNames = new ArrayList<>();
         createKitsConfig();
@@ -33,24 +41,25 @@ public class Main extends JavaPlugin {
         if (Arenas.getConfigurationSection("Arenas") != null) {
             arenaNames.addAll(Objects.requireNonNull(Arenas.getConfigurationSection("Arenas")).getKeys(false));
         }
-        Objects.requireNonNull(getCommand("flextournaments_arena")).setExecutor(new Arena());
-        Objects.requireNonNull(getCommand("flextournaments_arena")).setTabCompleter(new Arena());
-        Objects.requireNonNull(getCommand("flextournaments_fight")).setExecutor(new Fight());
-        Objects.requireNonNull(getCommand("flextournaments_kit")).setExecutor(new Kit());
-        Objects.requireNonNull(getCommand("flextournaments_kit")).setTabCompleter(new Kit());
-        Objects.requireNonNull(getCommand("flextournaments_settings")).setExecutor(new Settings());
-        Objects.requireNonNull(getCommand("flextournaments_settings")).setTabCompleter(new Settings());
-        this.getServer().getPluginManager().registerEvents(new MyListener(), this);
+        Objects.requireNonNull(getCommand("manualtournaments_arena")).setExecutor(new Arena());
+        Objects.requireNonNull(getCommand("manualtournaments_arena")).setTabCompleter(new Arena());
+        Objects.requireNonNull(getCommand("manualtournaments_fight")).setExecutor(new Fight());
+        Objects.requireNonNull(getCommand("manualtournaments_kit")).setExecutor(new Kit());
+        Objects.requireNonNull(getCommand("manualtournaments_kit")).setTabCompleter(new Kit());
+        Objects.requireNonNull(getCommand("manualtournaments_settings")).setExecutor(new Settings());
+        Objects.requireNonNull(getCommand("manualtournaments_settings")).setTabCompleter(new Settings());
+        getServer().getPluginManager().registerEvents(new MyListener(), this);
     }
 
     public void onDisable() {
     }
 
-    public FileConfiguration getKitsConfig() {
-        return this.KitsConfig;
+    FileConfiguration getKitsConfig() {
+        return KitsConfig;
     }
-    public FileConfiguration getArenaConfig() {
-        return this.ArenaConfig;
+
+    FileConfiguration getArenaConfig() {
+        return ArenaConfig;
     }
 
     private void createKitsConfig() {
@@ -81,9 +90,5 @@ public class Main extends JavaPlugin {
             customConfigFile.getParentFile().mkdirs();
             saveResource("config.yml", false);
         }
-    }
-
-    public static String conf(String s) {
-        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(Main.getPlugin().getConfig().getString(s)));
     }
 }

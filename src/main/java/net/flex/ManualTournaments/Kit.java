@@ -1,13 +1,14 @@
-package net.flex.FlexTournaments;
+package net.flex.ManualTournaments;
 
+import lombok.SneakyThrows;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -19,34 +20,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
+@SuppressWarnings("deprecation")
 public class Kit implements TabCompleter, CommandExecutor {
 
-    public FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
-    FileConfiguration config = Main.getPlugin().getConfig();
+    private final FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
 
-    public static Kit getInstance() {
+    static Kit getInstance() {
         try {
-            return Kit.class.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return Kit.class.getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                 InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        try {
-            KitsConfig.load(Main.getPlugin().KitsConfigfile);
-        } catch (IOException | InvalidConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+        KitsConfig.load(Main.getPlugin().KitsConfigfile);
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
-            Player player = ((Player) sender).getPlayer();
+            Player player = ((OfflinePlayer) sender).getPlayer();
             assert player != null;
             if (args.length == 0) {
                 Main.getPlugin();
@@ -104,7 +101,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         return false;
     }
 
-    public void getType(String pathing, ItemStack is) {
+    private void getType(String pathing, ItemStack is) {
         KitsConfig.set(pathing + ".type", is.getType().toString().toUpperCase());
         KitsConfig.set(pathing + ".amount", is.getAmount());
 
@@ -114,7 +111,7 @@ public class Kit implements TabCompleter, CommandExecutor {
 
             if (is.getItemMeta().hasEnchants()) {
                 Map<Enchantment, Integer> enchants = is.getEnchantments();
-                List<String> enchantList = new ArrayList<>();
+                Collection<String> enchantList = new ArrayList<>();
                 for (Enchantment e : is.getEnchantments().keySet()) {
                     int level = enchants.get(e);
                     enchantList.add(e.getName().toUpperCase() + ":" + level);
@@ -124,7 +121,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
     }
 
-    public void createKit(Player player, String kitName) {
+    private void createKit(Player player, String kitName) {
         String path = "Kits." + kitName + ".";
         PlayerInventory inv = player.getInventory();
         if (Main.getPlugin().kitNames.contains(kitName)) {
@@ -133,8 +130,7 @@ public class Kit implements TabCompleter, CommandExecutor {
             Main.getPlugin().kitNames.add(kitName);
             for (int i = 0; i < 36; i++) {
                 ItemStack is = inv.getItem(i);
-                if (is == null || is.getType() == Material.AIR)
-                    continue;
+                if (is == null || is.getType() == Material.AIR) continue;
 
                 String pathing = path + "items." + i;
                 getType(pathing, is);
@@ -160,12 +156,11 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
     }
 
-    public void setIntType(Player player, ConfigurationSection s, String path) {
+    private void setIntType(Player player, ConfigurationSection s, String path) {
         if (s != null) {
             for (String str : Objects.requireNonNull(s).getKeys(false)) {
                 int slot = Integer.parseInt(str);
-                if (0 < slot && slot < 36)
-                    continue;
+                if (0 < slot && slot < 36) continue;
 
                 String string = path + "items." + slot + ".";
                 String type = KitsConfig.getString(string + "type");
@@ -177,11 +172,9 @@ public class Kit implements TabCompleter, CommandExecutor {
                 ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(type)), amount);
                 ItemMeta im = is.getItemMeta();
 
-                if (im == null)
-                    continue;
+                if (im == null) continue;
 
-                if (name != null)
-                    im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+                if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
 
                 for (String s1 : enchants) {
                     String[] indiEnchants = s1.split(":");
@@ -194,7 +187,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
     }
 
-    public void setOffHandType(Player player, ConfigurationSection s, String path) {
+    private void setOffHandType(Player player, ConfigurationSection s, String path) {
         if (s != null) {
             for (String str : Objects.requireNonNull(s).getKeys(false)) {
                 if (!str.equals("AIR")) {
@@ -208,11 +201,9 @@ public class Kit implements TabCompleter, CommandExecutor {
                     ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(type)), amount);
                     ItemMeta im = is.getItemMeta();
 
-                    if (im == null)
-                        continue;
+                    if (im == null) continue;
 
-                    if (name != null)
-                        im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+                    if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
 
                     for (String s1 : enchants) {
                         String[] indiEnchants = s1.split(":");
@@ -226,7 +217,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
     }
 
-    public void setArmorType(Player player, ConfigurationSection s, String path) {
+    private void setArmorType(Player player, ConfigurationSection s, String path) {
         if (s != null) {
             for (String str : Objects.requireNonNull(s).getKeys(false)) {
                 String string = path + "armor." + str + ".";
@@ -239,11 +230,9 @@ public class Kit implements TabCompleter, CommandExecutor {
                 ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(type)), amount);
                 ItemMeta im = is.getItemMeta();
 
-                if (im == null)
-                    continue;
+                if (im == null) continue;
 
-                if (name != null)
-                    im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+                if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
 
                 for (String s1 : enchants) {
                     String[] indiEnchants = s1.split(":");
@@ -264,7 +253,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
     }
 
-    public void giveKit(Player player, String kitName) {
+    void giveKit(Player player, String kitName) {
         String path = "Kits." + kitName + ".";
         player.getInventory().clear();
         player.setHealth(20.0);
@@ -285,7 +274,7 @@ public class Kit implements TabCompleter, CommandExecutor {
     @Nullable
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 1) {
-            return new ArrayList<>(List.of("create", "give", "list", "remove", "unbreakable"));
+            return new ArrayList<>(Arrays.asList("create", "give", "list", "remove", "unbreakable"));
         } else if (args.length == 2) {
             List<String> b = new ArrayList<>();
             if (args[0].equals("create")) {
@@ -297,6 +286,6 @@ public class Kit implements TabCompleter, CommandExecutor {
             return b;
         }
 
-        return List.of();
+        return Arrays.asList();
     }
 }
