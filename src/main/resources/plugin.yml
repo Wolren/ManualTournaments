@@ -1,26 +1,55 @@
 main: net.flex.ManualTournaments.Main
 name: ManualTournaments
 version: 1.0
+description: Plugin you can use to make manual tournaments
 author: Wildbot
-description: ManualTournaments
+website: ""
 commands:
   manualtournaments_arena:
     aliases:
       - mt_arena
       - mta
-    permission: mt.arena, mt.*
+      - arena
+    permission: mt.arena
+    permission-message: ""
+    usage: "Usage: /arena [create|list|remove...]"
   manualtournaments_fight:
     aliases:
       - mt_fight
       - mtf
-    permission: mt.fight, mt.*
+      - fight
+    permission: mt.fight
+    permission-message: ""
+    usage: "Usage: /fight [player1] [player2]"
   manualtournaments_kit:
     aliases:
       - mt_kit
       - mtk
-    permission: mt.kit, mt.*
+      - kit
+    permissions: mt.kit
+    permission-message: ""
+    usage: "Usage: /kit [test|stop]"
   manualtournaments_settings:
     aliases:
       - mt_settings
       - mts
-    permission: mt.settings, mt.*
+      - settings
+    permission: mt.settings
+    permission-message: ""
+    usage: "Usage: /settings [test|stop]"
+permissions:
+  mt.arena:
+    description: Allows creating and managing arenas
+  mt.fight:
+    description: Allows starting the fight between players
+  mt.kit:
+    description: Allows creating and managing kits
+  mt.settings:
+    description: Allows changing settings
+  mt.*:
+    description: Permission allowing using all ManualTournaments commands
+    children:
+      mt.arena: true
+      mt.fight: true
+      mt.kit: true
+      mt.settings: true

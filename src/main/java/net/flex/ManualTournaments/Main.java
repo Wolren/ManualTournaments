@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments;
 
 import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,13 +16,9 @@ public class Main extends JavaPlugin {
     List<String> kitNames, arenaNames;
     File KitsConfigfile, ArenaConfigFile, customConfigFile;
     FileConfiguration KitsConfig, ArenaConfig, customConfig;
-
+    public static int version = Main.formatNMSVersion(Main.getNMSVersion());
     static Main getPlugin() {
         return getPlugin(Main.class);
-    }
-
-    static String conf(String s) {
-        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }
 
     public void onEnable() {
@@ -90,5 +87,67 @@ public class Main extends JavaPlugin {
             customConfigFile.getParentFile().mkdirs();
             saveResource("config.yml", false);
         }
+    }
+
+    static String getNMSVersion() {
+        String v = Bukkit.getServer().getClass().getPackage().getName();
+        return v.substring(v.lastIndexOf('.') + 1);
+    }
+
+    static int formatNMSVersion(String nms) {
+        switch (nms) {
+            case "v1_7_R1":
+                return 1;
+            case "v1_7_R2":
+                return 2;
+            case "v1_7_R3":
+                return 3;
+            case "v1_7_R4":
+                return 4;
+            case "v1_8_R1":
+                return 5;
+            case "v1_8_R2":
+                return 6;
+            case "v1_8_R3":
+                return 7;
+            case "v1_9_R1":
+                return 8;
+            case "v1_9_R2":
+                return 9;
+            case "v1_10_R1":
+                return 10;
+            case "v1_11_R1":
+                return 11;
+            case "v1_12_R1":
+                return 12;
+            case "v1_13_R1":
+                return 13;
+            case "v1_13_R2":
+                return 14;
+            case "v1_14_R1":
+                return 15;
+            case "v1_15_R1":
+                return 16;
+            case "v1_16_R1":
+                return 17;
+            case "v1_16_R2":
+                return 18;
+            case "v1_16_R3":
+                return 19;
+            case "v1_17_R1":
+                return 20;
+            case "v1_18_R1":
+                return 21;
+            case "v1_18_R2":
+                return 22;
+            case "v1_19_R1":
+                return 23;
+
+        }
+        throw new IllegalArgumentException(nms + " isn't supported");
+    }
+
+    static String conf(String s) {
+        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }
 }

@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Settings implements TabCompleter, CommandExecutor {
@@ -129,7 +130,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                 throw new RuntimeException(e);
             }
         }
-        return false;
+        return true;
     }
 
     @Nullable
@@ -151,6 +152,6 @@ public class Settings implements TabCompleter, CommandExecutor {
                     return new ArrayList<>(Main.getPlugin().kitNames);
             }
         }
-        return Arrays.asList();
+        return Collections.emptyList();
     }
 }

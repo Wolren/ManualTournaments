@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 class MyListener implements Listener {
-    private static final FileConfiguration config = Main.getPlugin().getConfig();
+    static final FileConfiguration config = Main.getPlugin().getConfig();
     static int y;
 
     @EventHandler
@@ -49,7 +49,7 @@ class MyListener implements Listener {
             } catch (IOException | InvalidConfigurationException e) {
                 throw new RuntimeException(e);
             }
-            Fight.FightsConfig.set("Fight-duration", Fight.l - 3);
+            Fight.FightsConfig.set("Fight-duration", Fight.j - 3);
             y = 1;
             try {
                 Fight.FightsConfig.save(Fight.FightsConfigFile);
@@ -124,8 +124,9 @@ class MyListener implements Listener {
         Player p = e.getPlayer();
         if (Fight.temporary.contains(p)) {
             Location from = e.getFrom();
-            if (from.getZ() != Objects.requireNonNull(e.getTo()).getZ() && from.getX() != e.getTo().getX() && from.getY() != e.getTo().getY()) {
-                p.teleport(e.getFrom());
+            Location loc = new Location(from.getWorld(), from.getX(), from.getY(), from.getZ());
+            if (from.getZ() != Objects.requireNonNull(e.getTo()).getZ() || from.getX() != e.getTo().getX() || from.getY() != e.getTo().getY()) {
+                p.teleport(loc);
             }
         }
     }
