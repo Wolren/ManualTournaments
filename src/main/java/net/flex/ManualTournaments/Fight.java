@@ -8,8 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -22,7 +20,7 @@ public class Fight implements CommandExecutor {
     static final List<UUID> team1 = new ArrayList<>();
     static final List<UUID> team2 = new ArrayList<>();
     static final List<Player> temporary = new ArrayList<>();
-    static final FileConfiguration config = Main.getPlugin().getConfig();
+    private static final FileConfiguration config = Main.getPlugin().getConfig();
     private static final Collection<String> team1String = new ArrayList<>();
     private static final Collection<String> team2String = new ArrayList<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
@@ -32,12 +30,13 @@ public class Fight implements CommandExecutor {
     static FileConfiguration FightsConfig;
     static int j;
     private static int o = config.getInt("fight-count");
-    private final FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
-    private final FileConfiguration ArenasConfig = Main.getPlugin().ArenaConfig;
+    private final FileConfiguration KitsConfig = Main.getPlugin().getKitsConfig();
+    private final FileConfiguration ArenasConfig = Main.getPlugin().getArenaConfig();
     private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        config.load(Main.getPlugin().customConfigFile);
         Main plugin = Main.getPlugin();
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
@@ -45,11 +44,10 @@ public class Fight implements CommandExecutor {
             Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
             if (args.length == 0 || args.length == 1) {
-                send(p, "wrong-arguments");
-                //Possibly lower number can help optimise the code
+                return false;
+                //Possibly lower number can help optimise the speed
             } else if (args.length <= 100) {
                 if (args.length % 2 == 0) {
-                    config.load(plugin.customConfigFile);
                     KitsConfig.load(plugin.KitsConfigfile);
                     ArenasConfig.load(plugin.ArenaConfigFile);
                     distinctElements.clear();
@@ -110,19 +108,11 @@ public class Fight implements CommandExecutor {
                                         int i = config.getInt("countdown-time");
 
                                         public void run() {
-                                            p.setWalkSpeed(0.0f);
                                             temporary.add(fighter);
-                                            if (Main.version < 5) {
-                                                p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, (i * 20) - 1, 100000, false));
-                                            } else if (Main.version < 13) {
-                                                p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, (i * 20) - 1, 100000, false, false));
-                                            } else {
-                                                p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, (i * 20) - 1, 100000, false, false, false));
-                                            }
+                                            p.setWalkSpeed(0.0f);
                                             if (i == 0) {
-                                                p.setWalkSpeed(0.2f);
                                                 temporary.clear();
-                                                p.removePotionEffect(PotionEffectType.JUMP);
+                                                p.setWalkSpeed(0.2f);
                                                 if (Main.version > 11) {
                                                     fighter.playSound(p.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                                                 } else {
@@ -189,10 +179,10 @@ public class Fight implements CommandExecutor {
                         send(p, "fight-duplicates");
                     }
                 } else {
-                    send(p, "wrong-arguments");
+                    return false;
                 }
             } else {
-                send(p, "wrong-arguments");
+                return false;
             }
             if (config.getBoolean("create-fights-folder")) {
                 FightsConfig.save(FightsConfigFile);

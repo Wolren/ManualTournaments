@@ -3,6 +3,7 @@ name: ManualTournaments
 version: 1.0
 description: Plugin you can use to make manual tournaments
 author: Wildbot
+api-version: 1.19
 website: ""
 commands:
   manualtournaments_arena:
@@ -28,7 +29,7 @@ commands:
       - kit
     permissions: mt.kit
     permission-message: ""
-    usage: "Usage: /kit [test|stop]"
+    usage: "Usage: /kit [create|list|remove...]"
   manualtournaments_settings:
     aliases:
       - mt_settings
@@ -36,7 +37,16 @@ commands:
       - settings
     permission: mt.settings
     permission-message: ""
-    usage: "Usage: /settings [test|stop]"
+    usage: "Usage: /settings [current_arena|current_kit...]"
+  manualtournaments_spectate:
+    aliases:
+      - mt_spectate
+      - mt_spec
+      - spec
+      - spectate
+    permission: mt.spectate
+    permission-message: "&cYou have to have mt.spectate permission to use this command!"
+    usage: "Usage: /spectate"
 permissions:
   mt.arena:
     description: Allows creating and managing arenas
@@ -46,6 +56,8 @@ permissions:
     description: Allows creating and managing kits
   mt.settings:
     description: Allows changing settings
+  mt.spectate:
+    description: Allows spectating arenas
   mt.*:
     description: Permission allowing using all ManualTournaments commands
     children:
@@ -53,3 +65,4 @@ permissions:
       mt.fight: true
       mt.kit: true
       mt.settings: true
+      mt.spectate: true

@@ -25,8 +25,8 @@ import java.util.*;
 
 @SuppressWarnings("deprecation")
 public class Kit implements TabCompleter, CommandExecutor {
-
-    private final FileConfiguration KitsConfig = Main.getPlugin().KitsConfig;
+    private static final FileConfiguration config = Main.getPlugin().getConfig();
+    private final FileConfiguration KitsConfig = Main.getPlugin().getKitsConfig();
 
     static Kit getInstance() {
         try {
@@ -39,6 +39,7 @@ public class Kit implements TabCompleter, CommandExecutor {
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        config.load(Main.getPlugin().customConfigFile);
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
@@ -46,7 +47,7 @@ public class Kit implements TabCompleter, CommandExecutor {
             assert p != null;
             KitsConfig.load(Main.getPlugin().KitsConfigfile);
             if (args.length == 0) {
-                p.sendMessage(Main.conf("wrong-arguments"));
+                return false;
             } else if (args.length == 1) {
                 String a = args[0];
                 if (a.equals("list")) {
@@ -92,7 +93,7 @@ public class Kit implements TabCompleter, CommandExecutor {
                     send(p, "kit-not-exists");
                 }
             } else {
-                send(p, "wrong-arguments");
+                return false;
             }
             try {
                 Main.getPlugin().getKitsConfig().save(Main.getPlugin().KitsConfigfile);
@@ -103,36 +104,18 @@ public class Kit implements TabCompleter, CommandExecutor {
         return true;
     }
 
-    @Nullable
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] args) {
-        if (args.length == 1) {
-            return new ArrayList<>(Arrays.asList("create", "give", "list", "remove", "unbreakable"));
-        } else if (args.length == 2) {
-            List<String> arr = new ArrayList<>();
-            if (args[0].equals("create")) {
-                arr.add("[name]");
-            } else if (args[0].equals("remove") || args[0].equals("give")) {
-                arr.addAll(Main.getPlugin().kitNames);
-            }
-
-            return arr;
-        }
-
-        return Collections.emptyList();
-    }
-
     private void createKit(Player p, String kitName) {
         String path = "Kits." + kitName + ".";
         PlayerInventory inv = p.getInventory();
         Main.getPlugin().kitNames.add(kitName);
         for (int i = 0; i < 36; i++) {
             ItemStack is = inv.getItem(i);
-            if (is == null || is.getType() == Material.AIR) continue;
+            if (is == null) continue;
             String pathA = path + "items." + i;
             getType(pathA, is);
         }
         for (ItemStack armor : inv.getArmorContents()) {
-            if (armor != null && armor.getType() != Material.AIR) {
+            if (armor != null) {
                 String pathB = path + "armor." + armor.getType().toString().toUpperCase();
                 KitsConfig.set(pathB, inv.getArmorContents());
                 getType(pathB, armor);
@@ -140,8 +123,8 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
         if (Main.version > 8) {
             ItemStack offhand = inv.getItemInOffHand();
-            if (offhand.getType() != Material.AIR) {
-                String pathC = path + "offhand." + offhand.getType().toString().toUpperCase();
+            String pathC = path + "offhand." + offhand.getType().toString().toUpperCase();
+            if (!offhand.getType().equals(Material.AIR)) {
                 KitsConfig.set(pathC, offhand);
                 getType(pathC, offhand);
             }
@@ -187,12 +170,12 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
         ConfigurationSection csA = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "items");
         ConfigurationSection csB = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "armor");
-        String csC = KitsConfig.getString("Kits." + kitName + "." + "offhand");
+        ConfigurationSection csC = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "offhand");
         setPlayerContents(p, path, csA, csB, csC);
         p.updateInventory();
     }
 
-    private void setPlayerContents(Player player, String path, ConfigurationSection csA, ConfigurationSection csB, String csC) {
+    private void setPlayerContents(Player player, String path, ConfigurationSection csA, ConfigurationSection csB, ConfigurationSection csC) {
         if (csA != null) {
             for (String str : Objects.requireNonNull(csA).getKeys(false)) {
                 int slot = Integer.parseInt(str);
@@ -257,7 +240,8 @@ public class Kit implements TabCompleter, CommandExecutor {
             }
         }
         if (Main.version > 8 && csC != null) {
-            String pC = path + "offhand." + csC + ".";
+            List<String> strs = new ArrayList<>(Objects.requireNonNull(csC).getKeys(false));
+            String pC = path + "offhand." + strs.get(0) + ".";
             String typeC = KitsConfig.getString(pC + "type");
             String nameC = KitsConfig.getString(pC + "name");
             short durability = 0;
@@ -286,5 +270,23 @@ public class Kit implements TabCompleter, CommandExecutor {
 
     private static void send(Player p, String s) {
         p.sendMessage(Main.conf(s));
+    }
+
+    @Nullable
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] args) {
+        if (args.length == 1) {
+            return new ArrayList<>(Arrays.asList("create", "give", "list", "remove", "unbreakable"));
+        } else if (args.length == 2) {
+            List<String> arr = new ArrayList<>();
+            if (args[0].equals("create")) {
+                arr.add("[name]");
+            } else if (args[0].equals("remove") || args[0].equals("give")) {
+                arr.addAll(Main.getPlugin().kitNames);
+            }
+
+            return arr;
+        }
+
+        return Collections.emptyList();
     }
 }

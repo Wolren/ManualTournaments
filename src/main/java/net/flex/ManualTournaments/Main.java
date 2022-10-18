@@ -45,7 +45,10 @@ public class Main extends JavaPlugin {
         Objects.requireNonNull(getCommand("manualtournaments_kit")).setTabCompleter(new Kit());
         Objects.requireNonNull(getCommand("manualtournaments_settings")).setExecutor(new Settings());
         Objects.requireNonNull(getCommand("manualtournaments_settings")).setTabCompleter(new Settings());
+        Objects.requireNonNull(getCommand("manualtournaments_spectate")).setExecutor(new Spectate());
+        Objects.requireNonNull(getCommand("manualtournaments_spectate")).setTabCompleter(new Spectate());
         getServer().getPluginManager().registerEvents(new MyListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 
     public void onDisable() {

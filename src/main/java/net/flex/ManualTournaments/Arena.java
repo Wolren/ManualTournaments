@@ -16,20 +16,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 public class Arena implements CommandExecutor, TabCompleter {
-    private final FileConfiguration ArenasConfig = Main.getPlugin().ArenaConfig;
+    private static final FileConfiguration config = Main.getPlugin().getConfig();
+    private final FileConfiguration ArenasConfig = Main.getPlugin().getArenaConfig();
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        config.load(Main.getPlugin().customConfigFile);
+        ArenasConfig.load(Main.getPlugin().ArenaConfigFile);
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
             Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
             if (args.length == 0) {
-                send(p, "wrong-arguments");
+                return false;
             } else if (args.length == 1) {
                 if (args[0].equals("list")) {
                     p.sendMessage(Main.conf("arena-list") + Main.getPlugin().arenaNames.toString());
+                } else {
+                    return false;
                 }
             } else if (args.length == 2) {
                 getArenasConfig().load(Main.getPlugin().ArenaConfigFile);
@@ -79,12 +84,14 @@ public class Arena implements CommandExecutor, TabCompleter {
                         case "validate":
                             checkArena(p, arenaName);
                             break;
+                        default:
+                            return false;
                     }
                 } else {
-                    send(p, "arena-not-exists");
+                    return false;
                 }
             } else {
-                send(p, "wrong-arguments");
+                return false;
             }
             Main.getPlugin().getArenaConfig().save(Main.getPlugin().ArenaConfigFile);
         }
@@ -92,37 +99,19 @@ public class Arena implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
-        if (args.length == 1) {
-            return Arrays.asList("create", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
-        } else if (args.length == 2) {
-            String a = args[0];
-            List<String> arr = new ArrayList<>();
-            if (a.equals("create")) {
-                arr.add("(arena name)");
-            } else if (a.equals("remove") || a.equals("pos1") || a.equals("pos2") || a.equals("spectator") || a.equals("teleport") || a.equals("validate")) {
-                arr.addAll(Main.getPlugin().arenaNames);
-            }
-
-            return arr;
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    private void checkArena(CommandSender player, String arenaName) {
+    private void checkArena(CommandSender p, String arenaName) {
         String path = "Arenas." + arenaName + ".";
         if (getArenasConfig().isSet(path + "pos1") && getArenasConfig().isSet(path + "pos2") && getArenasConfig().isSet(path + "spectator")) {
-            player.sendMessage(Main.conf("arena-set-correctly"));
+            p.sendMessage(Main.conf("arena-set-correctly"));
         } else {
             if (!getArenasConfig().isSet(path + "pos1")) {
-                player.sendMessage(Main.conf("arena-lacks-pos1"));
+                p.sendMessage(Main.conf("arena-lacks-pos1"));
             }
             if (!getArenasConfig().isSet(path + "pos2")) {
-                player.sendMessage(Main.conf("arena-lacks-pos2"));
+                p.sendMessage(Main.conf("arena-lacks-pos2"));
             }
             if (!getArenasConfig().isSet(path + "spectator")) {
-                player.sendMessage(Main.conf("arena-lacks-spectator"));
+                p.sendMessage(Main.conf("arena-lacks-spectator"));
             }
         }
     }
@@ -164,5 +153,23 @@ public class Arena implements CommandExecutor, TabCompleter {
 
     public FileConfiguration getArenasConfig() {
         return ArenasConfig;
+    }
+
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+        if (args.length == 1) {
+            return Arrays.asList("create", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
+        } else if (args.length == 2) {
+            String a = args[0];
+            List<String> arr = new ArrayList<>();
+            if (a.equals("create")) {
+                arr.add("(arena name)");
+            } else if (a.equals("remove") || a.equals("pos1") || a.equals("pos2") || a.equals("spectator") || a.equals("teleport") || a.equals("validate")) {
+                arr.addAll(Main.getPlugin().arenaNames);
+            }
+
+            return arr;
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

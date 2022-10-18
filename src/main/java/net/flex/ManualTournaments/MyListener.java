@@ -10,9 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -124,10 +122,17 @@ class MyListener implements Listener {
         Player p = e.getPlayer();
         if (Fight.temporary.contains(p)) {
             Location from = e.getFrom();
-            Location loc = new Location(from.getWorld(), from.getX(), from.getY(), from.getZ());
-            if (from.getZ() != Objects.requireNonNull(e.getTo()).getZ() || from.getX() != e.getTo().getX() || from.getY() != e.getTo().getY()) {
-                p.teleport(loc);
+            if (from.getX() != Objects.requireNonNull(e.getTo()).getX() || from.getY() != e.getTo().getY()) {
+                p.teleport(from);
             }
+        }
+    }
+
+    @EventHandler
+    private void onJump(PlayerJumpEvent e) {
+        Player p = e.getPlayer();
+        if (Fight.temporary.contains(p)) {
+            e.setCancelled(true);
         }
     }
 
@@ -139,6 +144,9 @@ class MyListener implements Listener {
                 e.setCancelled(true);
             }
         }
+        if (Spectate.spectators.contains(p)) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -149,21 +157,59 @@ class MyListener implements Listener {
                 e.setCancelled(true);
             }
         }
+        if (Spectate.spectators.contains(p)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        if (config.getBoolean("default-gamemode-on-join")) {
+            p.setGameMode(Bukkit.getServer().getDefaultGameMode());
+        }
     }
 
     @EventHandler
     private void onLeave(PlayerQuitEvent e) {
         Player p = e.getPlayer();
-        if (Fight.temporary.contains(p) || Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
+        if (Fight.temporary.contains(p) || Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId()) || Spectate.spectators.contains(p)) {
             if (config.getBoolean("kill-on-fight-end")) {
+                p.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 p.setHealth(0);
                 p.setWalkSpeed(0.2f);
             } else {
                 String path = "fight-end-spawn.";
                 if (config.isSet(path)) {
+                    p.setGameMode(Bukkit.getServer().getDefaultGameMode());
                     p.teleport(Arena.pathing(path, config));
                     p.setWalkSpeed(0.2f);
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    private void onCommand(PlayerCommandPreprocessEvent e) {
+        Player p = e.getPlayer();
+        if (Spectate.spectators.contains(p)) {
+            if (e.getMessage().startsWith("spec") || e.getMessage().startsWith("mt_spec") || config.getStringList("spectator-allowed-commands").contains(e.getMessage())) {
+                e.setCancelled(false);
+            } else {
+                p.sendMessage(Main.conf("not-allowed"));
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    private void onWorldChange(PlayerChangedWorldEvent e) {
+        Player p = e.getPlayer();
+        if (Spectate.spectators.contains(p)) {
+            Spectate.spectators.remove(p);
+            p.setGameMode(Bukkit.getServer().getDefaultGameMode());
+            for (Player other : Bukkit.getServer().getOnlinePlayers()) {
+                other.showPlayer(Main.getPlugin(), p);
             }
         }
     }
