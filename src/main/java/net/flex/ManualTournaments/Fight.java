@@ -60,7 +60,7 @@ public class Fight implements CommandExecutor {
                     team2String.clear();
                     teamA.setPrefix(Main.conf("team1-prefix"));
                     teamB.setPrefix(Main.conf("team2-prefix"));
-                    if (Main.version > 8) {
+                    if (Main.version > 7) {
                         teamA.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                         teamB.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                     }
