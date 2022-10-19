@@ -53,19 +53,25 @@ public class Kit implements TabCompleter, CommandExecutor {
                 if (a.equals("list")) {
                     p.sendMessage(Main.conf("kit-list") + Main.getPlugin().kitNames.toString());
                 } else if (a.equals("unbreakable")) {
-                    ItemStack[] inv = p.getInventory().getContents();
-                    for (ItemStack im : inv) {
-                        if (im != null) {
-                            if (im.getType().getMaxDurability() != 0) {
-                                ItemMeta unb = im.getItemMeta();
-                                assert unb != null;
-                                unb.setUnbreakable(true);
-                                im.setItemMeta(unb);
+                    if (Main.version > 4) {
+                        ItemStack[] inv = p.getInventory().getContents();
+                        for (ItemStack im : inv) {
+                            if (im != null) {
+                                if (im.getType().getMaxDurability() != 0) {
+                                    ItemMeta unb = im.getItemMeta();
+                                    assert unb != null;
+                                    if (Main.version > 10) {
+                                        unb.setUnbreakable(true);
+                                    } else {
+                                        send(p, "not-supported");
+                                    }
+                                    im.setItemMeta(unb);
+                                }
                             }
                         }
+                        p.updateInventory();
+                        send(p, "kit-set-unbreakable");
                     }
-                    p.updateInventory();
-                    send(p, "kit-set-unbreakable");
                 } else if (Main.getPlugin().kitNames.contains(a)) {
                     giveKit(p, a);
                     send(p, "kit-given");
@@ -91,6 +97,7 @@ public class Kit implements TabCompleter, CommandExecutor {
                     }
                 } else {
                     send(p, "kit-not-exists");
+                    return true;
                 }
             } else {
                 return false;

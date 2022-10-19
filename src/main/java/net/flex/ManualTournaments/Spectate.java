@@ -52,11 +52,11 @@ public class Spectate implements TabCompleter, CommandExecutor {
                 }
                 if (!config.getBoolean("spectator-visibility")) {
                     for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                        other.hidePlayer(Main.getPlugin(), p);
+                        other.hidePlayer(p);
                     }
                 } else {
                     for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                        other.showPlayer(Main.getPlugin(), p);
+                        other.showPlayer(p);
                     }
                 }
                 if (Objects.equals(config.getString("spectator-gamemode"), "spectator")) {
@@ -81,7 +81,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                         String path = "fight-end-spawn.";
                         p.setGameMode(gameMode);
                         for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                            other.showPlayer(Main.getPlugin(), p);
+                            other.showPlayer(p);
                         }
                         p.teleport(Arena.pathing(path, config));
                         send(p, "spectator-stopped-spectating");

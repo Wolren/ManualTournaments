@@ -88,7 +88,8 @@ public class Arena implements CommandExecutor, TabCompleter {
                             return false;
                     }
                 } else {
-                    return false;
+                    send(p, "arena-not-exists");
+                    return true;
                 }
             } else {
                 return false;

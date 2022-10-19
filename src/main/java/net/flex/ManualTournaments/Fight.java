@@ -1,7 +1,10 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Note;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -99,9 +102,11 @@ public class Fight implements CommandExecutor {
                                         Kit(fighter);
                                     } else {
                                         send(p, "current-kit-not-set");
+                                        return true;
                                     }
                                 } else {
                                     send(p, "current-arena-not-set");
+                                    return true;
                                 }
                                 if (config.getBoolean("freeze-on-start")) {
                                     (new BukkitRunnable() {
@@ -116,14 +121,14 @@ public class Fight implements CommandExecutor {
                                                 if (Main.version > 11) {
                                                     fighter.playSound(p.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                                                 } else {
-                                                    fighter.playNote(p.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
+                                                    fighter.playNote(p.getEyeLocation(), org.bukkit.Instrument.PIANO, Note.sharp(0, Note.Tone.G));
                                                 }
                                                 cancel();
                                             } else {
                                                 if (Main.version > 11) {
                                                     fighter.playSound(p.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
                                                 } else {
-                                                    fighter.playNote(p.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
+                                                    fighter.playNote(p.getEyeLocation(), org.bukkit.Instrument.PIANO, Note.flat(1, Note.Tone.B));
                                                 }
                                             }
 
@@ -177,6 +182,7 @@ public class Fight implements CommandExecutor {
                         }
                     } else {
                         send(p, "fight-duplicates");
+                        return true;
                     }
                 } else {
                     return false;

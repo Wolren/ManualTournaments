@@ -33,7 +33,7 @@ fight-end-spawn:
 current-kit: ""
 current-arena: ""
 fight-winners: "Congratulations to {team} for winning the fight!"
-#Team names (for now they don't do anything)
+#Team names (for now they don't really matter)
 team1: "Red"
 team2: "Blue"
 #Prefix visible on tab and nickname
@@ -47,6 +47,7 @@ arena-lacks-pos1: "Arena lacks pos1"
 arena-lacks-pos2: "Arena lacks pos2"
 arena-lacks-spectator: "Arena lacks spectator position"
 arena-list: "Arenas: "
+arena-not-exists: "Arena with this name doesn't exist"
 arena-not-set: "You have to set spectator position before teleporting!"
 arena-pos1: "Position for player 1 set successfully"
 arena-pos2: "Position for player 2 set successfully"
@@ -70,6 +71,7 @@ kit-not-exists: "Kit doesn't exist"
 kit-removed: "Kit removed successfully"
 kit-set-unbreakable: "Items in inventory set unbreakable"
 not-allowed: "You are not allowed to use this command during spectator mode"
+not-supported: "This command is not supported for this version"
 sender-not-a-player: "Sender must be a player"
 #List of allowed commands other than /spectate stop you can use while spectating
 spectator-allowed-commands: []

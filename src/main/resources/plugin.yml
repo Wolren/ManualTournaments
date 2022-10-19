@@ -45,7 +45,7 @@ commands:
       - spec
       - spectate
     permission: mt.spectate
-    permission-message: "&cYou have to have mt.spectate permission to use this command!"
+    permission-message: "You have to have mt.spectate permission to use this command!"
     usage: "Usage: /spectate"
 permissions:
   mt.arena:

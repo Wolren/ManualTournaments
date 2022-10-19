@@ -209,7 +209,7 @@ class MyListener implements Listener {
             Spectate.spectators.remove(p);
             p.setGameMode(Bukkit.getServer().getDefaultGameMode());
             for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                other.showPlayer(Main.getPlugin(), p);
+                other.showPlayer(p);
             }
         }
     }
