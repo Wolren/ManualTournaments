@@ -1,6 +1,5 @@
 package net.flex.ManualTournaments;
 
-import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,8 +21,6 @@ public class Main extends JavaPlugin {
     }
 
     public void onEnable() {
-        int pluginId = 16516;
-        new Metrics(this, pluginId);
         kitNames = new ArrayList<>();
         arenaNames = new ArrayList<>();
         createKitsConfig();
