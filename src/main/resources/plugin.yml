@@ -12,7 +12,7 @@ commands:
       - mta
       - arena
     permission: mt.arena
-    permission-message: ""
+    permission-message: "You don't have permission to use that command"
     usage: "Usage: /arena [create|list|remove...]"
   manualtournaments_fight:
     aliases:
@@ -20,7 +20,7 @@ commands:
       - mtf
       - fight
     permission: mt.fight
-    permission-message: ""
+    permission-message: "You don't have permission to use that command"
     usage: "Usage: /fight [player1] [player2]"
   manualtournaments_kit:
     aliases:
@@ -28,7 +28,7 @@ commands:
       - mtk
       - kit
     permissions: mt.kit
-    permission-message: ""
+    permission-message: "You don't have permission to use that command"
     usage: "Usage: /kit [create|list|remove...]"
   manualtournaments_settings:
     aliases:
@@ -36,7 +36,7 @@ commands:
       - mts
       - settings
     permission: mt.settings
-    permission-message: ""
+    permission-message: "You don't have permission to use that command"
     usage: "Usage: /settings [current_arena|current_kit...]"
   manualtournaments_spectate:
     aliases:
@@ -45,8 +45,9 @@ commands:
       - spec
       - spectate
     permission: mt.spectate
-    permission-message: "You have to have mt.spectate permission to use this command!"
+    permission-message: "You have to have spectator permission to use this command!"
     usage: "Usage: /spectate"
+    default: true
 permissions:
   mt.arena:
     description: Allows creating and managing arenas

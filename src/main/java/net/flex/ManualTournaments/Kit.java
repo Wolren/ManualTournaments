@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-@SuppressWarnings("deprecation")
 public class Kit implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
     private final FileConfiguration KitsConfig = Main.getPlugin().getKitsConfig();

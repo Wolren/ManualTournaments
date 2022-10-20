@@ -28,12 +28,7 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
     }
 
     @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    @NotNull
-    public static HandlerList getHandlerList() {
+    public @NotNull HandlerList getHandlers() {
         return handlers;
     }
 
@@ -88,7 +83,7 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         }
 
         private void remove(Player player){
-            if (jumping.containsKey(player)) jumping.remove(player);
+            jumping.remove(player);
         }
 
         private void add(Player player){
