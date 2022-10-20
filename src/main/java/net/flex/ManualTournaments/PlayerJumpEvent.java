@@ -32,6 +32,11 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         return handlers;
     }
 
+    @NotNull
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     public boolean isCancelled() {
         return this.cancel;
     }
