@@ -38,13 +38,13 @@ public class Fight implements CommandExecutor {
     private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
 
     @SneakyThrows
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
-        Main plugin = Main.getPlugin();
+        final Main plugin = Main.getPlugin();
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
-            Player p = ((OfflinePlayer) sender).getPlayer();
+            final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
             if (args.length == 0 || args.length == 1) {
                 return false;
@@ -72,24 +72,24 @@ public class Fight implements CommandExecutor {
                         teamB.setAllowFriendlyFire(true);
                     }
                     //Check if needed
-                    for (Player online : Bukkit.getOnlinePlayers()) {
+                    for (final Player online : Bukkit.getOnlinePlayers()) {
                         online.setScoreboard(board);
                     }
                     //Adding to distinct list to check for duplicates
-                    for (String arg : args) {
-                        Player fighter = Bukkit.getPlayer(arg);
+                    for (final String arg : args) {
+                        final Player fighter = Bukkit.getPlayer(arg);
                         if (fighter != null) {
                             distinctElements.add(Objects.requireNonNull(fighter).toString());
                         }
                     }
                     if (distinctElements.size() == distinctElements.stream().distinct().count()) {
                         for (int i = 0; i < args.length; i++) {
-                            Player fighter = Bukkit.getPlayer(args[i]);
+                            final Player fighter = Bukkit.getPlayer(args[i]);
                             if (fighter != null) {
                                 if (plugin.arenaNames.contains(config.getString("current-arena"))) {
                                     if (plugin.kitNames.contains(config.getString("current-kit"))) {
-                                        String path1 = "Arenas." + config.getString("current-arena") + "." + "pos1" + ".";
-                                        String path2 = "Arenas." + config.getString("current-arena") + "." + "pos2" + ".";
+                                        final String path1 = "Arenas." + config.getString("current-arena") + "." + "pos1" + ".";
+                                        final String path2 = "Arenas." + config.getString("current-arena") + "." + "pos2" + ".";
                                         if (i < (args.length / 2)) {
                                             teamA.addEntry(fighter.getDisplayName());
                                             team1.add(fighter.getUniqueId());
@@ -156,9 +156,9 @@ public class Fight implements CommandExecutor {
                             createFightsFolder(o);
                             FightsConfig.set("ArenaName", config.getString("current-arena"));
                             FightsConfig.set("KitName", config.getString("current-kit"));
-                            String listString = teamList(team1, team1String);
+                            final String listString = teamList(team1, team1String);
                             FightsConfig.set("Team1", listString);
-                            String listString2 = teamList(team2, team2String);
+                            final String listString2 = teamList(team2, team2String);
                             FightsConfig.set("Team2", listString2);
                             FightsConfig.set("Fight-duration", 0);
                         }
@@ -199,8 +199,8 @@ public class Fight implements CommandExecutor {
         return true;
     }
 
-    private void createFightsFolder(int i) {
-        File fightsConfigFolder = new File(Main.getPlugin().getDataFolder(), "fights");
+    private void createFightsFolder(final int i) {
+        final File fightsConfigFolder = new File(Main.getPlugin().getDataFolder(), "fights");
         if (!fightsConfigFolder.exists()) {
             fightsConfigFolder.mkdir();
         }
@@ -209,18 +209,18 @@ public class Fight implements CommandExecutor {
         YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
 
-    private void Kit(Player x) {
+    private void Kit(final Player x) {
         if (Main.getPlugin().getConfig().getString("current-kit") != null) {
-            Kit.getInstance().giveKit(x, Main.getPlugin().getConfig().getString("current-kit"));
+            Kit.giveKit(x, Main.getPlugin().getConfig().getString("current-kit"));
         }
     }
 
-    private static void send(Player p, String s) {
+    private static void send(final Player p, final String s) {
         p.sendMessage(Main.conf(s));
     }
 
-    static String teamList(Iterable<UUID> team, Collection<String> teamString) {
-        for (UUID uuid : team) {
+    static String teamList(final Iterable<UUID> team, final Collection<String> teamString) {
+        for (final UUID uuid : team) {
             teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
         }
         return String.join(", ", teamString);

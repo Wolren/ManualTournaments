@@ -21,18 +21,18 @@ public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
 
     @SneakyThrows
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
         if (!(sender instanceof Player)) {
             sender.sendMessage(Main.conf("sender-not-a-player"));
         } else {
-            Player p = ((OfflinePlayer) sender).getPlayer();
+            final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
             if (args.length == 0) {
                 return false;
             } else if (args.length == 1) {
                 if (args[0].equals("endspawn")) {
-                    String path = "fight-end-spawn.";
+                    final String path = "fight-end-spawn.";
                     Arena.getLocation(path, p, config);
                     send(p, "config-updated-successfully");
                 }
@@ -128,7 +128,7 @@ public class Settings implements TabCompleter, CommandExecutor {
             }
             try {
                 config.save(Main.getPlugin().customConfigFile);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -136,7 +136,7 @@ public class Settings implements TabCompleter, CommandExecutor {
     }
 
     @Nullable
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final org.bukkit.command.Command command, @NotNull final String s, @NotNull final String[] args) {
         if (args.length == 1) {
             return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end");
         } else if (args.length == 2) {
@@ -157,7 +157,7 @@ public class Settings implements TabCompleter, CommandExecutor {
         return Collections.emptyList();
     }
 
-    private static void send(Player p, String s) {
+    private static void send(final Player p, final String s) {
         p.sendMessage(Main.conf(s));
     }
 }

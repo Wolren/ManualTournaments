@@ -19,6 +19,12 @@ public class Main extends JavaPlugin {
     static Main getPlugin() {
         return getPlugin(Main.class);
     }
+    FileConfiguration getKitsConfig() {
+        return KitsConfig;
+    }
+    FileConfiguration getArenaConfig() {
+        return ArenaConfig;
+    }
 
     public void onEnable() {
         kitNames = new ArrayList<>();
@@ -27,8 +33,8 @@ public class Main extends JavaPlugin {
         createArenaConfig();
         createCustomConfig();
         getConfig().options().copyDefaults(true);
-        FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigfile);
-        FileConfiguration Arenas = YamlConfiguration.loadConfiguration(ArenaConfigFile);
+        final FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigfile);
+        final FileConfiguration Arenas = YamlConfiguration.loadConfiguration(ArenaConfigFile);
         if (Kits.getConfigurationSection("Kits") != null) {
             kitNames.addAll(Objects.requireNonNull(Kits.getConfigurationSection("Kits")).getKeys(false));
         }
@@ -51,21 +57,13 @@ public class Main extends JavaPlugin {
     public void onDisable() {
     }
 
-    FileConfiguration getKitsConfig() {
-        return KitsConfig;
-    }
-
-    FileConfiguration getArenaConfig() {
-        return ArenaConfig;
-    }
-
-    private void createKitsConfig() {
-        KitsConfigfile = new File(getDataFolder(), "kits.yml");
-        KitsConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(KitsConfigfile);
-        if (!KitsConfigfile.exists()) {
-            KitsConfigfile.getParentFile().mkdirs();
-            saveResource("kits.yml", false);
+    private void createCustomConfig() {
+        customConfigFile = new File(getDataFolder(), "config.yml");
+        customConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(customConfigFile);
+        if (!customConfigFile.exists()) {
+            customConfigFile.getParentFile().mkdirs();
+            saveResource("config.yml", false);
         }
     }
 
@@ -79,31 +77,28 @@ public class Main extends JavaPlugin {
         }
     }
 
-    private void createCustomConfig() {
-        customConfigFile = new File(getDataFolder(), "config.yml");
-        customConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(customConfigFile);
-        if (!customConfigFile.exists()) {
-            customConfigFile.getParentFile().mkdirs();
-            saveResource("config.yml", false);
+    private void createKitsConfig() {
+        KitsConfigfile = new File(getDataFolder(), "kits.yml");
+        KitsConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(KitsConfigfile);
+        if (!KitsConfigfile.exists()) {
+            KitsConfigfile.getParentFile().mkdirs();
+            saveResource("kits.yml", false);
         }
     }
 
     static String getNMSVersion() {
-        String v = Bukkit.getServer().getClass().getPackage().getName();
+        final String v = Bukkit.getServer().getClass().getPackage().getName();
         return v.substring(v.lastIndexOf('.') + 1);
     }
 
-    static int formatNMSVersion(String nms) {
+    static int formatNMSVersion(final String nms) {
         switch (nms) {
             case "v1_7_R1":
-                return 1;
             case "v1_7_R2":
-                return 2;
             case "v1_7_R3":
-                return 3;
             case "v1_7_R4":
-                return 4;
+                throw new IllegalArgumentException(nms + " isn't supported");
             case "v1_8_R1":
                 return 5;
             case "v1_8_R2":
@@ -142,12 +137,11 @@ public class Main extends JavaPlugin {
                 return 22;
             case "v1_19_R1":
                 return 23;
-
         }
         throw new IllegalArgumentException(nms + " isn't supported");
     }
 
-    static String conf(String s) {
+    static String conf(final String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }
 }

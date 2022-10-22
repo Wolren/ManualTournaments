@@ -23,7 +23,7 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private boolean cancel = false;
 
-    public PlayerJumpEvent(Player player) {
+    public PlayerJumpEvent(final Player player) {
         super(player);
     }
 
@@ -41,7 +41,7 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         return this.cancel;
     }
 
-    public void setCancelled(boolean cancel) {
+    public void setCancelled(final boolean cancel) {
         this.cancel = cancel;
     }
 
@@ -50,13 +50,13 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         public static final double jump_vel_border = 0.4;
 
         @EventHandler
-        public void onJump(PlayerMoveEvent event){
-            Player player = event.getPlayer();
-            double vy = player.getVelocity().getY();
-            Material mat = player.getLocation().getBlock().getType();
-            boolean isClimbing = mat == Material.LADDER || mat == Material.VINE;
+        public void onJump(final PlayerMoveEvent event){
+            final Player player = event.getPlayer();
+            final double vy = player.getVelocity().getY();
+            final Material mat = player.getLocation().getBlock().getType();
+            final boolean isClimbing = mat == Material.LADDER || mat == Material.VINE;
             if (vy > jump_vel_border && !isClimbing && !jumping.get(player)) {
-                PlayerJumpEvent jumpEvent = new PlayerJumpEvent(player);
+                final PlayerJumpEvent jumpEvent = new PlayerJumpEvent(player);
                 Bukkit.getServer().getPluginManager().callEvent(jumpEvent);
                 if (jumpEvent.isCancelled()) player.setVelocity(new Vector(player.getVelocity().getX(),0,player.getVelocity().getZ()));
                 jumping.replace(player,true);
@@ -66,32 +66,32 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         }
 
         @EventHandler
-        public void onJoin(PlayerJoinEvent event){
-            Player player = event.getPlayer();
+        public void onJoin(final PlayerJoinEvent event){
+            final Player player = event.getPlayer();
             add(player);
         }
 
         @EventHandler
-        public void onQuit(PlayerQuitEvent event){
-            Player player = event.getPlayer();
+        public void onQuit(final PlayerQuitEvent event){
+            final Player player = event.getPlayer();
             remove(player);
         }
 
         @EventHandler
-        public void onEnable(PluginEnableEvent event){
-            for (Player player: Bukkit.getOnlinePlayers()) add(player);
+        public void onEnable(final PluginEnableEvent event){
+            for (final Player player: Bukkit.getOnlinePlayers()) add(player);
         }
 
         @EventHandler
-        public void onDisable(PluginDisableEvent event){
+        public void onDisable(final PluginDisableEvent event){
             jumping.clear();
         }
 
-        private void remove(Player player){
+        private void remove(final Player player){
             jumping.remove(player);
         }
 
-        private void add(Player player){
+        private void add(final Player player){
             if (!jumping.containsKey(player)) jumping.put(player,false);
         }
     }
