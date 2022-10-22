@@ -16,12 +16,15 @@ public class Main extends JavaPlugin {
     File KitsConfigfile, ArenaConfigFile, customConfigFile;
     FileConfiguration KitsConfig, ArenaConfig, customConfig;
     public static int version = Main.formatNMSVersion(Main.getNMSVersion());
+
     static Main getPlugin() {
         return getPlugin(Main.class);
     }
+
     FileConfiguration getKitsConfig() {
         return KitsConfig;
     }
+
     FileConfiguration getArenaConfig() {
         return ArenaConfig;
     }

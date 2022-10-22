@@ -32,9 +32,8 @@ public class Spectate implements TabCompleter, CommandExecutor {
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
         ArenasConfig.load(Main.getPlugin().ArenaConfigFile);
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(Main.conf("sender-not-a-player"));
-        } else {
+        if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
+        else {
             final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
             if (args.length == 0) {
@@ -45,20 +44,16 @@ public class Spectate implements TabCompleter, CommandExecutor {
                         send(p, "spectator-started-spectating");
                     } else {
                         send(p, "arena-not-set");
-                        return false;
+                        return true;
                     }
                 } else {
                     send(p, "current-arena-not-set");
-                    return false;
+                    return true;
                 }
                 if (!config.getBoolean("spectator-visibility")) {
-                    for (final Player other : Bukkit.getServer().getOnlinePlayers()) {
-                        other.hidePlayer(p);
-                    }
+                    for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.hidePlayer(p);
                 } else {
-                    for (final Player other : Bukkit.getServer().getOnlinePlayers()) {
-                        other.showPlayer(p);
-                    }
+                    for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
                 }
                 if (Objects.equals(config.getString("spectator-gamemode"), "spectator")) {
                     p.setGameMode(GameMode.SPECTATOR);
@@ -70,6 +65,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                     p.setGameMode(GameMode.CREATIVE);
                 } else {
                     send(p, "spectator-wrong-arguments");
+                    return true;
                 }
                 spectators.add(p);
             } else if (args.length == 1) {
@@ -79,32 +75,22 @@ public class Spectate implements TabCompleter, CommandExecutor {
                         p.setHealth(0.0f);
                         send(p, "spectator-stopped-spectating");
                     } else {
-                        final String path = "fight-end-spawn.";
                         p.setGameMode(gameMode);
-                        for (final Player other : Bukkit.getServer().getOnlinePlayers()) {
-                            other.showPlayer(p);
-                        }
-                        p.teleport(Arena.pathing(path, config));
+                        for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
+                        p.teleport(Arena.pathing("fight-end-spawn.", config));
                         send(p, "spectator-stopped-spectating");
                     }
                     spectators.remove(p);
-                } else {
-                    send(p, "not-allowed");
-                }
-            } else {
-                return false;
-            }
+                } else send(p, "not-allowed");
+            } else return false;
         }
-
         return true;
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
-        if (args.length == 1) {
-            return Collections.singletonList("stop");
-        }
+        if (args.length == 1) return Collections.singletonList("stop");
         return null;
     }
 

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+
 public class Arena implements CommandExecutor, TabCompleter {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
     private final FileConfiguration ArenaConfig = Main.getPlugin().getArenaConfig();
@@ -23,19 +24,15 @@ public class Arena implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
         ArenaConfig.load(Main.getPlugin().ArenaConfigFile);
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(Main.conf("sender-not-a-player"));
-        } else {
+        if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
+        else {
             final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
-            if (args.length == 0) {
-                return false;
-            } else if (args.length == 1) {
-                if (args[0].equals("list")) {
+            if (args.length == 0) return false;
+            else if (args.length == 1) {
+                if (args[0].equals("list"))
                     p.sendMessage(Main.conf("arena-list") + Main.getPlugin().arenaNames.toString());
-                } else {
-                    return false;
-                }
+                else return false;
             } else if (args.length == 2) {
                 ArenaConfig.load(Main.getPlugin().ArenaConfigFile);
                 final String a = args[0];
@@ -48,6 +45,7 @@ public class Arena implements CommandExecutor, TabCompleter {
                         send(p, "arena-create");
                     } else {
                         send(p, "arena-already-exists");
+                        return true;
                     }
                 } else if (a.equals("remove")) {
                     if (Main.getPlugin().arenaNames.contains(arenaName)) {
@@ -56,6 +54,7 @@ public class Arena implements CommandExecutor, TabCompleter {
                         send(p, "arena-removed");
                     } else {
                         send(p, "arena-not-exists");
+                        return true;
                     }
                 } else if (Main.getPlugin().arenaNames.contains(arenaName)) {
                     final String pathC = path + "spectator.";
@@ -75,11 +74,8 @@ public class Arena implements CommandExecutor, TabCompleter {
                             send(p, "arena-spectator");
                             break;
                         case "teleport":
-                            if (check(arenaName)) {
-                                p.teleport(pathing(pathC, ArenaConfig));
-                            } else {
-                                send(p, "arena-not-set");
-                            }
+                            if (check(arenaName)) p.teleport(pathing(pathC, ArenaConfig));
+                            else send(p, "arena-not-set");
                             break;
                         case "validate":
                             checkArena(p, arenaName);
@@ -91,12 +87,9 @@ public class Arena implements CommandExecutor, TabCompleter {
                     send(p, "arena-not-exists");
                     return true;
                 }
-            } else {
-                return false;
-            }
+            } else return false;
             Main.getPlugin().getArenaConfig().save(Main.getPlugin().ArenaConfigFile);
         }
-
         return true;
     }
 
@@ -105,21 +98,14 @@ public class Arena implements CommandExecutor, TabCompleter {
         if (ArenaConfig.isSet(path + "pos1") && ArenaConfig.isSet(path + "pos2") && ArenaConfig.isSet(path + "spectator")) {
             send(p, "arena-set-correctly");
         } else {
-            if (!ArenaConfig.isSet(path + "pos1")) {
-                send(p, "arena-lacks-pos1");
-            }
-            if (!ArenaConfig.isSet(path + "pos2")) {
-                send(p, "arena-lacks-pos2");
-            }
-            if (!ArenaConfig.isSet(path + "spectator")) {
-                send(p, "arena-lacks-spectator");
-            }
+            if (!ArenaConfig.isSet(path + "pos1")) send(p, "arena-lacks-pos1");
+            if (!ArenaConfig.isSet(path + "pos2")) send(p, "arena-lacks-pos2");
+            if (!ArenaConfig.isSet(path + "spectator")) send(p, "arena-lacks-spectator");
         }
     }
 
     private Boolean check(final String arenaName) {
-        final String path = "Arenas." + arenaName + ".";
-        return ArenaConfig.isSet(path + "spectator");
+        return ArenaConfig.isSet("Arenas." + arenaName + "." + "spectator");
     }
 
     static void getLocation(final String pathing, final Player p, final ConfigurationSection cfg) {
@@ -129,7 +115,6 @@ public class Arena implements CommandExecutor, TabCompleter {
         final float yaw = p.getLocation().getYaw();
         final float pitch = p.getLocation().getPitch();
         final String world = Objects.requireNonNull(p.getLocation().getWorld()).getName();
-
         cfg.set(pathing + "x", x);
         cfg.set(pathing + "y", y);
         cfg.set(pathing + "z", z);
@@ -153,17 +138,15 @@ public class Arena implements CommandExecutor, TabCompleter {
     }
 
     public List<String> onTabComplete(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String alias, final String[] args) {
-        if (args.length == 1) {
+        if (args.length == 1)
             return Arrays.asList("create", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
-        } else if (args.length == 2) {
+        else if (args.length == 2) {
             final String a = args[0];
             final List<String> arr = new ArrayList<>();
-            if (a.equals("create")) {
-                arr.add("(arena name)");
-            } else if (a.equals("remove") || a.equals("pos1") || a.equals("pos2") || a.equals("spectator") || a.equals("teleport") || a.equals("validate")) {
+            if (a.equals("create")) arr.add("(arena name)");
+            else if (a.equals("remove") || a.equals("pos1") || a.equals("pos2") || a.equals("spectator") || a.equals("teleport") || a.equals("validate")) {
                 arr.addAll(Main.getPlugin().arenaNames);
             }
-
             return arr;
         } else {
             return Collections.emptyList();

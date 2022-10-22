@@ -3,7 +3,6 @@ package net.flex.ManualTournaments;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +12,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -30,41 +28,27 @@ class MyListener implements Listener {
         removeEntries();
         if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
             e.setDroppedExp(0);
-            if (!config.getBoolean("drop-on-death")) {
-                e.getDrops().clear();
-            }
+            if (!config.getBoolean("drop-on-death")) e.getDrops().clear();
         }
         teamRemover(p, Fight.team1, Fight.team2);
         teamRemover(p, Fight.team2, Fight.team1);
-        if (config.getBoolean("create-fights-folder")) {
-            endCounter();
-        }
+        if (config.getBoolean("create-fights-folder")) endCounter();
     }
 
+    @SneakyThrows
     private void endCounter() {
         if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
-            try {
-                Fight.FightsConfig.load(Fight.FightsConfigFile);
-            } catch (final IOException | InvalidConfigurationException e) {
-                throw new RuntimeException(e);
-            }
+            Fight.FightsConfig.load(Fight.FightsConfigFile);
             Fight.FightsConfig.set("Fight-duration", Fight.j - 3);
             y = 1;
-            try {
-                Fight.FightsConfig.save(Fight.FightsConfigFile);
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            Fight.FightsConfig.save(Fight.FightsConfigFile);
         }
     }
 
     private void removeEntries() {
         for (final Player p : Bukkit.getServer().getOnlinePlayers()) {
-            if (Fight.team1.contains(p.getUniqueId())) {
-                Fight.teamA.removeEntry(p.getDisplayName());
-            } else if (Fight.team2.contains(p.getUniqueId())) {
-                Fight.teamB.removeEntry(p.getDisplayName());
-            }
+            if (Fight.team1.contains(p.getUniqueId())) Fight.teamA.removeEntry(p.getDisplayName());
+            else if (Fight.team2.contains(p.getUniqueId())) Fight.teamB.removeEntry(p.getDisplayName());
         }
     }
 
@@ -86,31 +70,24 @@ class MyListener implements Listener {
                     public void run() {
                         if (i == 0) {
                             final Collection<String> a = new ArrayList<>();
-                            for (final UUID uuid : team2) {
+                            for (final UUID uuid : team2)
                                 a.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
-                            }
                             final String listString = String.join(", ", a);
                             final String replace = Objects.requireNonNull(Main.getPlugin().getConfig().getString("fight-winners")).replace("{team}", listString);
                             Bukkit.getServer().broadcastMessage(replace);
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (final Player p1 : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p1.getUniqueId())) {
-                                        p1.setHealth(0);
-                                    }
+                                    if (team2.contains(p1.getUniqueId())) p1.setHealth(0);
                                 }
                             } else {
                                 final String path = "fight-end-spawn.";
                                 for (final Player p1 : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p1.getUniqueId())) {
-                                        if (config.isSet(path)) {
-                                            p1.teleport(Arena.pathing(path, config));
-                                        }
-                                    }
+                                    if (team2.contains(p1.getUniqueId()) && config.isSet(path))
+                                        p1.teleport(Arena.pathing(path, config));
                                 }
                             }
                             cancel();
                         }
-
                         --i;
                     }
                 }.runTaskTimer(Main.getPlugin(), 0L, 20L);
@@ -123,52 +100,39 @@ class MyListener implements Listener {
         final Player p = e.getPlayer();
         if (Fight.temporary.contains(p)) {
             final Location from = e.getFrom();
-            if (from.getX() != Objects.requireNonNull(e.getTo()).getX() || from.getY() != e.getTo().getY()) {
+            if (from.getX() != Objects.requireNonNull(e.getTo()).getX() || from.getY() != e.getTo().getY())
                 p.teleport(from);
-            }
         }
     }
 
     @EventHandler
     private void onJump(final PlayerJumpEvent e) {
         final Player p = e.getPlayer();
-        if (Fight.temporary.contains(p)) {
-            e.setCancelled(true);
-        }
+        if (Fight.temporary.contains(p)) e.setCancelled(true);
     }
 
     @EventHandler
     private void onDrop(final PlayerDropItemEvent e) {
         final Player p = e.getPlayer();
         if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
-            if (!config.getBoolean("drop-items")) {
-                e.setCancelled(true);
-            }
+            if (!config.getBoolean("drop-items")) e.setCancelled(true);
         }
-        if (Spectate.spectators.contains(p)) {
-            e.setCancelled(true);
-        }
+        if (Spectate.spectators.contains(p)) e.setCancelled(true);
     }
 
     @EventHandler
     private void onBreak(final BlockBreakEvent e) {
         final Player p = e.getPlayer();
         if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
-            if (!config.getBoolean("break-blocks")) {
-                e.setCancelled(true);
-            }
+            if (!config.getBoolean("break-blocks")) e.setCancelled(true);
         }
-        if (Spectate.spectators.contains(p)) {
-            e.setCancelled(true);
-        }
+        if (Spectate.spectators.contains(p)) e.setCancelled(true);
     }
 
     @EventHandler
     private void onJoin(final PlayerJoinEvent e) {
         final Player p = e.getPlayer();
-        if (config.getBoolean("default-gamemode-on-join")) {
-            p.setGameMode(Bukkit.getServer().getDefaultGameMode());
-        }
+        if (config.getBoolean("default-gamemode-on-join")) p.setGameMode(Bukkit.getServer().getDefaultGameMode());
     }
 
     @EventHandler
@@ -209,9 +173,7 @@ class MyListener implements Listener {
         if (Spectate.spectators.contains(p)) {
             Spectate.spectators.remove(p);
             p.setGameMode(Bukkit.getServer().getDefaultGameMode());
-            for (final Player other : Bukkit.getServer().getOnlinePlayers()) {
-                other.showPlayer(p);
-            }
+            for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
         }
     }
 }

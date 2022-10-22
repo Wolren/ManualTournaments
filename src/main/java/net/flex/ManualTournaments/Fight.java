@@ -1,10 +1,7 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import org.bukkit.Bukkit;
-import org.bukkit.Note;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,15 +38,12 @@ public class Fight implements CommandExecutor {
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
         final Main plugin = Main.getPlugin();
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(Main.conf("sender-not-a-player"));
-        } else {
+        if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
+        else {
             final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
-            if (args.length == 0 || args.length == 1) {
-                return false;
-                //Possibly lower number can help optimise the speed
-            } else if (args.length <= 100) {
+            if (args.length == 0 || args.length == 1) return false;
+            else {
                 if (args.length % 2 == 0) {
                     KitsConfig.load(plugin.KitsConfigfile);
                     ArenasConfig.load(plugin.ArenaConfigFile);
@@ -72,15 +66,11 @@ public class Fight implements CommandExecutor {
                         teamB.setAllowFriendlyFire(true);
                     }
                     //Check if needed
-                    for (final Player online : Bukkit.getOnlinePlayers()) {
-                        online.setScoreboard(board);
-                    }
+                    for (final Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
                     //Adding to distinct list to check for duplicates
                     for (final String arg : args) {
                         final Player fighter = Bukkit.getPlayer(arg);
-                        if (fighter != null) {
-                            distinctElements.add(Objects.requireNonNull(fighter).toString());
-                        }
+                        if (fighter != null) distinctElements.add(Objects.requireNonNull(fighter).toString());
                     }
                     if (distinctElements.size() == distinctElements.stream().distinct().count()) {
                         for (int i = 0; i < args.length; i++) {
@@ -94,10 +84,12 @@ public class Fight implements CommandExecutor {
                                             teamA.addEntry(fighter.getDisplayName());
                                             team1.add(fighter.getUniqueId());
                                             fighter.teleport(Arena.pathing(path1, ArenasConfig));
+                                            fighter.setGameMode(GameMode.SURVIVAL);
                                         } else if (i >= (args.length / 2)) {
                                             teamB.addEntry(fighter.getDisplayName());
                                             team2.add(fighter.getUniqueId());
                                             fighter.teleport(Arena.pathing(path2, ArenasConfig));
+                                            fighter.setGameMode(GameMode.SURVIVAL);
                                         }
                                         Kit(fighter);
                                     } else {
@@ -118,18 +110,16 @@ public class Fight implements CommandExecutor {
                                             if (i == 0) {
                                                 temporary.clear();
                                                 p.setWalkSpeed(0.2f);
-                                                if (Main.version > 11) {
+                                                if (Main.version > 11)
                                                     fighter.playSound(p.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-                                                } else {
-                                                    fighter.playNote(p.getEyeLocation(), org.bukkit.Instrument.PIANO, Note.sharp(0, Note.Tone.G));
-                                                }
+                                                else
+                                                    fighter.playNote(p.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
                                                 cancel();
                                             } else {
-                                                if (Main.version > 11) {
+                                                if (Main.version > 11)
                                                     fighter.playSound(p.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
-                                                } else {
-                                                    fighter.playNote(p.getEyeLocation(), org.bukkit.Instrument.PIANO, Note.flat(1, Note.Tone.B));
-                                                }
+                                                else
+                                                    fighter.playNote(p.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
                                             }
 
                                             --i;
@@ -138,14 +128,11 @@ public class Fight implements CommandExecutor {
                                 }
                             }
                         }
-                        if (config.getBoolean("count-fights")) {
-                            config.set("fight-count", ++o);
-                        }
+                        if (config.getBoolean("count-fights")) config.set("fight-count", ++o);
                         if (config.getBoolean("create-fights-folder")) {
                             j = 0;
                             MyListener.y = 0;
                             new BukkitRunnable() {
-
                                 public void run() {
                                     if (MyListener.y == 1) {
                                         cancel();
@@ -173,7 +160,6 @@ public class Fight implements CommandExecutor {
                                     } else {
                                         Bukkit.broadcastMessage(Main.conf("fight-will-start") + i + Main.conf("fight-will-start-seconds"));
                                     }
-
                                     --i;
                                 }
                             }).runTaskTimer(plugin, 0L, 20L);
@@ -187,15 +173,12 @@ public class Fight implements CommandExecutor {
                 } else {
                     return false;
                 }
-            } else {
-                return false;
             }
             if (config.getBoolean("create-fights-folder")) {
                 FightsConfig.save(FightsConfigFile);
             }
             config.save(plugin.customConfigFile);
         }
-
         return true;
     }
 
@@ -209,9 +192,9 @@ public class Fight implements CommandExecutor {
         YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
 
-    private void Kit(final Player x) {
+    private void Kit(final Player p) {
         if (Main.getPlugin().getConfig().getString("current-kit") != null) {
-            Kit.giveKit(x, Main.getPlugin().getConfig().getString("current-kit"));
+            Kit.giveKit(p, Main.getPlugin().getConfig().getString("current-kit"));
         }
     }
 
@@ -220,9 +203,7 @@ public class Fight implements CommandExecutor {
     }
 
     static String teamList(final Iterable<UUID> team, final Collection<String> teamString) {
-        for (final UUID uuid : team) {
-            teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
-        }
+        for (final UUID uuid : team) teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
         return String.join(", ", teamString);
     }
 }

@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,14 +22,12 @@ public class Settings implements TabCompleter, CommandExecutor {
     @SneakyThrows
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(Main.conf("sender-not-a-player"));
-        } else {
+        if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
+        else {
             final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
-            if (args.length == 0) {
-                return false;
-            } else if (args.length == 1) {
+            if (args.length == 0) return false;
+            else if (args.length == 1) {
                 if (args[0].equals("endspawn")) {
                     final String path = "fight-end-spawn.";
                     Arena.getLocation(path, p, config);
@@ -45,9 +42,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                         } else if (args[1].equals("false")) {
                             config.set("drop-items", false);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "config-options");
-                        }
+                        } else send(p, "config-options");
                         break;
                     case "break_blocks":
                         if (args[1].equals("true")) {
@@ -56,9 +51,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                         } else if (args[1].equals("false")) {
                             config.set("break-blocks", false);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "config-options");
-                        }
+                        } else send(p, "config-options");
                         break;
                     case "friendly_fire":
                         if (args[1].equals("true")) {
@@ -67,9 +60,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                         } else if (args[1].equals("false")) {
                             config.set("friendly-fire", false);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "config-options");
-                        }
+                        } else send(p, "config-options");
                         break;
                     case "drop_on_death":
                         if (args[1].equals("true")) {
@@ -78,9 +69,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                         } else if (args[1].equals("false")) {
                             config.set("drop-on-death", false);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "config-options");
-                        }
+                        } else send(p, "config-options");
                         break;
                     case "kill_on_fight_end":
                         if (args[1].equals("true")) {
@@ -89,9 +78,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                         } else if (args[1].equals("false")) {
                             config.set("kill-on-fight-end", false);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "config-options");
-                        }
+                        } else send(p, "config-options");
                         break;
                     case "freeze_on_start":
                         if (args[1].equals("true")) {
@@ -100,43 +87,31 @@ public class Settings implements TabCompleter, CommandExecutor {
                         } else if (args[1].equals("false")) {
                             config.set("freeze-on-start", false);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "config-options");
-                        }
+                        } else send(p, "config-options");
                         break;
                     case "current_arena":
                         if (Main.getPlugin().arenaNames.contains(args[1])) {
                             config.set("current-arena", args[1]);
                             send(p, "config-updated-successfully");
-                        } else {
-                           send(p, "arena-not-exists");
-                        }
+                        } else send(p, "arena-not-exists");
                         break;
                     case "current_kit":
                         if (Main.getPlugin().kitNames.contains(args[1])) {
                             config.set("current-kit", args[1]);
                             send(p, "config-updated-successfully");
-                        } else {
-                            send(p, "kit-not-exists");
-                        }
+                        } else send(p, "kit-not-exists");
                         break;
                     default:
                         return false;
                 }
-            } else {
-                return false;
-            }
-            try {
-                config.save(Main.getPlugin().customConfigFile);
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
+            } else return false;
+            config.save(Main.getPlugin().customConfigFile);
         }
         return true;
     }
 
     @Nullable
-    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final org.bukkit.command.Command command, @NotNull final String s, @NotNull final String[] args) {
+    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         if (args.length == 1) {
             return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end");
         } else if (args.length == 2) {

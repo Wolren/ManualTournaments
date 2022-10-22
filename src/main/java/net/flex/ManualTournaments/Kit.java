@@ -75,7 +75,7 @@ public class Kit implements TabCompleter, CommandExecutor {
                 final String kitName = args[1];
                 if (a.equals("create")) {
                     if (!Main.getPlugin().kitNames.contains(kitName)) {
-                        createKit(p, kitName);
+                        getKit(p, kitName);
                         send(p, "kit-made");
                     } else p.sendMessage(Main.conf("kit-already-exists"));
                 } else if (Main.getPlugin().kitNames.contains(kitName)) {
@@ -100,7 +100,7 @@ public class Kit implements TabCompleter, CommandExecutor {
     }
 
     @SneakyThrows
-    private void createKit(final Player p, final String kitName) {
+    private void getKit(final Player p, final String kitName) {
         final String path = "Kits." + kitName + ".";
         final PlayerInventory inv = p.getInventory();
         final Collection<PotionEffect> effects = p.getActivePotionEffects();
@@ -143,7 +143,6 @@ public class Kit implements TabCompleter, CommandExecutor {
         if (is.hasItemMeta()) {
             if (Objects.requireNonNull(is.getItemMeta()).hasDisplayName())
                 KitsConfig.set(path + ".name", is.getItemMeta().getDisplayName());
-
             if (is.getType().equals(Material.ENCHANTED_BOOK)) {
                 final EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
                 final Map<Enchantment, Integer> enchants = storageMeta.getStoredEnchants();
@@ -153,14 +152,9 @@ public class Kit implements TabCompleter, CommandExecutor {
                     enchantList.add(e.getName().toUpperCase() + ":" + level);
                 }
                 KitsConfig.set(path + ".enchants", enchantList);
-                if (storageMeta.hasLore()) {
-                    KitsConfig.set(path + ".lore", storageMeta.getLore());
-                }
-                if (storageMeta.hasDisplayName()) {
-                    KitsConfig.set(path + ".name", storageMeta.getDisplayName());
-                } else {
-                    KitsConfig.set(path + ".name", "&e" + "Enchanted Book");
-                }
+                if (storageMeta.hasLore()) KitsConfig.set(path + ".lore", storageMeta.getLore());
+                if (storageMeta.hasDisplayName()) KitsConfig.set(path + ".name", storageMeta.getDisplayName());
+                else KitsConfig.set(path + ".name", "&e" + "Enchanted Book");
             } else if (is.getItemMeta() instanceof PotionMeta && Main.version > 7) {
                 final PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
                 KitsConfig.set(path + ".potion.type", Objects.requireNonNull(potionMeta.getBasePotionData().getType().name()));
@@ -176,7 +170,6 @@ public class Kit implements TabCompleter, CommandExecutor {
                 }
                 KitsConfig.set(path + ".enchants", enchantList);
             }
-
             if (is.getItemMeta().hasLore()) {
                 KitsConfig.set(path + ".lore", is.getItemMeta().getLore());
             }
@@ -189,103 +182,82 @@ public class Kit implements TabCompleter, CommandExecutor {
         p.setHealth(20.0D);
         p.setFoodLevel(20);
         p.setFireTicks(0);
-        for (final PotionEffect effect : p.getActivePotionEffects()) {
-            p.removePotionEffect(effect.getType());
-        }
-        final ConfigurationSection csA = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "items");
-        final ConfigurationSection csB = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "armor");
-        final ConfigurationSection csC = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "offhand");
-        final ConfigurationSection csD = KitsConfig.getConfigurationSection("Kits." + kitName + "." + "effects");
-        setPlayerContents(p, path, csA, csB, csC);
-        setPlayerEffects(p, path, csD);
+        for (final PotionEffect effect : p.getActivePotionEffects()) p.removePotionEffect(effect.getType());
+        final ConfigurationSection itemsSection = KitsConfig.getConfigurationSection(path + "items");
+        final ConfigurationSection armorSection = KitsConfig.getConfigurationSection(path + "armor");
+        final ConfigurationSection offhandSection = KitsConfig.getConfigurationSection(path + "offhand");
+        final ConfigurationSection effectsSection = KitsConfig.getConfigurationSection(path + "effects");
+        setPlayerItems(p, path, itemsSection);
+        setPlayerArmor(p, path, armorSection);
+        setPlayerOffhand(p, path, offhandSection);
+        setPlayerEffects(p, path, effectsSection);
         p.updateInventory();
     }
 
-    public static void setPlayerContents(final Player player, final String path, final ConfigurationSection csA, final ConfigurationSection csB, final ConfigurationSection csC) {
-        if (csA != null) {
-            for (final String str : Objects.requireNonNull(csA).getKeys(false)) {
+    private static void setPlayerItems(final Player p, final String path, final ConfigurationSection itemsSection) {
+        if (itemsSection != null) {
+            for (final String str : Objects.requireNonNull(itemsSection).getKeys(false)) {
                 final int slot = Integer.parseInt(str);
-                final String itemPath = path + "items." + slot + ".";
-                final String type = KitsConfig.getString(itemPath + "type");
-                assert type != null;
-                final String name = KitsConfig.getString(itemPath + "name");
-                final List<String> enchants = KitsConfig.getStringList(itemPath + "enchants");
-                final List<String> lore = KitsConfig.getStringList(itemPath + "lore");
-                final int amount = KitsConfig.getInt(itemPath + "amount");
-                final ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(type)), amount);
-                short durability = 0;
-                if (Main.version < 13) durability = (short) KitsConfig.getInt(itemPath + "durability");
-                if (KitsConfig.getString(itemPath + "potion") != null && Main.version > 7) {
-                    final PotionType potionType = PotionType.valueOf(KitsConfig.getString(itemPath + "potion.type"));
-                    final boolean extended = KitsConfig.getBoolean(itemPath + "potion.extended");
-                    final boolean upgraded = KitsConfig.getBoolean(itemPath + "potion.upgraded");
-                    final PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
-                    assert potionMeta != null;
-                    potionMeta.setBasePotionData(new PotionData(potionType, extended, upgraded));
-                    is.setItemMeta(potionMeta);
-                    player.getInventory().setItem(slot, is);
+                final String pathing = path + "items." + slot + ".";
+                final String name = KitsConfig.getString(pathing + "name");
+                final List<String> enchants = KitsConfig.getStringList(pathing + "enchants");
+                final ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(KitsConfig.getString(pathing + "type")))), KitsConfig.getInt(pathing + "amount"));
+                if (KitsConfig.getString(pathing + "potion") != null && Main.version > 7) {
+                    effect1(pathing, is);
+                    p.getInventory().setItem(slot, is);
                 } else if (is.getType().equals(Material.ENCHANTED_BOOK)) {
                     for (final String s : enchants) {
-                        final String[] indiEnchants = s.split(":");
-                        final EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
-                        assert storageMeta != null;
-                        storageMeta.addStoredEnchant(Objects.requireNonNull(Enchantment.getByName(indiEnchants[0])), Integer.parseInt(indiEnchants[1]), true);
-                        is.setItemMeta(storageMeta);
-                        player.getInventory().setItem(slot, is);
+                        enchant1(is, s);
+                        p.getInventory().setItem(slot, is);
                     }
                 } else {
                     final ItemMeta im = is.getItemMeta();
-                    if (Main.version < 13) is.setDurability(durability);
+                    if (Main.version < 13) is.setDurability((short) KitsConfig.getInt(pathing + "durability"));
                     if (im == null) continue;
                     if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-                    im.setLore(lore);
+                    im.setLore(KitsConfig.getStringList(pathing + "lore"));
                     for (final String s : enchants) {
-                        final String[] indiEnchants = s.split(":");
-                        im.addEnchant(Objects.requireNonNull(Enchantment.getByName(indiEnchants[0])), Integer.parseInt(indiEnchants[1]), true);
+                        final String[] stringEnchants = s.split(":");
+                        im.addEnchant(Objects.requireNonNull(Enchantment.getByName(stringEnchants[0])), Integer.parseInt(stringEnchants[1]), true);
                     }
                     is.setItemMeta(im);
-                    player.getInventory().setItem(slot, is);
+                    p.getInventory().setItem(slot, is);
                 }
             }
         }
-        if (csB != null) {
-            for (final String str : Objects.requireNonNull(csB).getKeys(false)) {
-                final String pB = path + "armor." + str + ".";
-                final String typeB = KitsConfig.getString(pB + "type");
-                final String nameB = KitsConfig.getString(pB + "name");
-                short durability = 0;
-                if (Main.version < 13) {
-                    durability = (short) KitsConfig.getInt(pB + "durability");
-                }
-                final List<String> enchants = KitsConfig.getStringList(pB + "enchants");
-                final int amount = KitsConfig.getInt(pB + "amount");
-                assert typeB != null;
-                final ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(typeB)), amount);
+    }
+
+    private static void setPlayerArmor(final Player p, final String path, final ConfigurationSection armorSection) {
+        if (armorSection != null) {
+            for (final String str : Objects.requireNonNull(armorSection).getKeys(false)) {
+                final String pathing = path + "armor." + str + ".";
+                final ItemStack is = itemStack(pathing);
                 final ItemMeta im = is.getItemMeta();
                 if (Main.version < 13) {
+                    final short durability;
+                    durability = (short) KitsConfig.getInt(pathing + "durability");
                     is.setDurability(durability);
                 }
                 if (im == null) continue;
-                if (nameB != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', nameB));
-                for (final String s1 : enchants) {
-                    final String[] indiEnchants = s1.split(":");
-                    im.addEnchant(Objects.requireNonNull(Enchantment.getByName(indiEnchants[0])), Integer.parseInt(indiEnchants[1]), true);
-                }
+                enchant2(KitsConfig.getString(pathing + "name"), KitsConfig.getStringList(pathing + "enchants"), im);
                 is.setItemMeta(im);
-                if (pB.contains("HELMET")) {
-                    player.getInventory().setHelmet(is);
-                } else if (pB.contains("CHESTPLATE")) {
-                    player.getInventory().setChestplate(is);
-                } else if (pB.contains("LEGGINGS")) {
-                    player.getInventory().setLeggings(is);
-                } else if (pB.contains("BOOTS")) {
-                    player.getInventory().setBoots(is);
+                if (pathing.contains("HELMET")) {
+                    p.getInventory().setHelmet(is);
+                } else if (pathing.contains("CHESTPLATE")) {
+                    p.getInventory().setChestplate(is);
+                } else if (pathing.contains("LEGGINGS")) {
+                    p.getInventory().setLeggings(is);
+                } else if (pathing.contains("BOOTS")) {
+                    p.getInventory().setBoots(is);
                 }
             }
         }
-        if (Main.version > 8 && csC != null) {
-            final List<String> strs = new ArrayList<>(Objects.requireNonNull(csC).getKeys(false));
-            final String pC = path + "offhand." + strs.get(0) + ".";
+    }
+
+    private static void setPlayerOffhand(final Player p, final String path, final ConfigurationSection offhandSection) {
+        if (Main.version > 8 && offhandSection != null) {
+            final List<String> strings = new ArrayList<>(Objects.requireNonNull(offhandSection).getKeys(false));
+            final String pC = path + "offhand." + strings.get(0) + ".";
             final String typeC = KitsConfig.getString(pC + "type");
             final String nameC = KitsConfig.getString(pC + "name");
             short durability = 0;
@@ -297,22 +269,12 @@ public class Kit implements TabCompleter, CommandExecutor {
             assert typeC != null;
             final ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(typeC)), amount);
             if (KitsConfig.getString(pC + "potion") != null && Main.version > 7) {
-                final PotionType type = PotionType.valueOf(KitsConfig.getString(pC + "potion.type"));
-                final boolean extended = KitsConfig.getBoolean(pC + "potion.extended");
-                final boolean upgraded = KitsConfig.getBoolean(pC + "potion.upgraded");
-                final PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
-                assert potionMeta != null;
-                potionMeta.setBasePotionData(new PotionData(type, extended, upgraded));
-                is.setItemMeta(potionMeta);
-                player.getInventory().setItemInOffHand(is);
+                effect1(pC, is);
+                p.getInventory().setItemInOffHand(is);
             } else if (is.getType().equals(Material.ENCHANTED_BOOK)) {
                 for (final String s : enchants) {
-                    final String[] indiEnchants = s.split(":");
-                    final EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
-                    assert storageMeta != null;
-                    storageMeta.addStoredEnchant(Objects.requireNonNull(Enchantment.getByName(indiEnchants[0])), Integer.parseInt(indiEnchants[1]), true);
-                    is.setItemMeta(storageMeta);
-                    player.getInventory().setItemInOffHand(is);
+                    enchant1(is, s);
+                    p.getInventory().setItemInOffHand(is);
                 }
             } else {
                 final ItemMeta im = is.getItemMeta();
@@ -320,19 +282,15 @@ public class Kit implements TabCompleter, CommandExecutor {
                     is.setDurability(durability);
                 }
                 if (im != null) {
-                    if (nameC != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', nameC));
-                    for (final String s1 : enchants) {
-                        final String[] indiEnchants = s1.split(":");
-                        im.addEnchant(Objects.requireNonNull(Enchantment.getByName(indiEnchants[0])), Integer.parseInt(indiEnchants[1]), true);
-                    }
+                    enchant2(nameC, enchants, im);
                 }
                 is.setItemMeta(im);
-                player.getInventory().setItemInOffHand(is);
+                p.getInventory().setItemInOffHand(is);
             }
         }
     }
 
-    public static void setPlayerEffects(final Player p, final String path, final ConfigurationSection csD) {
+    private static void setPlayerEffects(final Player p, final String path, final ConfigurationSection csD) {
         if (csD != null) {
             final Iterable<String> effects = new ArrayList<>(Objects.requireNonNull(csD).getKeys(false));
             for (final String s : effects) {
@@ -346,12 +304,42 @@ public class Kit implements TabCompleter, CommandExecutor {
         }
     }
 
+    private static ItemStack itemStack(final String pathing) {
+        return new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(KitsConfig.getString(pathing + "type")))), KitsConfig.getInt(pathing + "amount"));
+    }
+
+    private static void effect1(final String pathing, final ItemStack is) {
+        final PotionType potionType = PotionType.valueOf(KitsConfig.getString(pathing + "potion.type"));
+        final boolean extended = KitsConfig.getBoolean(pathing + "potion.extended");
+        final boolean upgraded = KitsConfig.getBoolean(pathing + "potion.upgraded");
+        final PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
+        assert potionMeta != null;
+        potionMeta.setBasePotionData(new PotionData(potionType, extended, upgraded));
+        is.setItemMeta(potionMeta);
+    }
+
+    private static void enchant1(final ItemStack is, final String s) {
+        final String[] stringEnchants = s.split(":");
+        final EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
+        assert storageMeta != null;
+        storageMeta.addStoredEnchant(Objects.requireNonNull(Enchantment.getByName(stringEnchants[0])), Integer.parseInt(stringEnchants[1]), true);
+        is.setItemMeta(storageMeta);
+    }
+
+    private static void enchant2(final String nameC, final Iterable<String> enchants, final ItemMeta im) {
+        if (nameC != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', nameC));
+        for (final String s1 : enchants) {
+            final String[] stringEnchants = s1.split(":");
+            im.addEnchant(Objects.requireNonNull(Enchantment.getByName(stringEnchants[0])), Integer.parseInt(stringEnchants[1]), true);
+        }
+    }
+
     private static void send(final Player p, final String s) {
         p.sendMessage(Main.conf(s));
     }
 
     @Nullable
-    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final org.bukkit.command.Command command, @NotNull final String s, @NotNull final String[] args) {
+    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         if (args.length == 1) {
             return new ArrayList<>(Arrays.asList("create", "give", "list", "remove", "unbreakable"));
         } else if (args.length == 2) {
@@ -361,10 +349,8 @@ public class Kit implements TabCompleter, CommandExecutor {
             } else if (args[0].equals("remove") || args[0].equals("give")) {
                 arr.addAll(Main.getPlugin().kitNames);
             }
-
             return arr;
         }
-
         return Collections.emptyList();
     }
 }
