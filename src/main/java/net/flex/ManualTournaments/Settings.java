@@ -53,6 +53,15 @@ public class Settings implements TabCompleter, CommandExecutor {
                             send(p, "config-updated-successfully");
                         } else send(p, "config-options");
                         break;
+                    case "place_blocks":
+                        if (args[1].equals("true")) {
+                            config.set("place_blocks", true);
+                            send(p, "config-updated-successfully");
+                        } else if (args[1].equals("false")) {
+                            config.set("place_blocks", false);
+                            send(p, "config-updated-successfully");
+                        } else send(p, "config-options");
+                        break;
                     case "friendly_fire":
                         if (args[1].equals("true")) {
                             config.set("friendly-fire", true);
@@ -113,7 +122,7 @@ public class Settings implements TabCompleter, CommandExecutor {
     @Nullable
     public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end");
+            return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end", "place_blocks");
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "break_blocks":

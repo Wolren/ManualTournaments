@@ -42,6 +42,7 @@ public class Arena implements CommandExecutor, TabCompleter {
                     if (!Main.getPlugin().arenaNames.contains(arenaName)) {
                         Main.getPlugin().getArenaConfig().set("Arenas", arenaName);
                         Main.getPlugin().arenaNames.add(arenaName);
+                        if (!Objects.requireNonNull(config.getString("current-arena")).isEmpty()) config.set("current-arena", arenaName);
                         send(p, "arena-create");
                     } else {
                         send(p, "arena-already-exists");
