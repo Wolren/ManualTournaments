@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments;
 
+import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -57,6 +58,7 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 
+    @SneakyThrows
     public void onDisable() {
     }
 

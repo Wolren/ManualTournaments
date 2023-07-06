@@ -13,7 +13,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 
 public class Arena implements CommandExecutor, TabCompleter {
@@ -22,74 +21,79 @@ public class Arena implements CommandExecutor, TabCompleter {
 
     @SneakyThrows
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
-        config.load(Main.getPlugin().customConfigFile);
-        ArenaConfig.load(Main.getPlugin().ArenaConfigFile);
-        if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
-        else {
-            final Player p = ((OfflinePlayer) sender).getPlayer();
-            assert p != null;
-            if (args.length == 0) return false;
-            else if (args.length == 1) {
-                if (args[0].equals("list"))
+        loadConfigs();
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("sender-not-a-player");
+            return false;
+        }
+        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
+        if (!playerOptional.isPresent()) {
+            return false;
+        }
+        Player p = playerOptional.get();
+        if (args.length == 1) {
+            switch (args[0].toUpperCase()) {
+                case "LIST":
                     p.sendMessage(Main.conf("arena-list") + Main.getPlugin().arenaNames.toString());
-                else return false;
-            } else if (args.length == 2) {
-                ArenaConfig.load(Main.getPlugin().ArenaConfigFile);
-                final String a = args[0];
-                final String arenaName = args[1];
-                final String path = "Arenas." + arenaName + ".";
-                if (a.equals("create")) {
-                    if (!Main.getPlugin().arenaNames.contains(arenaName)) {
-                        Main.getPlugin().getArenaConfig().set("Arenas", arenaName);
+                    break;
+                default:
+                    return false;
+            }
+        } else if (args.length == 2) {
+            final String arenaName = args[1];
+            final String path = "Arenas." + arenaName + ".";
+            final String pathC = path + "spectator.";
+            boolean arenaExists = Main.getPlugin().arenaNames.contains(arenaName);
+            switch (args[0].toUpperCase()) {
+                case "CREATE":
+                    if (!arenaExists) {
+                        Objects.requireNonNull(ArenaConfig.getConfigurationSection("Arenas")).createSection(arenaName);
                         Main.getPlugin().arenaNames.add(arenaName);
                         send(p, "arena-create");
-                    } else {
-                        send(p, "arena-already-exists");
-                        return true;
-                    }
-                } else if (a.equals("remove")) {
-                    if (Main.getPlugin().arenaNames.contains(arenaName)) {
+                    } else send(p, "arena-already-exists");
+                    break;
+                case "REMOVE":
+                    if (arenaExists) {
                         ArenaConfig.set("Arenas." + arenaName, null);
                         Main.getPlugin().arenaNames.remove(arenaName);
                         send(p, "arena-removed");
-                    } else {
-                        send(p, "arena-not-exists");
-                        return true;
-                    }
-                } else if (Main.getPlugin().arenaNames.contains(arenaName)) {
-                    final String pathC = path + "spectator.";
-                    switch (a) {
-                        case "pos1":
-                            final String pathA = path + "pos1.";
-                            getLocation(pathA, p, ArenaConfig);
-                            send(p, "arena-pos1");
-                            break;
-                        case "pos2":
-                            final String pathB = path + "pos2.";
-                            getLocation(pathB, p, ArenaConfig);
-                            send(p, "arena-pos2");
-                            break;
-                        case "spectator":
-                            getLocation(pathC, p, ArenaConfig);
-                            send(p, "arena-spectator");
-                            break;
-                        case "teleport":
-                            if (check(arenaName)) p.teleport(pathing(pathC, ArenaConfig));
-                            else send(p, "arena-not-set");
-                            break;
-                        case "validate":
-                            checkArena(p, arenaName);
-                            break;
-                        default:
-                            return false;
-                    }
-                } else {
-                    send(p, "arena-not-exists");
-                    return true;
-                }
-            } else return false;
-            Main.getPlugin().getArenaConfig().save(Main.getPlugin().ArenaConfigFile);
-        }
+                    } else send(p, "arena-not-exists");
+                    break;
+                case "POS1":
+                    if (arenaExists) {
+                        final String pathA = path + "pos1.";
+                        getLocation(pathA, p, ArenaConfig);
+                        send(p, "arena-pos1");
+                    } else send(p, "arena-not-exists");
+                    break;
+                case "POS2":
+                    if (arenaExists) {
+                        final String pathB = path + "pos2.";
+                        getLocation(pathB, p, ArenaConfig);
+                        send(p, "arena-pos2");
+                    } else send(p, "arena-not-exists");
+                    break;
+                case "SPECTATOR":
+                    if (arenaExists) {
+                        getLocation(pathC, p, ArenaConfig);
+                        send(p, "arena-spectator");
+                    } else send(p, "arena-not-exists");
+                    break;
+                case "TELEPORT":
+                    if (arenaExists) {
+                        if (check(arenaName)) p.teleport(pathing(pathC, ArenaConfig));
+                        else send(p, "arena-not-set");
+                    } else send(p, "arena-not-exists");
+                    break;
+                case "VALIDATE":
+                    if (arenaExists) checkArena(p, arenaName);
+                    else send(p, "arena-not-exists");
+                    break;
+                default:
+                    return false;
+            }
+            ArenaConfig.save(Main.getPlugin().ArenaConfigFile);
+        } else return false;
         return true;
     }
 
@@ -121,6 +125,12 @@ public class Arena implements CommandExecutor, TabCompleter {
         cfg.set(pathing + "yaw", yaw);
         cfg.set(pathing + "pitch", pitch);
         cfg.set(pathing + "world", world);
+    }
+
+    @SneakyThrows
+    private void loadConfigs() {
+        config.load(Main.getPlugin().customConfigFile);
+        ArenaConfig.load(Main.getPlugin().ArenaConfigFile);
     }
 
     static Location pathing(final String path, final FileConfiguration cfg) {

@@ -3,7 +3,6 @@ name: ManualTournaments
 version: 1.0
 description: Plugin you can use to make manual tournaments
 author: Wildbot
-api-version: 1.19
 website: ""
 commands:
   manualtournaments_arena:
