@@ -32,13 +32,9 @@ public class Arena implements CommandExecutor, TabCompleter {
         }
         Player p = playerOptional.get();
         if (args.length == 1) {
-            switch (args[0].toUpperCase()) {
-                case "LIST":
-                    p.sendMessage(Main.conf("arena-list") + Main.getPlugin().arenaNames.toString());
-                    break;
-                default:
-                    return false;
-            }
+            if (args[0].equalsIgnoreCase("LIST")) {
+                p.sendMessage(Main.conf("arena-list") + Main.getPlugin().arenaNames.toString());
+            } else return false;
         } else if (args.length == 2) {
             final String arenaName = args[1];
             final String path = "Arenas." + arenaName + ".";
