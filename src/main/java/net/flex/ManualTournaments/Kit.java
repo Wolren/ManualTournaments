@@ -339,19 +339,6 @@ public class Kit implements TabCompleter, CommandExecutor {
         p.sendMessage(Main.conf(s));
     }
 
-    public static String serialize(ItemStack itemStack) {
-
-        return null;
-    }
-
-    public static ItemStack deserialize(String json) {
-        Gson gson = new Gson();
-        Map<String, Object> deserializedItemStack = gson.fromJson(json, Map.class);
-        return ItemStack.deserialize(deserializedItemStack);
-    }
-
-
-
     @Nullable
     public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         if (args.length == 1) {
