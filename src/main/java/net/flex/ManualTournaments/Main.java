@@ -37,8 +37,8 @@ public class Main extends JavaPlugin {
         createArenaConfig();
         createCustomConfig();
         getConfig().options().copyDefaults(true);
-        final FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigfile);
-        final FileConfiguration Arenas = YamlConfiguration.loadConfiguration(ArenaConfigFile);
+        FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigfile);
+        FileConfiguration Arenas = YamlConfiguration.loadConfiguration(ArenaConfigFile);
         if (Kits.getConfigurationSection("Kits") != null) {
             kitNames.addAll(Objects.requireNonNull(Kits.getConfigurationSection("Kits")).getKeys(false));
         }
@@ -63,11 +63,11 @@ public class Main extends JavaPlugin {
     }
 
     static String getNMSVersion() {
-        final String v = Bukkit.getServer().getClass().getPackage().getName();
+        String v = Bukkit.getServer().getClass().getPackage().getName();
         return v.substring(v.lastIndexOf('.') + 1);
     }
 
-    static int formatNMSVersion(final String nms) {
+    static int formatNMSVersion(String nms) {
         switch (nms) {
             case "1_4_R1":
             case "1_5_R2":
@@ -129,7 +129,7 @@ public class Main extends JavaPlugin {
         }
     }
 
-    static String conf(final String s) {
+    static String conf(String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }
 

@@ -14,114 +14,82 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class Settings implements TabCompleter, CommandExecutor {
+    private final Main plugin = Main.getPlugin();
     private static final FileConfiguration config = Main.getPlugin().getConfig();
 
     @SneakyThrows
-    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
-        config.load(Main.getPlugin().customConfigFile);
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        config.load(plugin.customConfigFile);
         Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
         if (!playerOptional.isPresent() || !(sender instanceof Player)) {
             sender.sendMessage("sender-not-a-player");
             return false;
         }
-        else {
-            final Player p = ((OfflinePlayer) sender).getPlayer();
-            assert p != null;
-            if (args.length == 0) return false;
-            else if (args.length == 1) {
-                if (args[0].equals("endspawn")) {
-                    final String path = "fight-end-spawn.";
-                    Arena.getLocation(path, p, config);
-                    send(p, "config-updated-successfully");
-                }
-            } else if (args.length == 2) {
-                switch (args[0]) {
-                    case "drop_items":
-                        if (args[1].equals("true")) {
-                            config.set("drop-items", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("drop-items", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "break_blocks":
-                        if (args[1].equals("true")) {
-                            config.set("break-blocks", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("break-blocks", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "place_blocks":
-                        if (args[1].equals("true")) {
-                            config.set("place_blocks", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("place_blocks", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "friendly_fire":
-                        if (args[1].equals("true")) {
-                            config.set("friendly-fire", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("friendly-fire", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "drop_on_death":
-                        if (args[1].equals("true")) {
-                            config.set("drop-on-death", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("drop-on-death", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "kill_on_fight_end":
-                        if (args[1].equals("true")) {
-                            config.set("kill-on-fight-end", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("kill-on-fight-end", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "freeze_on_start":
-                        if (args[1].equals("true")) {
-                            config.set("freeze-on-start", true);
-                            send(p, "config-updated-successfully");
-                        } else if (args[1].equals("false")) {
-                            config.set("freeze-on-start", false);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "config-options");
-                        break;
-                    case "current_arena":
-                        if (Main.getPlugin().arenaNames.contains(args[1])) {
-                            config.set("current-arena", args[1]);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "arena-not-exists");
-                        break;
-                    case "current_kit":
-                        if (Main.getPlugin().kitNames.contains(args[1])) {
-                            config.set("current-kit", args[1]);
-                            send(p, "config-updated-successfully");
-                        } else send(p, "kit-not-exists");
-                        break;
-                    default:
-                        return false;
-                }
-            } else return false;
-            config.save(Main.getPlugin().customConfigFile);
-        }
+        Player player = playerOptional.get();
+        if (args.length == 1 && args[0].equalsIgnoreCase("endspawn")) {
+            Arena.getLocation("fight-end-spawn.", player, config);
+            send(player, "config-updated-successfully");
+        } else if (args.length == 2) {
+            switch (args[0].toUpperCase()) {
+                case "DROP_ITEMS":
+                    updateConfigAndNotify(player, "drop-items", args[1]);
+                    break;
+                case "BREAK_BLOCKS":
+                    updateConfigAndNotify(player, "break-blocks", args[1]);
+                    break;
+                case "PLACE_BLOCKS":
+                    updateConfigAndNotify(player, "place_blocks", args[1]);
+                    break;
+                case "FRIENDLY_FIRE":
+                    updateConfigAndNotify(player, "friendly-fire", args[1]);
+                    break;
+                case "DROP_ON_DEATH":
+                    updateConfigAndNotify(player, "drop-on-death", args[1]);
+                    break;
+                case "KILL_ON_FIGHT_END":
+                    updateConfigAndNotify(player, "kill-on-fight-end", args[1]);
+                    break;
+                case "FREEZE_ON_START":
+                    updateConfigAndNotify(player, "freeze-on-start", args[1]);
+                    break;
+                case "CURRENT_ARENA":
+                    if (Main.getPlugin().arenaNames.contains(args[1])) {
+                        config.set("current-arena", args[1]);
+                        send(player, "config-updated-successfully");
+                    } else {
+                        send(player, "arena-not-exists");
+                    }
+                    break;
+                case "CURRENT_KIT":
+                    if (Main.getPlugin().kitNames.contains(args[1])) {
+                        config.set("current-kit", args[1]);
+                        send(player, "config-updated-successfully");
+                    } else {
+                        send(player, "kit-not-exists");
+                    }
+                    break;
+                default:
+                    return false;
+            }
+        } else return false;
+        config.save(Main.getPlugin().customConfigFile);
         return true;
     }
 
+    private void updateConfigAndNotify(Player player, String configKey, String value) {
+        if (value.equals("true")) {
+            config.set(configKey, true);
+            send(player, "config-updated-successfully");
+        } else if (value.equals("false")) {
+            config.set(configKey, false);
+            send(player, "config-updated-successfully");
+        } else {
+            send(player, "config-options");
+        }
+    }
+
     @Nullable
-    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 1) {
             return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end", "place_blocks");
         } else if (args.length == 2) {
@@ -142,7 +110,7 @@ public class Settings implements TabCompleter, CommandExecutor {
         return Collections.emptyList();
     }
 
-    private static void send(final Player p, final String s) {
+    private static void send(Player p, String s) {
         p.sendMessage(Main.conf(s));
     }
 }

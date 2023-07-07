@@ -23,15 +23,15 @@ public class Fight implements CommandExecutor {
     private final FileConfiguration ArenaConfig = Main.getPlugin().getArenaConfig();
     static File FightsConfigFile;
     static FileConfiguration FightsConfig;
-    static final List<UUID> team1 = new ArrayList<>();
-    static final List<UUID> team2 = new ArrayList<>();
+    static List<UUID> team1 = new ArrayList<>();
+    static List<UUID> team2 = new ArrayList<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    static final Team team1Board = board.registerNewTeam(Main.conf("team1"));
-    static final Team team2Board = board.registerNewTeam(Main.conf("team2"));
+    static Team team1Board = board.registerNewTeam(Main.conf("team1"));
+    static Team team2Board = board.registerNewTeam(Main.conf("team2"));
     private static final Collection<String> team1String = new ArrayList<>();
     private static final Collection<String> team2String = new ArrayList<>();
     private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
-    static final List<Player> temporary = new ArrayList<>();
+    static List<Player> temporary = new ArrayList<>();
     private final String currentArena = config.getString("current-arena");
     private final String currentKit = config.getString("current-kit");
     static int duration;
@@ -40,7 +40,7 @@ public class Fight implements CommandExecutor {
     private static final float WALK_SPEED_NORMAL = 0.2F;
 
     @SneakyThrows
-    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String string, @NotNull final String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
         if (!playerOptional.isPresent() || !(sender instanceof Player)) {
             sender.sendMessage("sender-not-a-player");
@@ -49,8 +49,8 @@ public class Fight implements CommandExecutor {
         loadConfigs();
         Player player = playerOptional.get();
         distinctElements.clear();
-        for (final String arg : args) {
-            final Player fighter = Bukkit.getPlayer(arg);
+        for (String arg : args) {
+            Player fighter = Bukkit.getPlayer(arg);
             if (fighter != null) distinctElements.add(fighter.toString());
         }
         if (args.length > 1 && args.length % 2 == 0 && distinctElements.stream().distinct().count() == args.length) {
@@ -71,14 +71,14 @@ public class Fight implements CommandExecutor {
                 team1Board.setAllowFriendlyFire(true);
                 team2Board.setAllowFriendlyFire(true);
             }
-            for (final Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
+            for (Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
             for (int i = 0; i < args.length; i++) {
-                final Player fighter = Bukkit.getPlayer(args[i]);
+                Player fighter = Bukkit.getPlayer(args[i]);
                 if (fighter != null) {
                     if (plugin.arenaNames.contains(currentArena)) {
                         if (plugin.kitNames.contains(currentKit)) {
-                            final String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
-                            final String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
+                            String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
+                            String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
                             if (i < (args.length / 2)) {
                                 team1Board.addEntry(fighter.getDisplayName());
                                 team1.add(fighter.getUniqueId());
@@ -170,22 +170,22 @@ public class Fight implements CommandExecutor {
         return true;
     }
 
-    private void createFightsFolder(final int i) {
-        final File fightsConfigFolder = new File(plugin.getDataFolder(), "fights");
+    private void createFightsFolder(int i) {
+        File fightsConfigFolder = new File(plugin.getDataFolder(), "fights");
         if (!fightsConfigFolder.exists()) fightsConfigFolder.mkdir();
         FightsConfigFile = new File(plugin.getDataFolder(), "fights/fight" + i + ".yml");
         FightsConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
 
-    private void Kit(final Player p) {
+    private void Kit(Player p) {
         if (config.getString("current-kit") != null) {
             Kit.setKit(p, config.getString("current-kit"));
         }
     }
 
-    static String teamList(final Iterable<UUID> team, final Collection<String> teamString) {
-        for (final UUID uuid : team) teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+    static String teamList(Iterable<UUID> team, Collection<String> teamString) {
+        for (UUID uuid : team) teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
         return String.join(", ", teamString);
     }
 
@@ -196,7 +196,7 @@ public class Fight implements CommandExecutor {
         ArenaConfig.load(plugin.ArenaConfigFile);
     }
 
-    private static void send(final Player player, final String s) {
+    private static void send(Player player, String s) {
         player.sendMessage(Main.conf(s));
     }
 }

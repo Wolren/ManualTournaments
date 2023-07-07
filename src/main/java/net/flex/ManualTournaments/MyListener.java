@@ -19,12 +19,13 @@ import java.util.UUID;
 
 
 class MyListener implements Listener {
-    static final FileConfiguration config = Main.getPlugin().getConfig();
+    private final Main plugin = Main.getPlugin();
+    static FileConfiguration config = Main.getPlugin().getConfig();
     static int stopper;
 
     @EventHandler
-    private void onDeath(final PlayerDeathEvent event) {
-        final Player player = event.getEntity();
+    private void onDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
         removeEntries();
         if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
             event.setDroppedExp(0);
@@ -46,19 +47,19 @@ class MyListener implements Listener {
     }
 
     private void removeEntries() {
-        for (final Player p : Bukkit.getServer().getOnlinePlayers()) {
-            if (Fight.team1.contains(p.getUniqueId())) Fight.team1Board.removeEntry(p.getDisplayName());
-            else if (Fight.team2.contains(p.getUniqueId())) Fight.team2Board.removeEntry(p.getDisplayName());
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            if (Fight.team1.contains(player.getUniqueId())) Fight.team1Board.removeEntry(player.getDisplayName());
+            else if (Fight.team2.contains(player.getUniqueId())) Fight.team2Board.removeEntry(player.getDisplayName());
         }
     }
 
     @SneakyThrows
-    private void teamRemover(final Player p, final Collection<UUID> team1, final Collection<UUID> team2) {
-        if (team1.contains(p.getUniqueId())) {
-            team1.remove(p.getUniqueId());
+    private void teamRemover(Player player, Collection<UUID> team1, Collection<UUID> team2) {
+        if (team1.contains(player.getUniqueId())) {
+            team1.remove(player.getUniqueId());
             if (team1.isEmpty() && !team2.isEmpty()) {
                 if (config.getBoolean("create-fights-folder")) {
-                    final Collection<String> h = new ArrayList<>();
+                    Collection<String> h = new ArrayList<>();
                     Fight.FightsConfig.load(Fight.FightsConfigFile);
                     Fight.FightsConfig.set("Fight-winners", Fight.teamList(team2, h));
                     Fight.FightsConfig.save(Fight.FightsConfigFile);
@@ -69,111 +70,112 @@ class MyListener implements Listener {
                     @SneakyThrows
                     public void run() {
                         if (i == 0) {
-                            final Collection<String> a = new ArrayList<>();
-                            for (final UUID uuid : team2)
-                                a.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
-                            final String listString = String.join(", ", a);
-                            final String replace = Objects.requireNonNull(Main.getPlugin().getConfig().getString("fight-winners")).replace("{team}", listString);
+                            Collection<String> array = new ArrayList<>();
+                            for (UUID uuid : team2)
+                                array.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+                            String listString = String.join(", ", array);
+                            String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
                             Bukkit.getServer().broadcastMessage(replace);
                             if (config.getBoolean("kill-on-fight-end")) {
-                                for (final Player p1 : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p1.getUniqueId())) p1.setHealth(0);
+                                for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                                    if (team2.contains(p.getUniqueId())) p.setHealth(0);
                                 }
                             } else {
-                                final String path = "fight-end-spawn.";
-                                for (final Player p1 : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p1.getUniqueId()) && config.isSet(path))
-                                        p1.teleport(Arena.location(path, config));
+                                String path = "fight-end-spawn.";
+                                for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                                    if (team2.contains(p.getUniqueId()) && config.isSet(path))
+                                        p.teleport(Arena.location(path, config));
                                 }
                             }
                             cancel();
                         }
                         --i;
                     }
-                }.runTaskTimer(Main.getPlugin(), 0L, 20L);
+                }.runTaskTimer(plugin, 0L, 20L);
             }
         }
     }
 
     @EventHandler
-    private void onMove(final PlayerMoveEvent e) {
-        final Player p = e.getPlayer();
-        if (Fight.temporary.contains(p)) {
-            final Location from = e.getFrom();
-            if (from.getX() != Objects.requireNonNull(e.getTo()).getX() || from.getY() != e.getTo().getY())
-                p.teleport(from);
+    private void onMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        if (Fight.temporary.contains(player)) {
+            Location from = event.getFrom();
+            if (from.getX() != Objects.requireNonNull(event.getTo()).getX() || from.getY() != event.getTo().getY())
+                player.teleport(from);
         }
     }
 
     @EventHandler
-    private void onJump(final PlayerJumpEvent e) {
-        final Player p = e.getPlayer();
-        if (Fight.temporary.contains(p)) e.setCancelled(true);
+    private void onJump(PlayerJumpEvent event) {
+        Player player = event.getPlayer();
+        if (Fight.temporary.contains(player)) event.setCancelled(true);
     }
 
     @EventHandler
-    private void onDrop(final PlayerDropItemEvent e) {
-        final Player p = e.getPlayer();
-        if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
-            if (!config.getBoolean("drop-items")) e.setCancelled(true);
+    private void onDrop(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
+            if (!config.getBoolean("drop-items")) event.setCancelled(true);
         }
-        if (Spectate.spectators.contains(p)) e.setCancelled(true);
+        if (Spectate.spectators.contains(player)) event.setCancelled(true);
     }
 
     @EventHandler
-    private void onBreak(final BlockBreakEvent e) {
-        final Player p = e.getPlayer();
-        if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
-            if (!config.getBoolean("break-blocks")) e.setCancelled(true);
+    private void onBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
+            if (!config.getBoolean("break-blocks")) event.setCancelled(true);
         }
-        if (Spectate.spectators.contains(p)) e.setCancelled(true);
+        if (Spectate.spectators.contains(player)) event.setCancelled(true);
     }
 
     @EventHandler
-    private void onJoin(final PlayerJoinEvent e) {
-        final Player p = e.getPlayer();
-        if (config.getBoolean("default-gamemode-on-join")) p.setGameMode(Bukkit.getServer().getDefaultGameMode());
+    private void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (config.getBoolean("default-gamemode-on-join")) player.setGameMode(Bukkit.getServer().getDefaultGameMode());
     }
 
     @EventHandler
-    private void onLeave(final PlayerQuitEvent e) {
-        final Player p = e.getPlayer();
-        if (Fight.temporary.contains(p) || Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId()) || Spectate.spectators.contains(p)) {
+    private void onLeave(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (Fight.temporary.contains(player) || Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId()) || Spectate.spectators.contains(player)) {
             if (config.getBoolean("kill-on-fight-end")) {
-                p.setGameMode(Bukkit.getServer().getDefaultGameMode());
-                p.setHealth(0);
-                p.setWalkSpeed(0.2f);
+                player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+                player.setHealth(0);
+                player.setWalkSpeed(0.2f);
             } else {
-                final String path = "fight-end-spawn.";
+                String path = "fight-end-spawn.";
                 if (config.isSet(path)) {
-                    p.setGameMode(Bukkit.getServer().getDefaultGameMode());
-                    p.teleport(Arena.location(path, config));
-                    p.setWalkSpeed(0.2f);
+                    player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+                    player.teleport(Arena.location(path, config));
+                    player.setWalkSpeed(0.2f);
                 }
             }
         }
     }
 
     @EventHandler
-    private void onCommand(final PlayerCommandPreprocessEvent e) {
-        final Player p = e.getPlayer();
-        if (Spectate.spectators.contains(p)) {
-            if (e.getMessage().startsWith("spec") || e.getMessage().startsWith("mt_spec") || config.getStringList("spectator-allowed-commands").contains(e.getMessage())) {
-                e.setCancelled(false);
+    private void onCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        if (Spectate.spectators.contains(player)) {
+            if (event.getMessage().startsWith("spec") || event.getMessage().startsWith("mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
+                event.setCancelled(false);
             } else {
-                p.sendMessage(Main.conf("not-allowed"));
-                e.setCancelled(true);
+                player.sendMessage(Main.conf("not-allowed"));
+                event.setCancelled(true);
             }
         }
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler
-    private void onWorldChange(final PlayerChangedWorldEvent e) {
-        final Player p = e.getPlayer();
-        if (Spectate.spectators.contains(p)) {
-            Spectate.spectators.remove(p);
-            p.setGameMode(Bukkit.getServer().getDefaultGameMode());
-            for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
+    private void onWorldChange(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        if (Spectate.spectators.contains(player)) {
+            Spectate.spectators.remove(player);
+            player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+            for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
         }
     }
 }

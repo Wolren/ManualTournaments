@@ -23,7 +23,7 @@ public class Arena implements CommandExecutor, TabCompleter {
     private final List<String> arenas = Main.getPlugin().arenaNames;
 
     @SneakyThrows
-    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String string, @NotNull final String[] args) {
+    public boolean onCommand(@NotNull  CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
         if (!playerOptional.isPresent() || !(sender instanceof Player)) {
             sender.sendMessage("sender-not-a-player");
@@ -32,12 +32,12 @@ public class Arena implements CommandExecutor, TabCompleter {
         loadConfigs();
         Player player = playerOptional.get();
         if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("LIST")) player.sendMessage(Main.conf("arena-list") + arenas.toString());
+            if (args[0].equalsIgnoreCase("list")) player.sendMessage(Main.conf("arena-list") + arenas.toString());
             else return false;
         } else if (args.length == 2) {
-            final String arenaName = args[1];
-            final String path = "Arenas." + arenaName + ".";
-            final String pathSpectator = path + "spectator.";
+            String arenaName = args[1];
+            String path = "Arenas." + arenaName + ".";
+            String pathSpectator = path + "spectator.";
             boolean arenaExists = arenas.contains(arenaName);
             switch (args[0].toUpperCase()) {
                 case "CREATE":
@@ -57,14 +57,14 @@ public class Arena implements CommandExecutor, TabCompleter {
                     break;
                 case "POS1":
                     if (arenaExists) {
-                        final String pathPos1 = path + "pos1.";
+                        String pathPos1 = path + "pos1.";
                         getLocation(pathPos1, player, ArenaConfig);
                         send(player, "arena-pos1");
                     } else send(player, "arena-not-exists");
                     break;
                 case "POS2":
                     if (arenaExists) {
-                        final String pathPos2 = path + "pos2.";
+                        String pathPos2 = path + "pos2.";
                         getLocation(pathPos2, player, ArenaConfig);
                         send(player, "arena-pos2");
                     } else send(player, "arena-not-exists");
@@ -94,13 +94,13 @@ public class Arena implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    static void getLocation(final String pathing, final Player player, final ConfigurationSection cfg) {
-        final double x = player.getLocation().getX();
-        final double y = player.getLocation().getY();
-        final double z = player.getLocation().getZ();
-        final float yaw = player.getLocation().getYaw();
-        final float pitch = player.getLocation().getPitch();
-        final String world = Objects.requireNonNull(player.getLocation().getWorld()).getName();
+    static void getLocation(String pathing, Player player, ConfigurationSection cfg) {
+        double x = player.getLocation().getX();
+        double y = player.getLocation().getY();
+        double z = player.getLocation().getZ();
+        float yaw = player.getLocation().getYaw();
+        float pitch = player.getLocation().getPitch();
+        String world = Objects.requireNonNull(player.getLocation().getWorld()).getName();
         cfg.set(pathing + "x", x);
         cfg.set(pathing + "y", y);
         cfg.set(pathing + "z", z);
@@ -109,18 +109,18 @@ public class Arena implements CommandExecutor, TabCompleter {
         cfg.set(pathing + "world", world);
     }
 
-    static Location location(final String path, final FileConfiguration cfg) {
-        final World world = Bukkit.getWorld(Objects.requireNonNull(cfg.get(path + "world")).toString());
-        final double x = cfg.getDouble(path + "x");
-        final double y = cfg.getDouble(path + "y");
-        final double z = cfg.getDouble(path + "z");
-        final float yaw = (float) cfg.getDouble(path + "yaw");
-        final float pitch = (float) cfg.getDouble(path + "pitch");
+    static Location location(String path, FileConfiguration cfg) {
+        World world = Bukkit.getWorld(Objects.requireNonNull(cfg.get(path + "world")).toString());
+        double x = cfg.getDouble(path + "x");
+        double y = cfg.getDouble(path + "y");
+        double z = cfg.getDouble(path + "z");
+        float yaw = (float) cfg.getDouble(path + "yaw");
+        float pitch = (float) cfg.getDouble(path + "pitch");
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    private void checkArena(final Player p, final String arenaName) {
-        final String path = "Arenas." + arenaName + ".";
+    private void checkArena(Player p, String arenaName) {
+        String path = "Arenas." + arenaName + ".";
         boolean pos1 = ArenaConfig.isSet(path + "pos1");
         boolean pos2 = ArenaConfig.isSet(path + "pos2");
         boolean spectator = ArenaConfig.isSet(path + "spectator");
@@ -138,15 +138,15 @@ public class Arena implements CommandExecutor, TabCompleter {
         ArenaConfig.load(plugin.ArenaConfigFile);
     }
 
-    private static void send(final Player player, final String s) {
+    private static void send(Player player, String s) {
         player.sendMessage(Main.conf(s));
     }
 
-    public List<String> onTabComplete(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String alias, final String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (args.length == 1)
             return Arrays.asList("create", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
         else if (args.length == 2) {
-            final List<String> arrayList = new ArrayList<>();
+            List<String> arrayList = new ArrayList<>();
             if (args[0].equals("create")) arrayList.add("(arena name)");
             else if (args[0].equals("remove") || args[0].equals("pos1") || args[0].equals("pos2") ||
                     args[0].equals("spectator") || args[0].equals("teleport") || args[0].equals("validate")) {

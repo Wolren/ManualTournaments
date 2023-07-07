@@ -22,23 +22,23 @@ import java.util.Objects;
 public class Spectate implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
     private final FileConfiguration ArenasConfig = Main.getPlugin().getArenaConfig();
-    static final List<Player> spectators = new ArrayList<>();
+    static List<Player> spectators = new ArrayList<>();
     GameMode gameMode = Bukkit.getServer().getDefaultGameMode();
 
     public Spectate() {
     }
 
     @SneakyThrows
-    public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         config.load(Main.getPlugin().customConfigFile);
         ArenasConfig.load(Main.getPlugin().ArenaConfigFile);
         if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
         else {
-            final Player p = ((OfflinePlayer) sender).getPlayer();
+            Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;
             if (args.length == 0) {
                 if (Main.getPlugin().arenaNames.contains(config.getString("current-arena"))) {
-                    final String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
+                    String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
                     if (ArenasConfig.isSet(path)) {
                         p.teleport(Arena.location(path, ArenasConfig));
                         send(p, "spectator-started-spectating");
@@ -51,9 +51,9 @@ public class Spectate implements TabCompleter, CommandExecutor {
                     return true;
                 }
                 if (!config.getBoolean("spectator-visibility")) {
-                    for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.hidePlayer(p);
+                    for (Player other : Bukkit.getServer().getOnlinePlayers()) other.hidePlayer(p);
                 } else {
-                    for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
+                    for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
                 }
                 if (Objects.equals(config.getString("spectator-gamemode"), "spectator")) {
                     p.setGameMode(GameMode.SPECTATOR);
@@ -76,7 +76,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                         send(p, "spectator-stopped-spectating");
                     } else {
                         p.setGameMode(gameMode);
-                        for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
+                        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
                         p.teleport(Arena.location("fight-end-spawn.", config));
                         send(p, "spectator-stopped-spectating");
                     }
@@ -89,12 +89,12 @@ public class Spectate implements TabCompleter, CommandExecutor {
 
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull final CommandSender commandSender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 1) return Collections.singletonList("stop");
         return null;
     }
 
-    private static void send(final Player p, final String s) {
+    private static void send(Player p, String s) {
         p.sendMessage(Main.conf(s));
     }
 }
