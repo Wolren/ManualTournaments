@@ -64,14 +64,17 @@ fight-wrong-arguments: "The arguments are wrong or don't follow the pattern"
 #The value between is second
 fight-will-start: "Fight will start in "
 fight-will-start-seconds: " seconds"
+not-allowed: "You are not allowed to use this command during spectator mode"
 kit-already-exists: "Kit with this name already exists"
+
 kit-given: "Kit given successfully"
 kit-list: "Kits: "
 kit-made: "Kit made successfully"
 kit-not-exists: "Kit doesn't exist"
+kit-unsupported-version:
 kit-removed: "Kit removed successfully"
 kit-set-unbreakable: "Items in inventory set unbreakable"
-not-allowed: "You are not allowed to use this command during spectator mode"
+
 not-supported: "This command is not supported for this version"
 sender-not-a-player: "Sender must be a player"
 #List of allowed commands other than /spectate stop you can use while spectating

@@ -60,7 +60,7 @@ public class Fight implements CommandExecutor {
             team2String.clear();
             team1Board.setPrefix(Main.conf("team1-prefix"));
             team2Board.setPrefix(Main.conf("team2-prefix"));
-            if (Main.version > 7) {
+            if (Main.version >= 14) {
                 team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                 team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
             }
@@ -109,13 +109,13 @@ public class Fight implements CommandExecutor {
                                 if (i == 0) {
                                     temporary.clear();
                                     player.setWalkSpeed(WALK_SPEED_NORMAL);
-                                    if (Main.version > 11)
+                                    if (Main.version >= 18)
                                         fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                                     else
                                         fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
                                     cancel();
                                 } else {
-                                    if (Main.version > 11)
+                                    if (Main.version >= 18)
                                         fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
                                     else
                                         fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
@@ -180,7 +180,7 @@ public class Fight implements CommandExecutor {
 
     private void Kit(final Player p) {
         if (config.getString("current-kit") != null) {
-            Kit.giveKit(p, config.getString("current-kit"));
+            Kit.setKit(p, config.getString("current-kit"));
         }
     }
 

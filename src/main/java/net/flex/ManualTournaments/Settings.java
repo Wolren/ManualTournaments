@@ -11,10 +11,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
@@ -22,7 +19,11 @@ public class Settings implements TabCompleter, CommandExecutor {
     @SneakyThrows
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command, @NotNull final String s, @NotNull final String[] args) {
         config.load(Main.getPlugin().customConfigFile);
-        if (!(sender instanceof Player)) sender.sendMessage(Main.conf("sender-not-a-player"));
+        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
+        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
+            sender.sendMessage("sender-not-a-player");
+            return false;
+        }
         else {
             final Player p = ((OfflinePlayer) sender).getPlayer();
             assert p != null;

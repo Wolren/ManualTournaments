@@ -17,21 +17,21 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
-@SuppressWarnings("deprecation")
+
 class MyListener implements Listener {
     static final FileConfiguration config = Main.getPlugin().getConfig();
     static int stopper;
 
     @EventHandler
-    private void onDeath(final PlayerDeathEvent e) {
-        final Player p = e.getEntity();
+    private void onDeath(final PlayerDeathEvent event) {
+        final Player player = event.getEntity();
         removeEntries();
-        if (Fight.team1.contains(p.getUniqueId()) || Fight.team2.contains(p.getUniqueId())) {
-            e.setDroppedExp(0);
-            if (!config.getBoolean("drop-on-death")) e.getDrops().clear();
+        if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
+            event.setDroppedExp(0);
+            if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
         }
-        teamRemover(p, Fight.team1, Fight.team2);
-        teamRemover(p, Fight.team2, Fight.team1);
+        teamRemover(player, Fight.team1, Fight.team2);
+        teamRemover(player, Fight.team2, Fight.team1);
         if (config.getBoolean("create-fights-folder")) endCounter();
     }
 
