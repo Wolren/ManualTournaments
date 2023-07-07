@@ -18,7 +18,7 @@ public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = Main.getPlugin().getConfig();
 
     @SneakyThrows
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         config.load(plugin.customConfigFile);
         Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
         if (!playerOptional.isPresent() || !(sender instanceof Player)) {
