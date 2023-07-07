@@ -20,7 +20,7 @@ import java.util.UUID;
 @SuppressWarnings("deprecation")
 class MyListener implements Listener {
     static final FileConfiguration config = Main.getPlugin().getConfig();
-    static int y;
+    static int stopper;
 
     @EventHandler
     private void onDeath(final PlayerDeathEvent e) {
@@ -39,16 +39,16 @@ class MyListener implements Listener {
     private void endCounter() {
         if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
             Fight.FightsConfig.load(Fight.FightsConfigFile);
-            Fight.FightsConfig.set("Fight-duration", Fight.j - 3);
-            y = 1;
+            Fight.FightsConfig.set("Fight-duration", Fight.duration - 3);
+            stopper = 1;
             Fight.FightsConfig.save(Fight.FightsConfigFile);
         }
     }
 
     private void removeEntries() {
         for (final Player p : Bukkit.getServer().getOnlinePlayers()) {
-            if (Fight.team1.contains(p.getUniqueId())) Fight.teamA.removeEntry(p.getDisplayName());
-            else if (Fight.team2.contains(p.getUniqueId())) Fight.teamB.removeEntry(p.getDisplayName());
+            if (Fight.team1.contains(p.getUniqueId())) Fight.team1Board.removeEntry(p.getDisplayName());
+            else if (Fight.team2.contains(p.getUniqueId())) Fight.team2Board.removeEntry(p.getDisplayName());
         }
     }
 
@@ -83,7 +83,7 @@ class MyListener implements Listener {
                                 final String path = "fight-end-spawn.";
                                 for (final Player p1 : Bukkit.getServer().getOnlinePlayers()) {
                                     if (team2.contains(p1.getUniqueId()) && config.isSet(path))
-                                        p1.teleport(Arena.pathing(path, config));
+                                        p1.teleport(Arena.location(path, config));
                                 }
                             }
                             cancel();
@@ -147,7 +147,7 @@ class MyListener implements Listener {
                 final String path = "fight-end-spawn.";
                 if (config.isSet(path)) {
                     p.setGameMode(Bukkit.getServer().getDefaultGameMode());
-                    p.teleport(Arena.pathing(path, config));
+                    p.teleport(Arena.location(path, config));
                     p.setWalkSpeed(0.2f);
                 }
             }

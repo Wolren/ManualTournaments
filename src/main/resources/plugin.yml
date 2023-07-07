@@ -2,6 +2,7 @@ main: net.flex.ManualTournaments.Main
 name: ManualTournaments
 version: 1.0
 description: Plugin you can use to make manual tournaments
+api-version: 1.13
 author: Wildbot
 website: ""
 commands:

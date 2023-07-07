@@ -40,7 +40,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                 if (Main.getPlugin().arenaNames.contains(config.getString("current-arena"))) {
                     final String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
                     if (ArenasConfig.isSet(path)) {
-                        p.teleport(Arena.pathing(path, ArenasConfig));
+                        p.teleport(Arena.location(path, ArenasConfig));
                         send(p, "spectator-started-spectating");
                     } else {
                         send(p, "arena-not-set");
@@ -77,7 +77,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                     } else {
                         p.setGameMode(gameMode);
                         for (final Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(p);
-                        p.teleport(Arena.pathing("fight-end-spawn.", config));
+                        p.teleport(Arena.location("fight-end-spawn.", config));
                         send(p, "spectator-stopped-spectating");
                     }
                     spectators.remove(p);

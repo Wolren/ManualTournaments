@@ -62,36 +62,6 @@ public class Main extends JavaPlugin {
     public void onDisable() {
     }
 
-    private void createCustomConfig() {
-        customConfigFile = new File(getDataFolder(), "config.yml");
-        customConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(customConfigFile);
-        if (!customConfigFile.exists()) {
-            customConfigFile.getParentFile().mkdirs();
-            saveResource("config.yml", false);
-        }
-    }
-
-    private void createArenaConfig() {
-        ArenaConfigFile = new File(getDataFolder(), "arenas.yml");
-        ArenaConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(ArenaConfigFile);
-        if (!ArenaConfigFile.exists()) {
-            ArenaConfigFile.getParentFile().mkdirs();
-            saveResource("arenas.yml", false);
-        }
-    }
-
-    private void createKitsConfig() {
-        KitsConfigfile = new File(getDataFolder(), "kits.yml");
-        KitsConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(KitsConfigfile);
-        if (!KitsConfigfile.exists()) {
-            KitsConfigfile.getParentFile().mkdirs();
-            saveResource("kits.yml", false);
-        }
-    }
-
     static String getNMSVersion() {
         final String v = Bukkit.getServer().getClass().getPackage().getName();
         return v.substring(v.lastIndexOf('.') + 1);
@@ -99,11 +69,6 @@ public class Main extends JavaPlugin {
 
     static int formatNMSVersion(final String nms) {
         switch (nms) {
-            case "v1_7_R1":
-            case "v1_7_R2":
-            case "v1_7_R3":
-            case "v1_7_R4":
-                throw new IllegalArgumentException(nms + " isn't supported");
             case "v1_8_R1":
                 return 5;
             case "v1_8_R2":
@@ -142,11 +107,48 @@ public class Main extends JavaPlugin {
                 return 22;
             case "v1_19_R1":
                 return 23;
+            case "v1_19_R2":
+                return 24;
+            case "v1_19_R3":
+                return 25;
+            case "v1_20_R1":
+                return 26;
+            default:
+                throw new IllegalArgumentException(nms + " isn't supported");
         }
-        throw new IllegalArgumentException(nms + " isn't supported");
     }
 
     static String conf(final String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
+    }
+
+    private void createCustomConfig() {
+        customConfigFile = new File(getDataFolder(), "config.yml");
+        customConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(customConfigFile);
+        if (!customConfigFile.exists()) {
+            customConfigFile.getParentFile().mkdirs();
+            saveResource("config.yml", false);
+        }
+    }
+
+    private void createArenaConfig() {
+        ArenaConfigFile = new File(getDataFolder(), "arenas.yml");
+        ArenaConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(ArenaConfigFile);
+        if (!ArenaConfigFile.exists()) {
+            ArenaConfigFile.getParentFile().mkdirs();
+            saveResource("arenas.yml", false);
+        }
+    }
+
+    private void createKitsConfig() {
+        KitsConfigfile = new File(getDataFolder(), "kits.yml");
+        KitsConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(KitsConfigfile);
+        if (!KitsConfigfile.exists()) {
+            KitsConfigfile.getParentFile().mkdirs();
+            saveResource("kits.yml", false);
+        }
     }
 }
