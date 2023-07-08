@@ -45,7 +45,10 @@ public class Spectate implements TabCompleter, CommandExecutor {
                     send(player, "arena-not-set");
                     return true;
                 }
-            } else send(player, "current-arena-not-set");
+            } else {
+                send(player, "current-arena-not-set");
+                return true;
+            }
             if (!config.getBoolean("spectator-visibility")) {
                 for (Player other : Bukkit.getServer().getOnlinePlayers()) other.hidePlayer(player);
             } else {
@@ -62,7 +65,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
             else send(player, "spectator-wrong-arguments");
             spectators.add(player);
         } else if (args.length == 1) {
-            if (args[0].equals("stop")) {
+            if (args[0].equalsIgnoreCase("stop")) {
                 if (config.getBoolean("kill-on-fight-end")) {
                     player.setGameMode(gameMode);
                     player.setHealth(0.0f);

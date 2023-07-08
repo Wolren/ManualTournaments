@@ -159,7 +159,8 @@ class MyListener implements Listener {
     private void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         if (Spectate.spectators.contains(player)) {
-            if (event.getMessage().startsWith("spec") || event.getMessage().startsWith("mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
+            if (event.getMessage().startsWith("spec") || event.getMessage().startsWith("spectator") ||
+                    event.getMessage().startsWith("mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
                 event.setCancelled(false);
             } else {
                 player.sendMessage(Main.conf("not-allowed"));

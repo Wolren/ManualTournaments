@@ -142,8 +142,11 @@ public class Kit implements TabCompleter, CommandExecutor {
         if (is.getItemMeta() != null) {
             if (is.getItemMeta().hasDisplayName())
                 KitsConfig.set(path + ".name", is.getItemMeta().getDisplayName());
-            if (is.getItemMeta().isUnbreakable())
-                KitsConfig.set(path + ".unbreakable", is.getItemMeta().isUnbreakable());
+            if (Main.version >= 17) {
+                if (is.getItemMeta().isUnbreakable()) {
+                    KitsConfig.set(path + ".unbreakable", is.getItemMeta().isUnbreakable());
+                }
+            }
             if (is.getType().equals(Material.ENCHANTED_BOOK)) {
                 EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
                 Map<Enchantment, Integer> enchants = storageMeta.getStoredEnchants();
@@ -250,20 +253,20 @@ public class Kit implements TabCompleter, CommandExecutor {
         List<String> enchants = KitsConfig.getStringList(slotPath + "enchants");
         int amount = KitsConfig.getInt(slotPath + "amount");
         ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(type))), amount);
-        if (KitsConfig.getString(slotPath + "potion") != null && Main.version >= 14) {
+        if (KitsConfig.getString(slotPath + "potion") != null) {
             effect(slotPath, is);
-            player.getInventory().setItemInOffHand(is);
+            if (Main.version >= 14) player.getInventory().setItemInOffHand(is);
         } else if (is.getType().equals(Material.ENCHANTED_BOOK)) {
             for (String s : enchants) {
                 storageEnchant(is, s);
-                player.getInventory().setItemInOffHand(is);
+                if (Main.version >= 14) player.getInventory().setItemInOffHand(is);
             }
         } else {
             ItemMeta im = is.getItemMeta();
             if (Main.version <= 18) is.setDurability(durability);
             if (im != null) enchant(name, enchants, im, slotPath);
             is.setItemMeta(im);
-            player.getInventory().setItemInOffHand(is);
+            if (Main.version >= 14) player.getInventory().setItemInOffHand(is);
         }
     }
 
@@ -288,7 +291,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         boolean extended = KitsConfig.getBoolean(pathing + "potion.extended");
         boolean upgraded = KitsConfig.getBoolean(pathing + "potion.upgraded");
         PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
-        if (potionMeta != null) potionMeta.setBasePotionData(new PotionData(potionType, extended, upgraded));
+        if (Main.version >= 14 && potionMeta != null) potionMeta.setBasePotionData(new PotionData(potionType, extended, upgraded));
         is.setItemMeta(potionMeta);
     }
 
@@ -303,7 +306,7 @@ public class Kit implements TabCompleter, CommandExecutor {
     private static void enchant(String name, Iterable<String> enchants, ItemMeta im, String slotPath) {
         if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
         im.setLore(KitsConfig.getStringList(slotPath + "lore"));
-        if (KitsConfig.getBoolean(slotPath + "unbreakable")) im.setUnbreakable(true);
+        if (KitsConfig.getBoolean(slotPath + "unbreakable") && Main.version >= 14) im.setUnbreakable(true);
         for (String s1 : enchants) {
             String[] stringEnchants = s1.split(":");
             im.addEnchant(Objects.requireNonNull(Enchantment.getByName(stringEnchants[0])), Integer.parseInt(stringEnchants[1]), true);
