@@ -1,9 +1,10 @@
 main: net.flex.ManualTournaments.Main
 name: ManualTournaments
-version: 1.2
+version: 1.2.1
 description: Plugin you can use to make manual tournaments
 api-version: 1.13
-author: Wildbot
+load: POSTWORLD
+author: Wolren
 website: ""
 commands:
   manualtournaments_arena:
@@ -13,7 +14,7 @@ commands:
       - arena
     permission: mt.arena
     permission-message: "You don't have permission to use that command"
-    usage: "Usage: /arena [create|list|remove...]"
+    usage: "Usage: /arena [list|create|remove|teleport|validate...]"
   manualtournaments_fight:
     aliases:
       - mt_fight
@@ -21,7 +22,7 @@ commands:
       - fight
     permission: mt.fight
     permission-message: "You don't have permission to use that command"
-    usage: "Usage: /fight [player1] [player2]"
+    usage: "Usage: /fight [player1] [player2]..."
   manualtournaments_kit:
     aliases:
       - mt_kit
@@ -29,7 +30,7 @@ commands:
       - kit
     permissions: mt.kit
     permission-message: "You don't have permission to use that command"
-    usage: "Usage: /kit [create|list|remove...]"
+    usage: "Usage: /kit [kit name] / [list|unbreakable|create|remove|give]"
   manualtournaments_settings:
     aliases:
       - mt_settings
@@ -50,15 +51,15 @@ commands:
     default: true
 permissions:
   mt.arena:
-    description: Allows creating and managing arenas
+    description: Allows for creating and managing arenas
   mt.fight:
-    description: Allows starting the fight between players
+    description: Allows for starting the fight between players
   mt.kit:
-    description: Allows creating and managing kits
+    description: Allows for creating and managing kits
   mt.settings:
-    description: Allows changing settings
+    description: Allows for changing settings
   mt.spectate:
-    description: Allows spectating arenas
+    description: Allows for spectating arenas
   mt.*:
     description: Permission allowing using all ManualTournaments commands
     children:
