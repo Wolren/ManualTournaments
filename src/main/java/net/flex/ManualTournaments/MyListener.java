@@ -8,8 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ class MyListener implements Listener {
     private final Main plugin = Main.getPlugin();
     static FileConfiguration config = Main.getPlugin().getConfig();
     static int stopper;
+    static boolean clearing = false;
 
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
@@ -58,6 +61,7 @@ class MyListener implements Listener {
         if (team1.contains(player.getUniqueId())) {
             team1.remove(player.getUniqueId());
             if (team1.isEmpty() && !team2.isEmpty()) {
+                clearing = true;
                 if (config.getBoolean("create-fights-folder")) {
                     Collection<String> h = new ArrayList<>();
                     Fight.FightsConfig.load(Fight.FightsConfigFile);
@@ -78,15 +82,18 @@ class MyListener implements Listener {
                             Bukkit.getServer().broadcastMessage(replace);
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p.getUniqueId())) p.setHealth(0);
+                                    if (team2.contains(p.getUniqueId())) p.damage(10000);
                                 }
                             } else {
                                 String path = "fight-end-spawn.";
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p.getUniqueId()) && config.isSet(path))
+                                    if (team2.contains(p.getUniqueId()) && config.isSet(path)) {
+                                        clear(player);
                                         p.teleport(Arena.location(path, config));
+                                    }
                                 }
                             }
+                            clearing = false;
                             cancel();
                         }
                         --i;
@@ -159,8 +166,7 @@ class MyListener implements Listener {
     private void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         if (Spectate.spectators.contains(player)) {
-            if (event.getMessage().startsWith("spec") || event.getMessage().startsWith("spectator") ||
-                    event.getMessage().startsWith("mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
+            if (event.getMessage().startsWith("/spec") || event.getMessage().contains("spectate") || event.getMessage().startsWith("/mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
                 event.setCancelled(false);
             } else {
                 player.sendMessage(Main.conf("not-allowed"));
@@ -178,5 +184,40 @@ class MyListener implements Listener {
             player.setGameMode(Bukkit.getServer().getDefaultGameMode());
             for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
         }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        Player player = (Player) event.getEntity();
+        if (Spectate.spectators.contains(player)) {
+            if (player.getHealth() - event.getFinalDamage() > 0) return;
+            event.setCancelled(true);
+            teleportSpawn(player);
+            Spectate.spectators.remove(player);
+        } else if ((Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) && clearing) {
+            if (player.getHealth() - event.getFinalDamage() > 0) return;
+            event.setCancelled(true);
+            Location respawnLocation = player.getBedSpawnLocation();
+            if (respawnLocation == null) respawnLocation = player.getWorld().getSpawnLocation();
+            clear(player);
+            player.teleport(respawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
+        }
+    }
+
+    private void clear(Player player) {
+        player.getInventory().clear();
+        player.setHealth(20.0D);
+        player.setFoodLevel(20);
+        player.setAbsorptionAmount(0);
+        player.setSaturation(0);
+        player.setFireTicks(0);
+        for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
+    }
+
+    private void teleportSpawn(Player player) {
+        Location respawnLocation = player.getBedSpawnLocation();
+        if (respawnLocation == null) respawnLocation = player.getWorld().getSpawnLocation();
+        player.teleport(respawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 }

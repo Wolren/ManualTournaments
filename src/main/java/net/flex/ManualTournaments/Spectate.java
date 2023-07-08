@@ -3,6 +3,7 @@ package net.flex.ManualTournaments;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -68,7 +69,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
             if (args[0].equalsIgnoreCase("stop")) {
                 if (config.getBoolean("kill-on-fight-end")) {
                     player.setGameMode(gameMode);
-                    player.setHealth(0.0f);
+                    player.damage(10000);
                     send(player, "spectator-stopped-spectating");
                 } else {
                     player.setGameMode(gameMode);
