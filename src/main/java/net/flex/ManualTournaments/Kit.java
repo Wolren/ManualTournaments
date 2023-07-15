@@ -26,12 +26,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.utils.General.message;
+import static net.flex.ManualTournaments.utils.General.send;
+
 @SuppressWarnings("deprecation")
 public class Kit implements TabCompleter, CommandExecutor {
-    private final Main plugin = Main.getPlugin();
-    private static final FileConfiguration config = Main.getPlugin().getConfig();
-    private static final FileConfiguration KitsConfig = Main.getPlugin().getKitsConfig();
-    private final List<String> kits = Main.getPlugin().kitNames;
+    private static final FileConfiguration config = getPlugin().getConfig();
+    private static final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
+    private final List<String> kits = getPlugin().kitNames;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -45,7 +48,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         if (args.length == 1) {
             switch (args[0].toUpperCase()) {
                 case "LIST":
-                    player.sendMessage(Main.conf("kit-list") + kits.toString());
+                    player.sendMessage(message("kit-list") + kits.toString());
                     break;
                 case "UNBREAKABLE":
                     if (Main.version >= 17) {
@@ -77,8 +80,8 @@ public class Kit implements TabCompleter, CommandExecutor {
                     if (!kitExists) {
                         getKit(player, kitName);
                         send(player, "kit-made");
-                        KitsConfig.save(plugin.KitsConfigfile);
-                    } else player.sendMessage(Main.conf("kit-already-exists"));
+                        KitsConfig.save(getPlugin().KitsConfigfile);
+                    } else player.sendMessage(message("kit-already-exists"));
                     break;
                 case "REMOVE":
                     if (kitExists) {
@@ -97,7 +100,7 @@ public class Kit implements TabCompleter, CommandExecutor {
                     return false;
             }
         } else return false;
-        KitsConfig.save(plugin.KitsConfigfile);
+        KitsConfig.save(getPlugin().KitsConfigfile);
         return true;
     }
 
@@ -132,7 +135,7 @@ public class Kit implements TabCompleter, CommandExecutor {
             KitsConfig.set(effectPath + ".duration", effect.getDuration());
         }
         kits.add(kitName);
-        KitsConfig.save(plugin.KitsConfigfile);
+        KitsConfig.save(getPlugin().KitsConfigfile);
     }
 
     private void getType(String path, ItemStack is) {
@@ -317,12 +320,8 @@ public class Kit implements TabCompleter, CommandExecutor {
 
     @SneakyThrows
     private void loadConfigs() {
-        config.load(plugin.customConfigFile);
-        KitsConfig.load(plugin.KitsConfigfile);
-    }
-
-    private static void send(Player p, String s) {
-        p.sendMessage(Main.conf(s));
+        config.load(getPlugin().customConfigFile);
+        KitsConfig.load(getPlugin().KitsConfigfile);
     }
 
     @Nullable

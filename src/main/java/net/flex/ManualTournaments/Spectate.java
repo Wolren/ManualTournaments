@@ -3,7 +3,6 @@ package net.flex.ManualTournaments;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,11 +15,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.utils.General.send;
+import static net.flex.ManualTournaments.utils.Locations.location;
+
 @SuppressWarnings("deprecation")
 public class Spectate implements TabCompleter, CommandExecutor {
-    private final Main plugin = Main.getPlugin();
-    private static final FileConfiguration config = Main.getPlugin().getConfig();
-    private final FileConfiguration ArenaConfig = Main.getPlugin().getArenaConfig();
+    private static final FileConfiguration config = getPlugin().getConfig();
+    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     static List<Player> spectators = new ArrayList<>();
     GameMode gameMode = Bukkit.getServer().getDefaultGameMode();
 
@@ -37,10 +39,10 @@ public class Spectate implements TabCompleter, CommandExecutor {
         loadConfigs();
         Player player = playerOptional.get();
         if (args.length == 0) {
-            if (plugin.arenaNames.contains(config.getString("current-arena"))) {
+            if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
                 String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
                 if (ArenaConfig.isSet(path)) {
-                    player.teleport(Arena.location(path, ArenaConfig));
+                    player.teleport(location(path, ArenaConfig));
                     send(player, "spectator-started-spectating");
                 } else {
                     send(player, "arena-not-set");
@@ -74,7 +76,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                 } else {
                     player.setGameMode(gameMode);
                     for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
-                    player.teleport(Arena.location("fight-end-spawn.", config));
+                    player.teleport(location("fight-end-spawn.", config));
                     send(player, "spectator-stopped-spectating");
                 }
                 spectators.remove(player);
@@ -85,8 +87,8 @@ public class Spectate implements TabCompleter, CommandExecutor {
 
     @SneakyThrows
     private void loadConfigs() {
-        config.load(plugin.customConfigFile);
-        ArenaConfig.load(plugin.ArenaConfigFile);
+        config.load(getPlugin().customConfigFile);
+        ArenaConfig.load(getPlugin().ArenaConfigFile);
     }
 
     @Nullable
@@ -94,9 +96,5 @@ public class Spectate implements TabCompleter, CommandExecutor {
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 1) return Collections.singletonList("stop");
         return null;
-    }
-
-    private static void send(Player p, String s) {
-        p.sendMessage(Main.conf(s));
     }
 }

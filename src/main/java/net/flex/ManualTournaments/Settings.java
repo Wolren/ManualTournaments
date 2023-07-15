@@ -13,13 +13,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class Settings implements TabCompleter, CommandExecutor {
-    private final Main plugin = Main.getPlugin();
-    private static final FileConfiguration config = Main.getPlugin().getConfig();
+import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.utils.General.send;
+import static net.flex.ManualTournaments.utils.Locations.getLocation;
+
+public final class Settings implements TabCompleter, CommandExecutor {
+    private static final FileConfiguration config = getPlugin().getConfig();
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        config.load(plugin.customConfigFile);
+        config.load(getPlugin().customConfigFile);
         Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
         if (!playerOptional.isPresent() || !(sender instanceof Player)) {
             sender.sendMessage("sender-not-a-player");
@@ -27,7 +30,7 @@ public class Settings implements TabCompleter, CommandExecutor {
         }
         Player player = playerOptional.get();
         if (args.length == 1 && args[0].equalsIgnoreCase("endspawn")) {
-            Arena.getLocation("fight-end-spawn.", player, config);
+            getLocation("fight-end-spawn.", player, config);
             send(player, "config-updated-successfully");
         } else if (args.length == 2) {
             switch (args[0].toUpperCase()) {
@@ -53,7 +56,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                     updateConfigAndNotify(player, "freeze-on-start", args[1]);
                     break;
                 case "CURRENT_ARENA":
-                    if (Main.getPlugin().arenaNames.contains(args[1])) {
+                    if (getPlugin().arenaNames.contains(args[1])) {
                         config.set("current-arena", args[1]);
                         send(player, "config-updated-successfully");
                     } else {
@@ -61,7 +64,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                     }
                     break;
                 case "CURRENT_KIT":
-                    if (Main.getPlugin().kitNames.contains(args[1])) {
+                    if (getPlugin().kitNames.contains(args[1])) {
                         config.set("current-kit", args[1]);
                         send(player, "config-updated-successfully");
                     } else {
@@ -72,7 +75,7 @@ public class Settings implements TabCompleter, CommandExecutor {
                     return false;
             }
         } else return false;
-        config.save(Main.getPlugin().customConfigFile);
+        config.save(getPlugin().customConfigFile);
         return true;
     }
 
@@ -102,15 +105,11 @@ public class Settings implements TabCompleter, CommandExecutor {
                 case "kill_on_fight_end":
                     return Arrays.asList("true", "false");
                 case "current_arena":
-                    return new ArrayList<>(Main.getPlugin().arenaNames);
+                    return new ArrayList<>(getPlugin().arenaNames);
                 case "current_kit":
-                    return new ArrayList<>(Main.getPlugin().kitNames);
+                    return new ArrayList<>(getPlugin().kitNames);
             }
         }
         return Collections.emptyList();
-    }
-
-    private static void send(Player p, String s) {
-        p.sendMessage(Main.conf(s));
     }
 }

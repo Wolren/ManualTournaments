@@ -16,18 +16,22 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.*;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.utils.General.message;
+import static net.flex.ManualTournaments.utils.General.send;
+import static net.flex.ManualTournaments.utils.Locations.location;
+
 public class Fight implements CommandExecutor {
-    private final Main plugin = Main.getPlugin();
-    private static final FileConfiguration config = Main.getPlugin().getConfig();
-    private final FileConfiguration KitsConfig = Main.getPlugin().getKitsConfig();
-    private final FileConfiguration ArenaConfig = Main.getPlugin().getArenaConfig();
+    private static final FileConfiguration config = getPlugin().getConfig();
+    private final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
+    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     static File FightsConfigFile;
     static FileConfiguration FightsConfig;
     static List<UUID> team1 = new ArrayList<>();
     static List<UUID> team2 = new ArrayList<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    static Team team1Board = board.registerNewTeam(Main.conf("team1"));
-    static Team team2Board = board.registerNewTeam(Main.conf("team2"));
+    static Team team1Board = board.registerNewTeam(message("team1"));
+    static Team team2Board = board.registerNewTeam(message("team2"));
     private static final Collection<String> team1String = new ArrayList<>();
     private static final Collection<String> team2String = new ArrayList<>();
     private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
@@ -58,8 +62,8 @@ public class Fight implements CommandExecutor {
             team2.clear();
             team1String.clear();
             team2String.clear();
-            team1Board.setPrefix(Main.conf("team1-prefix"));
-            team2Board.setPrefix(Main.conf("team2-prefix"));
+            team1Board.setPrefix(message("team1-prefix"));
+            team2Board.setPrefix(message("team2-prefix"));
             if (Main.version >= 14) {
                 team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                 team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
@@ -75,19 +79,19 @@ public class Fight implements CommandExecutor {
             for (int i = 0; i < args.length; i++) {
                 Player fighter = Bukkit.getPlayer(args[i]);
                 if (fighter != null) {
-                    if (plugin.arenaNames.contains(currentArena)) {
-                        if (plugin.kitNames.contains(currentKit)) {
+                    if (getPlugin().arenaNames.contains(currentArena)) {
+                        if (getPlugin().kitNames.contains(currentKit)) {
                             String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
                             String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
                             if (i < (args.length / 2)) {
                                 team1Board.addEntry(fighter.getDisplayName());
                                 team1.add(fighter.getUniqueId());
-                                fighter.teleport(Arena.location(pathPos1, ArenaConfig));
+                                fighter.teleport(location(pathPos1, ArenaConfig));
                                 fighter.setGameMode(GameMode.SURVIVAL);
                             } else if (i >= (args.length / 2)) {
                                 team2Board.addEntry(fighter.getDisplayName());
                                 team2.add(fighter.getUniqueId());
-                                fighter.teleport(Arena.location(pathPos2, ArenaConfig));
+                                fighter.teleport(location(pathPos2, ArenaConfig));
                                 fighter.setGameMode(GameMode.SURVIVAL);
                             }
                             Kit(fighter);
@@ -123,7 +127,7 @@ public class Fight implements CommandExecutor {
 
                                 --i;
                             }
-                        }).runTaskTimer(plugin, 0L, 20L);
+                        }).runTaskTimer(getPlugin(), 0L, 20L);
                     }
                 } else {
                     send(player, "fighter-error");
@@ -139,13 +143,13 @@ public class Fight implements CommandExecutor {
                         if (MyListener.stopper == 1) cancel();
                         duration++;
                     }
-                }.runTaskTimer(plugin, 0L, 20L);
+                }.runTaskTimer(getPlugin(), 0L, 20L);
                 createFightsFolder(fightCount);
                 FightsConfig.set("ArenaName", currentArena);
                 FightsConfig.set("KitName", currentKit);
                 FightsConfig.set("Team1", teamList(team1, team1String));
                 FightsConfig.set("Team2", teamList(team2, team2String));
-                FightsConfig.set("Fight-duration", 0);
+                FightsConfig.set("net.flex.ManualTournaments.Fight-duration", 0);
             }
             if (config.getBoolean("freeze-on-start")) {
                 (new BukkitRunnable() {
@@ -153,27 +157,27 @@ public class Fight implements CommandExecutor {
 
                     public void run() {
                         if (i == 0) {
-                            Bukkit.broadcastMessage(Main.conf("fight-good-luck"));
+                            Bukkit.broadcastMessage(message("fight-good-luck"));
                             cancel();
                         } else
-                            Bukkit.broadcastMessage(Main.conf("fight-will-start") + i + Main.conf("fight-will-start-seconds"));
+                            Bukkit.broadcastMessage(message("fight-will-start") + i + message("fight-will-start-seconds"));
                         --i;
                     }
-                }).runTaskTimer(plugin, 0L, 20L);
-            } else Bukkit.broadcastMessage(Main.conf("fight-good-luck"));
+                }).runTaskTimer(getPlugin(), 0L, 20L);
+            } else Bukkit.broadcastMessage(message("fight-good-luck"));
         } else {
             send(player, "fight-wrong-arguments");
             return false;
         }
         if (config.getBoolean("create-fights-folder")) FightsConfig.save(FightsConfigFile);
-        config.save(plugin.customConfigFile);
+        config.save(getPlugin().customConfigFile);
         return true;
     }
 
     private void createFightsFolder(int i) {
-        File fightsConfigFolder = new File(plugin.getDataFolder(), "fights");
+        File fightsConfigFolder = new File(getPlugin().getDataFolder(), "fights");
         if (!fightsConfigFolder.exists()) fightsConfigFolder.mkdir();
-        FightsConfigFile = new File(plugin.getDataFolder(), "fights/fight" + i + ".yml");
+        FightsConfigFile = new File(getPlugin().getDataFolder(), "fights/fight" + i + ".yml");
         FightsConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
@@ -191,12 +195,8 @@ public class Fight implements CommandExecutor {
 
     @SneakyThrows
     private void loadConfigs() {
-        KitsConfig.load(plugin.KitsConfigfile);
-        config.load(plugin.customConfigFile);
-        ArenaConfig.load(plugin.ArenaConfigFile);
-    }
-
-    private static void send(Player player, String s) {
-        player.sendMessage(Main.conf(s));
+        KitsConfig.load(getPlugin().KitsConfigfile);
+        config.load(getPlugin().customConfigFile);
+        ArenaConfig.load(getPlugin().ArenaConfigFile);
     }
 }

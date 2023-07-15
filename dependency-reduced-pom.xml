@@ -3,9 +3,67 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.flex</groupId>
   <artifactId>ManualTournaments</artifactId>
-  <version>1.0</version>
+  <version>1.2.1</version>
   <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+              </sourceDirs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+              </sourceDirs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>java-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>java-test-compile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.2.4</version>
@@ -17,14 +75,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <relocations>
-            <relocation>
-              <pattern>org.bstats</pattern>
-              <shadedPattern>net.flex.ManualTournaments</shadedPattern>
-            </relocation>
-          </relocations>
-        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -38,12 +88,13 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.19-R0.1-SNAPSHOT</version>
+      <version>1.20.1-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
+    <kotlin.version>1.9.0</kotlin.version>
     <maven.compiler.target>8</maven.compiler.target>
   </properties>
 </project>

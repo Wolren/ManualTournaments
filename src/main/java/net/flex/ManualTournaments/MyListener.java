@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,10 +20,13 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.utils.General.message;
+import static net.flex.ManualTournaments.utils.Locations.location;
 
-class MyListener implements Listener {
-    private final Main plugin = Main.getPlugin();
-    static FileConfiguration config = Main.getPlugin().getConfig();
+
+final class MyListener implements Listener {
+    static FileConfiguration config = getPlugin().getConfig();
     static int stopper;
     static boolean clearing = false;
 
@@ -43,7 +47,7 @@ class MyListener implements Listener {
     private void endCounter() {
         if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
             Fight.FightsConfig.load(Fight.FightsConfigFile);
-            Fight.FightsConfig.set("Fight-duration", Fight.duration - 3);
+            Fight.FightsConfig.set("net.flex.ManualTournaments.Fight-duration", Fight.duration - 3);
             stopper = 1;
             Fight.FightsConfig.save(Fight.FightsConfigFile);
         }
@@ -65,7 +69,7 @@ class MyListener implements Listener {
                 if (config.getBoolean("create-fights-folder")) {
                     Collection<String> h = new ArrayList<>();
                     Fight.FightsConfig.load(Fight.FightsConfigFile);
-                    Fight.FightsConfig.set("Fight-winners", Fight.teamList(team2, h));
+                    Fight.FightsConfig.set("net.flex.ManualTournaments.Fight-winners", Fight.teamList(team2, h));
                     Fight.FightsConfig.save(Fight.FightsConfigFile);
                 }
                 new BukkitRunnable() {
@@ -89,7 +93,7 @@ class MyListener implements Listener {
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                                     if (team2.contains(p.getUniqueId()) && config.isSet(path)) {
                                         clear(player);
-                                        p.teleport(Arena.location(path, config));
+                                        p.teleport(location(path, config));
                                     }
                                 }
                             }
@@ -98,7 +102,7 @@ class MyListener implements Listener {
                         }
                         --i;
                     }
-                }.runTaskTimer(plugin, 0L, 20L);
+                }.runTaskTimer(getPlugin(), 0L, 20L);
             }
         }
     }
@@ -155,7 +159,7 @@ class MyListener implements Listener {
                 String path = "fight-end-spawn.";
                 if (config.isSet(path)) {
                     player.setGameMode(Bukkit.getServer().getDefaultGameMode());
-                    player.teleport(Arena.location(path, config));
+                    player.teleport(location(path, config));
                     player.setWalkSpeed(0.2f);
                 }
             }
@@ -169,7 +173,7 @@ class MyListener implements Listener {
             if (event.getMessage().startsWith("/spec") || event.getMessage().contains("spectate") || event.getMessage().startsWith("/mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
                 event.setCancelled(false);
             } else {
-                player.sendMessage(Main.conf("not-allowed"));
+                player.sendMessage(message("not-allowed"));
                 event.setCancelled(true);
             }
         }

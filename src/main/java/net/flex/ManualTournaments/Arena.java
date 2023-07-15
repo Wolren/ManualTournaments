@@ -1,26 +1,27 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.utils.General.message;
+import static net.flex.ManualTournaments.utils.General.send;
+import static net.flex.ManualTournaments.utils.Locations.getLocation;
+import static net.flex.ManualTournaments.utils.Locations.location;
+
 public class Arena implements CommandExecutor, TabCompleter {
-    private final Main plugin = Main.getPlugin();
-    private static final FileConfiguration config = Main.getPlugin().getConfig();
-    private final FileConfiguration ArenaConfig = Main.getPlugin().getArenaConfig();
-    private final List<String> arenas = Main.getPlugin().arenaNames;
+    private static final FileConfiguration config = getPlugin().getConfig();
+    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
+    private final List<String> arenas = getPlugin().arenaNames;
 
     @SneakyThrows
     public boolean onCommand(@NotNull  CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
@@ -32,7 +33,7 @@ public class Arena implements CommandExecutor, TabCompleter {
         loadConfigs();
         Player player = playerOptional.get();
         if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("list")) player.sendMessage(Main.conf("arena-list") + arenas.toString());
+            if (args[0].equalsIgnoreCase("list")) player.sendMessage(message("arena-list") + arenas.toString());
             else return false;
         } else if (args.length == 2) {
             String arenaName = args[1];
@@ -89,34 +90,9 @@ public class Arena implements CommandExecutor, TabCompleter {
                 default:
                     return false;
             }
-            ArenaConfig.save(plugin.ArenaConfigFile);
+            ArenaConfig.save(getPlugin().ArenaConfigFile);
         } else return false;
         return true;
-    }
-
-    static void getLocation(String pathing, Player player, ConfigurationSection cfg) {
-        double x = player.getLocation().getX();
-        double y = player.getLocation().getY();
-        double z = player.getLocation().getZ();
-        float yaw = player.getLocation().getYaw();
-        float pitch = player.getLocation().getPitch();
-        String world = Objects.requireNonNull(player.getLocation().getWorld()).getName();
-        cfg.set(pathing + "x", x);
-        cfg.set(pathing + "y", y);
-        cfg.set(pathing + "z", z);
-        cfg.set(pathing + "yaw", yaw);
-        cfg.set(pathing + "pitch", pitch);
-        cfg.set(pathing + "world", world);
-    }
-
-    static Location location(String path, FileConfiguration cfg) {
-        World world = Bukkit.getWorld(Objects.requireNonNull(cfg.get(path + "world")).toString());
-        double x = cfg.getDouble(path + "x");
-        double y = cfg.getDouble(path + "y");
-        double z = cfg.getDouble(path + "z");
-        float yaw = (float) cfg.getDouble(path + "yaw");
-        float pitch = (float) cfg.getDouble(path + "pitch");
-        return new Location(world, x, y, z, yaw, pitch);
     }
 
     private void checkArena(Player p, String arenaName) {
@@ -134,12 +110,8 @@ public class Arena implements CommandExecutor, TabCompleter {
 
     @SneakyThrows
     private void loadConfigs() {
-        config.load(plugin.customConfigFile);
-        ArenaConfig.load(plugin.ArenaConfigFile);
-    }
-
-    private static void send(Player player, String s) {
-        player.sendMessage(Main.conf(s));
+        config.load(getPlugin().customConfigFile);
+        ArenaConfig.load(getPlugin().ArenaConfigFile);
     }
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {

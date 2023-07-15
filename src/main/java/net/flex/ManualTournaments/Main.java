@@ -1,8 +1,7 @@
 package net.flex.ManualTournaments;
 
-import lombok.SneakyThrows;
+import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Main extends JavaPlugin {
+public final class Main extends JavaPlugin {
     List<String> kitNames, arenaNames;
     File KitsConfigfile, ArenaConfigFile, customConfigFile;
     FileConfiguration KitsConfig, ArenaConfig, customConfig;
     public static int version = Main.formatNMSVersion(Main.getNMSVersion());
 
-    static Main getPlugin() {
+    public static Main getPlugin() {
         return getPlugin(Main.class);
     }
 
@@ -58,7 +57,6 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 
-    @SneakyThrows
     public void onDisable() {
     }
 
@@ -127,10 +125,6 @@ public class Main extends JavaPlugin {
             default:
                 return 100;
         }
-    }
-
-    static String conf(String s) {
-        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }
 
     private void createCustomConfig() {
