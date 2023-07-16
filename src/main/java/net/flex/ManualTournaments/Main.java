@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments;
 
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
+import net.flex.ManualTournaments.utils.Reload;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,7 +16,9 @@ import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
     List<String> kitNames, arenaNames;
-    File KitsConfigfile, ArenaConfigFile, customConfigFile;
+    public File KitsConfigfile;
+    public File ArenaConfigFile;
+    public File customConfigFile;
     FileConfiguration KitsConfig, ArenaConfig, customConfig;
     public static int version = Main.formatNMSVersion(Main.getNMSVersion());
 
@@ -23,15 +26,16 @@ public final class Main extends JavaPlugin {
         return getPlugin(Main.class);
     }
 
-    FileConfiguration getKitsConfig() {
+    public FileConfiguration getKitsConfig() {
         return KitsConfig;
     }
 
-    FileConfiguration getArenaConfig() {
+    public FileConfiguration getArenaConfig() {
         return ArenaConfig;
     }
 
     public void onEnable() {
+        super.onEnable();
         new UpdateChecker();
         kitNames = new ArrayList<>();
         arenaNames = new ArrayList<>();
@@ -53,6 +57,7 @@ public final class Main extends JavaPlugin {
         Objects.requireNonNull(getCommand("manualtournaments_fight")).setTabCompleter(new Fight());
         Objects.requireNonNull(getCommand("manualtournaments_kit")).setExecutor(new Kit());
         Objects.requireNonNull(getCommand("manualtournaments_kit")).setTabCompleter(new Kit());
+        Objects.requireNonNull(getCommand("manualtournaments_reload")).setExecutor(new Reload());
         Objects.requireNonNull(getCommand("manualtournaments_settings")).setExecutor(new Settings());
         Objects.requireNonNull(getCommand("manualtournaments_settings")).setTabCompleter(new Settings());
         Objects.requireNonNull(getCommand("manualtournaments_spectate")).setExecutor(new Spectate());
@@ -66,8 +71,8 @@ public final class Main extends JavaPlugin {
     }
 
     static String getNMSVersion() {
-        String v = Bukkit.getServer().getClass().getPackage().getName();
-        return v.substring(v.lastIndexOf('.') + 1);
+        String version = Bukkit.getServer().getClass().getPackage().getName();
+        return version.substring(version.lastIndexOf('.') + 1);
     }
 
     static int formatNMSVersion(String nms) {

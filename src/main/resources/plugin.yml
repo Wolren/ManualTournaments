@@ -31,6 +31,13 @@ commands:
     permissions: mt.kit
     permission-message: "You don't have permission to use that command"
     usage: "Usage: /kit [kit name] / [list|unbreakable|create|remove|give]"
+  manualtournaments_reload:
+    aliases:
+      - mt_reload
+      - mtr
+    permissions: mt.reload
+    permission-message: "You don't have permission to use that command"
+    usage: "Usage: /mtr reload"
   manualtournaments_settings:
     aliases:
       - mt_settings
