@@ -13,7 +13,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -21,7 +20,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Fight.cancelled;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.Shared.*;
 
 
@@ -47,8 +47,10 @@ final class MyListener implements Listener {
                 }
             }
         }
-        teamRemover(player, Fight.team1, Fight.team2);
-        teamRemover(player, Fight.team2, Fight.team1);
+        if (!cancelled) {
+            teamRemover(player, Fight.team1, Fight.team2);
+            teamRemover(player, Fight.team2, Fight.team1);
+        }
         if (config.getBoolean("create-fights-folder")) endCounter();
     }
 
@@ -59,13 +61,6 @@ final class MyListener implements Listener {
             Fight.FightsConfig.set("net.flex.ManualTournaments.Fight-duration", Fight.duration - 3);
             stopper = 1;
             Fight.FightsConfig.save(Fight.FightsConfigFile);
-        }
-    }
-
-    private void removeEntries() {
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (Fight.team1.contains(player.getUniqueId())) Fight.team1Board.removeEntry(player.getDisplayName());
-            else if (Fight.team2.contains(player.getUniqueId())) Fight.team2Board.removeEntry(player.getDisplayName());
         }
     }
 
@@ -96,7 +91,7 @@ final class MyListener implements Listener {
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                                     if (team2.contains(p.getUniqueId())) p.setHealth(0);
                                 }
-                            } else {
+                            } else if (!config.getBoolean("kill-on-fight-end")){
                                 String path = "fight-end-spawn.";
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                                     if (team2.contains(p.getUniqueId()) && config.isSet(path)) {
@@ -208,16 +203,6 @@ final class MyListener implements Listener {
             teleportSpawn(player);
             Spectate.spectators.remove(player);
         }
-    }
-
-    private void clear(Player player) {
-        player.getInventory().clear();
-        player.setHealth(20.0D);
-        player.setFoodLevel(20);
-        player.setAbsorptionAmount(0);
-        player.setSaturation(0);
-        player.setFireTicks(0);
-        for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
     }
 
     private void teleportSpawn(Player player) {

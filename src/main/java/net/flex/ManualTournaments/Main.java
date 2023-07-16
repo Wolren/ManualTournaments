@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
     List<String> kitNames, arenaNames;
@@ -49,6 +50,7 @@ public final class Main extends JavaPlugin {
         Objects.requireNonNull(getCommand("manualtournaments_arena")).setExecutor(new Arena());
         Objects.requireNonNull(getCommand("manualtournaments_arena")).setTabCompleter(new Arena());
         Objects.requireNonNull(getCommand("manualtournaments_fight")).setExecutor(new Fight());
+        Objects.requireNonNull(getCommand("manualtournaments_fight")).setTabCompleter(new Fight());
         Objects.requireNonNull(getCommand("manualtournaments_kit")).setExecutor(new Kit());
         Objects.requireNonNull(getCommand("manualtournaments_kit")).setTabCompleter(new Kit());
         Objects.requireNonNull(getCommand("manualtournaments_settings")).setExecutor(new Settings());
@@ -135,7 +137,8 @@ public final class Main extends JavaPlugin {
         customConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(customConfigFile);
         if (!customConfigFile.exists()) {
-            customConfigFile.getParentFile().mkdirs();
+            boolean create = customConfigFile.getParentFile().mkdirs();
+            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
             saveResource("config.yml", false);
         }
     }
@@ -145,7 +148,8 @@ public final class Main extends JavaPlugin {
         ArenaConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(ArenaConfigFile);
         if (!ArenaConfigFile.exists()) {
-            ArenaConfigFile.getParentFile().mkdirs();
+            boolean create = ArenaConfigFile.getParentFile().mkdirs();
+            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
             saveResource("arenas.yml", false);
         }
     }
@@ -155,7 +159,8 @@ public final class Main extends JavaPlugin {
         KitsConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(KitsConfigfile);
         if (!KitsConfigfile.exists()) {
-            KitsConfigfile.getParentFile().mkdirs();
+            boolean create = KitsConfigfile.getParentFile().mkdirs();
+            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
             saveResource("kits.yml", false);
         }
     }

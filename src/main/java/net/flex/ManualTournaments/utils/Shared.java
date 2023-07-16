@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.utils;
 
+import net.flex.ManualTournaments.Fight;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -7,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.Objects;
 
@@ -44,5 +46,22 @@ public final class Shared {
         float yaw = (float) cfg.getDouble(path + "yaw");
         float pitch = (float) cfg.getDouble(path + "pitch");
         return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    public static void clear(Player player) {
+        player.getInventory().clear();
+        player.setHealth(20.0D);
+        player.setFoodLevel(20);
+        player.setAbsorptionAmount(0);
+        player.setSaturation(0);
+        player.setFireTicks(0);
+        for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
+    }
+
+    public static void removeEntries() {
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            if (Fight.team1.contains(player.getUniqueId())) Fight.team1Board.removeEntry(player.getDisplayName());
+            else if (Fight.team2.contains(player.getUniqueId())) Fight.team2Board.removeEntry(player.getDisplayName());
+        }
     }
 }
