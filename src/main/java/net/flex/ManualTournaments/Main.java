@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments;
 
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
+import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,6 +31,7 @@ public final class Main extends JavaPlugin {
     }
 
     public void onEnable() {
+        new UpdateChecker();
         kitNames = new ArrayList<>();
         arenaNames = new ArrayList<>();
         createKitsConfig();
@@ -58,6 +60,7 @@ public final class Main extends JavaPlugin {
     }
 
     public void onDisable() {
+        super.onDisable();
     }
 
     static String getNMSVersion() {

@@ -16,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.General.send;
-import static net.flex.ManualTournaments.utils.Locations.location;
+import static net.flex.ManualTournaments.utils.Shared.send;
+import static net.flex.ManualTournaments.utils.Shared.location;
 
 @SuppressWarnings("deprecation")
 public class Spectate implements TabCompleter, CommandExecutor {

@@ -13,10 +13,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.General.message;
-import static net.flex.ManualTournaments.utils.General.send;
-import static net.flex.ManualTournaments.utils.Locations.getLocation;
-import static net.flex.ManualTournaments.utils.Locations.location;
+import static net.flex.ManualTournaments.utils.Shared.getLocation;
+import static net.flex.ManualTournaments.utils.Shared.location;
+import static net.flex.ManualTournaments.utils.Shared.message;
+import static net.flex.ManualTournaments.utils.Shared.send;
 
 public class Arena implements CommandExecutor, TabCompleter {
     private static final FileConfiguration config = getPlugin().getConfig();

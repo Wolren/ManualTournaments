@@ -17,9 +17,9 @@ import java.io.File;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.General.message;
-import static net.flex.ManualTournaments.utils.General.send;
-import static net.flex.ManualTournaments.utils.Locations.location;
+import static net.flex.ManualTournaments.utils.Shared.message;
+import static net.flex.ManualTournaments.utils.Shared.send;
+import static net.flex.ManualTournaments.utils.Shared.location;
 
 public class Fight implements CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
@@ -157,14 +157,14 @@ public class Fight implements CommandExecutor {
 
                     public void run() {
                         if (i == 0) {
-                            Bukkit.broadcastMessage(message("fight-good-luck"));
+                            if (config.getBoolean("fight-good-luck-enabled")) Bukkit.broadcastMessage(message("fight-good-luck"));
                             cancel();
                         } else
                             Bukkit.broadcastMessage(message("fight-will-start") + i + message("fight-will-start-seconds"));
                         --i;
                     }
                 }).runTaskTimer(getPlugin(), 0L, 20L);
-            } else Bukkit.broadcastMessage(message("fight-good-luck"));
+            } else if (config.getBoolean("fight-good-luck-enabled")) Bukkit.broadcastMessage(message("fight-good-luck"));
         } else {
             send(player, "fight-wrong-arguments");
             return false;

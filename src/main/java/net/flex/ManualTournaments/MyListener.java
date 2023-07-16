@@ -3,6 +3,7 @@ package net.flex.ManualTournaments;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -21,8 +22,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.General.message;
-import static net.flex.ManualTournaments.utils.Locations.location;
+import static net.flex.ManualTournaments.utils.Shared.message;
+import static net.flex.ManualTournaments.utils.Shared.location;
 
 
 final class MyListener implements Listener {
@@ -33,10 +34,19 @@ final class MyListener implements Listener {
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
+        Player killer = player.getKiller();
         removeEntries();
         if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
             event.setDroppedExp(0);
+            event.setDeathMessage("");
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
+            if (killer != null) {
+                if (Fight.team1.contains(killer.getUniqueId()) || Fight.team2.contains(killer.getUniqueId())) {
+                    String replacePlayer = Objects.requireNonNull(config.getString("fight-death")).replace("{player}", player.getDisplayName());
+                    String replaceKiller = replacePlayer.replace("{killer}", killer.getDisplayName());
+                    event.setDeathMessage(ChatColor.translateAlternateColorCodes('&', replaceKiller));
+                }
+            }
         }
         teamRemover(player, Fight.team1, Fight.team2);
         teamRemover(player, Fight.team2, Fight.team1);
@@ -69,24 +79,23 @@ final class MyListener implements Listener {
                 if (config.getBoolean("create-fights-folder")) {
                     Collection<String> h = new ArrayList<>();
                     Fight.FightsConfig.load(Fight.FightsConfigFile);
-                    Fight.FightsConfig.set("net.flex.ManualTournaments.Fight-winners", Fight.teamList(team2, h));
+                    Fight.FightsConfig.set("Fight-winners", Fight.teamList(team2, h));
                     Fight.FightsConfig.save(Fight.FightsConfigFile);
                 }
+                Collection<String> array = new ArrayList<>();
+                for (UUID uuid : team2) array.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+                String listString = String.join(", ", array);
                 new BukkitRunnable() {
                     int i = config.getInt("teleport-countdown-time");
 
                     @SneakyThrows
                     public void run() {
                         if (i == 0) {
-                            Collection<String> array = new ArrayList<>();
-                            for (UUID uuid : team2)
-                                array.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
-                            String listString = String.join(", ", array);
                             String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
-                            Bukkit.getServer().broadcastMessage(replace);
+                            Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                                    if (team2.contains(p.getUniqueId())) p.damage(10000);
+                                    if (team2.contains(p.getUniqueId())) p.setHealth(0);
                                 }
                             } else {
                                 String path = "fight-end-spawn.";
@@ -199,13 +208,6 @@ final class MyListener implements Listener {
             event.setCancelled(true);
             teleportSpawn(player);
             Spectate.spectators.remove(player);
-        } else if ((Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) && clearing) {
-            if (player.getHealth() - event.getFinalDamage() > 0) return;
-            event.setCancelled(true);
-            Location respawnLocation = player.getBedSpawnLocation();
-            if (respawnLocation == null) respawnLocation = player.getWorld().getSpawnLocation();
-            clear(player);
-            player.teleport(respawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
         }
     }
 
