@@ -21,9 +21,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.message;
-import static net.flex.ManualTournaments.utils.Shared.location;
+import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.Shared.*;
 
 
 final class MyListener implements Listener {

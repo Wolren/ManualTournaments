@@ -16,10 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.message;
-import static net.flex.ManualTournaments.utils.Shared.send;
-import static net.flex.ManualTournaments.utils.Shared.location;
+import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.Shared.*;
 
 public class Fight implements CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();

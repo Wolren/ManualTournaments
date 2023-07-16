@@ -12,9 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.getLocation;
-import static net.flex.ManualTournaments.utils.Shared.send;
+import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.Shared.*;
 
 public final class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();

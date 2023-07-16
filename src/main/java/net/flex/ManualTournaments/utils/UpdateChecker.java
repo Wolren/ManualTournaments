@@ -8,7 +8,7 @@ import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 
 public final class UpdateChecker {
     private String version;

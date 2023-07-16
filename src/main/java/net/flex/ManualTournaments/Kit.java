@@ -26,9 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.message;
-import static net.flex.ManualTournaments.utils.Shared.send;
+import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.Shared.*;
 
 @SuppressWarnings("deprecation")
 public class Kit implements TabCompleter, CommandExecutor {
