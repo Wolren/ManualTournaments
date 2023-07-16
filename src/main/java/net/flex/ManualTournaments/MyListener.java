@@ -28,7 +28,6 @@ import static net.flex.ManualTournaments.utils.Shared.*;
 final class MyListener implements Listener {
     static FileConfiguration config = getPlugin().getConfig();
     static int stopper;
-    static boolean clearing = false;
 
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
@@ -39,7 +38,7 @@ final class MyListener implements Listener {
             event.setDroppedExp(0);
             event.setDeathMessage("");
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
-            if (killer != null) {
+            if (killer != null && !cancelled) {
                 if (Fight.team1.contains(killer.getUniqueId()) || Fight.team2.contains(killer.getUniqueId())) {
                     String replacePlayer = Objects.requireNonNull(config.getString("fight-death")).replace("{player}", player.getDisplayName());
                     String replaceKiller = replacePlayer.replace("{killer}", killer.getDisplayName());
@@ -69,11 +68,10 @@ final class MyListener implements Listener {
         if (team1.contains(player.getUniqueId())) {
             team1.remove(player.getUniqueId());
             if (team1.isEmpty() && !team2.isEmpty()) {
-                clearing = true;
                 if (config.getBoolean("create-fights-folder")) {
-                    Collection<String> h = new ArrayList<>();
+                    Collection<String> winners = new ArrayList<>();
                     Fight.FightsConfig.load(Fight.FightsConfigFile);
-                    Fight.FightsConfig.set("Fight-winners", Fight.teamList(team2, h));
+                    Fight.FightsConfig.set("Fight-winners", teamList(team2, winners));
                     Fight.FightsConfig.save(Fight.FightsConfigFile);
                 }
                 Collection<String> array = new ArrayList<>();
@@ -100,7 +98,6 @@ final class MyListener implements Listener {
                                     }
                                 }
                             }
-                            clearing = false;
                             cancel();
                         }
                         --i;

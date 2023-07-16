@@ -3,7 +3,6 @@ package net.flex.ManualTournaments;
 import lombok.SneakyThrows;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.Shared.*;
 
 @SuppressWarnings("deprecation")
@@ -34,16 +33,13 @@ public class Kit implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
     private static final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
     private final List<String> kits = getPlugin().kitNames;
+    Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
-        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
-            sender.sendMessage("sender-not-a-player");
-            return false;
-        }
+        if (optional(sender) == null) return false;
+        else player = optional(sender);
         loadConfigs();
-        Player player = playerOptional.get();
         if (args.length == 1) {
             switch (args[0].toUpperCase()) {
                 case "LIST":

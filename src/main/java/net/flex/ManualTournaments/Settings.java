@@ -1,7 +1,6 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,23 +9,23 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.Shared.*;
 
 public final class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
+    Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
+        if (optional(sender) == null) return false;
+        else player = optional(sender);
         config.load(getPlugin().customConfigFile);
-        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
-        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
-            sender.sendMessage("sender-not-a-player");
-            return false;
-        }
-        Player player = playerOptional.get();
         if (args.length == 1 && args[0].equalsIgnoreCase("endspawn")) {
             getLocation("fight-end-spawn.", player, config);
             send(player, "config-updated-successfully");

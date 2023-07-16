@@ -1,7 +1,6 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,23 +18,19 @@ public class Arena implements CommandExecutor, TabCompleter {
     private static final FileConfiguration config = getPlugin().getConfig();
     private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     private final List<String> arenas = getPlugin().arenaNames;
+    Player player = null;
 
     @SneakyThrows
-    public boolean onCommand(@NotNull  CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
-        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
-            sender.sendMessage("sender-not-a-player");
-            return false;
-        }
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
+        if (optional(sender) == null) return false;
+        else player = optional(sender);
         loadConfigs();
-        Player player = playerOptional.get();
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("list")) player.sendMessage(message("arena-list") + arenas.toString());
             else return false;
         } else if (args.length == 2) {
             String arenaName = args[1];
             String path = "Arenas." + arenaName + ".";
-            String pathSpectator = path + "spectator.";
             boolean arenaExists = arenas.contains(arenaName);
             switch (args[0].toUpperCase()) {
                 case "CREATE":
@@ -69,14 +64,14 @@ public class Arena implements CommandExecutor, TabCompleter {
                     break;
                 case "SPECTATOR":
                     if (arenaExists) {
-                        getLocation(pathSpectator, player, ArenaConfig);
+                        getLocation(path + "spectator.", player, ArenaConfig);
                         send(player, "arena-spectator");
                     } else send(player, "arena-not-exists");
                     break;
                 case "TELEPORT":
                     if (arenaExists) {
                         if (ArenaConfig.isSet("Arenas." + arenaName + "." + "spectator"))
-                            player.teleport(location(pathSpectator, ArenaConfig));
+                            player.teleport(location(path + "spectator.", ArenaConfig));
                         else send(player, "arena-not-set");
                     } else send(player, "arena-not-exists");
                     break;

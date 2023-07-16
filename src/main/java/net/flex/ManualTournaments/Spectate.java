@@ -3,7 +3,6 @@ package net.flex.ManualTournaments;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,9 +12,12 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.Shared.*;
 
 @SuppressWarnings("deprecation")
@@ -24,19 +26,13 @@ public class Spectate implements TabCompleter, CommandExecutor {
     private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     static List<Player> spectators = new ArrayList<>();
     GameMode gameMode = Bukkit.getServer().getDefaultGameMode();
-
-    public Spectate() {
-    }
+    Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
-        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
-            sender.sendMessage("sender-not-a-player");
-            return false;
-        }
+        if (optional(sender) == null) return false;
+        else player = optional(sender);
         loadConfigs();
-        Player player = playerOptional.get();
         if (args.length == 0) {
             if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
                 String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";

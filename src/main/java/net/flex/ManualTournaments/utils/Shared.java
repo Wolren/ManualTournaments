@@ -1,18 +1,19 @@
 package net.flex.ManualTournaments.utils;
 
 import net.flex.ManualTournaments.Fight;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getPlugin;
 
 public final class Shared {
     public static String message(String s) {
@@ -21,6 +22,14 @@ public final class Shared {
 
     public static void send(Player player, String s) {
         player.sendMessage(message(s));
+    }
+
+    public static Player optional(CommandSender sender) {
+        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
+        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
+            sender.sendMessage("sender-not-a-player");
+            return null;
+        } else return playerOptional.get();
     }
 
     public static void getLocation(String pathing, Player player, ConfigurationSection cfg) {
@@ -46,6 +55,11 @@ public final class Shared {
         float yaw = (float) cfg.getDouble(path + "yaw");
         float pitch = (float) cfg.getDouble(path + "pitch");
         return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    public static String teamList(final Iterable<UUID> team, final Collection<String> teamString) {
+        for (final UUID uuid : team) teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+        return String.join(", ", teamString);
     }
 
     public static void clear(Player player) {

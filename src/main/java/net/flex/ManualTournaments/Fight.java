@@ -15,6 +15,10 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -23,34 +27,33 @@ import static net.flex.ManualTournaments.utils.Shared.*;
 
 public class Fight implements CommandExecutor, TabCompleter {
     private static final FileConfiguration config = getPlugin().getConfig();
-    private final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
-    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
-    static File FightsConfigFile;
-    static FileConfiguration FightsConfig;
+    private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
+    private static final Collection<String> team1String = new ArrayList<>();
+    private static final Collection<String> team2String = new ArrayList<>();
+    private static final float WALK_SPEED_ZERO = 0.0F;
+    private static final float WALK_SPEED_NORMAL = 0.2F;
     public static List<UUID> team1 = new ArrayList<>();
     public static List<UUID> team2 = new ArrayList<>();
-    private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team team1Board = board.registerNewTeam(message("team1"));
     public static Team team2Board = board.registerNewTeam(message("team2"));
-    private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
+    static File FightsConfigFile;
+    static FileConfiguration FightsConfig;
     static List<Player> temporary = new ArrayList<>();
-    private final String currentArena = config.getString("current-arena");
-    private final String currentKit = config.getString("current-kit");
     static int duration;
     static boolean cancelled = false;
     private static int fightCount = config.getInt("fight-count");
-    private static final float WALK_SPEED_ZERO = 0.0F;
-    private static final float WALK_SPEED_NORMAL = 0.2F;
+    private final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
+    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
+    private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
+    private final String currentArena = config.getString("current-arena");
+    private final String currentKit = config.getString("current-kit");
+    Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
-        if (!playerOptional.isPresent() || !(sender instanceof Player)) {
-            sender.sendMessage("sender-not-a-player");
-            return false;
-        }
+        if (optional(sender) == null) return false;
+        else player = optional(sender);
         loadConfigs();
-        Player player = playerOptional.get();
         distinctElements.clear();
         for (String arg : args) {
             Player fighter = Bukkit.getPlayer(arg);
@@ -59,6 +62,7 @@ public class Fight implements CommandExecutor, TabCompleter {
         if (args.length == 1 && args[0].equals("stop")) {
             player.setWalkSpeed(WALK_SPEED_NORMAL);
             removeEntries();
+            cancelled = true;
             for (Player online : Bukkit.getOnlinePlayers()) {
                 if (team1.contains(online.getUniqueId()) || team2.contains(online.getUniqueId())) {
                     online.setHealth(0);
@@ -70,124 +74,124 @@ public class Fight implements CommandExecutor, TabCompleter {
             }
             team1.clear();
             team2.clear();
-            cancelled = true;
             return true;
         } else if (args.length > 1 && args.length % 2 == 0 && distinctElements.stream().distinct().count() == args.length) {
-            cancelled = false;
-            team1.clear();
-            team2.clear();
-            team1Board.setPrefix(message("team1-prefix"));
-            team2Board.setPrefix(message("team2-prefix"));
-            if (Main.version >= 14) {
-                team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-            }
-            if (!config.getBoolean("friendly-fire")) {
-                team1Board.setAllowFriendlyFire(false);
-                team2Board.setAllowFriendlyFire(false);
-            } else if (config.getBoolean("friendly-fire")) {
-                team1Board.setAllowFriendlyFire(true);
-                team2Board.setAllowFriendlyFire(true);
-            }
-            for (Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
-            for (int i = 0; i < args.length; i++) {
-                Player fighter = Bukkit.getPlayer(args[i]);
-                if (fighter != null) {
-                    if (getPlugin().arenaNames.contains(currentArena)) {
-                        if (getPlugin().kitNames.contains(currentKit)) {
-                            String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
-                            String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
-                            if (i < (args.length / 2)) {
-                                team1Board.addEntry(fighter.getDisplayName());
-                                team1.add(fighter.getUniqueId());
-                                fighter.teleport(location(pathPos1, ArenaConfig));
-                                fighter.setGameMode(GameMode.SURVIVAL);
-                            } else if (i >= (args.length / 2)) {
-                                team2Board.addEntry(fighter.getDisplayName());
-                                team2.add(fighter.getUniqueId());
-                                fighter.teleport(location(pathPos2, ArenaConfig));
-                                fighter.setGameMode(GameMode.SURVIVAL);
+            if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
+                cancelled = false;
+                team1Board.setPrefix(message("team1-prefix"));
+                team2Board.setPrefix(message("team2-prefix"));
+                if (Main.version >= 14) {
+                    team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                    team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                }
+                if (!config.getBoolean("friendly-fire")) {
+                    team1Board.setAllowFriendlyFire(false);
+                    team2Board.setAllowFriendlyFire(false);
+                } else if (config.getBoolean("friendly-fire")) {
+                    team1Board.setAllowFriendlyFire(true);
+                    team2Board.setAllowFriendlyFire(true);
+                }
+                for (Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
+                for (int i = 0; i < args.length; i++) {
+                    Player fighter = Bukkit.getPlayer(args[i]);
+                    if (fighter != null) {
+                        if (getPlugin().arenaNames.contains(currentArena)) {
+                            if (getPlugin().kitNames.contains(currentKit)) {
+                                String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
+                                String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
+                                if (i < (args.length / 2)) {
+                                    team1Board.addEntry(fighter.getDisplayName());
+                                    team1.add(fighter.getUniqueId());
+                                    fighter.teleport(location(pathPos1, ArenaConfig));
+                                    fighter.setGameMode(GameMode.SURVIVAL);
+                                } else if (i >= (args.length / 2)) {
+                                    team2Board.addEntry(fighter.getDisplayName());
+                                    team2.add(fighter.getUniqueId());
+                                    fighter.teleport(location(pathPos2, ArenaConfig));
+                                    fighter.setGameMode(GameMode.SURVIVAL);
+                                }
+                                Kit(fighter);
+                            } else {
+                                send(player, "current-kit-not-set");
+                                return true;
                             }
-                            Kit(fighter);
                         } else {
-                            send(player, "current-kit-not-set");
+                            send(player, "current-arena-not-set");
                             return true;
                         }
-                    } else {
-                        send(player, "current-arena-not-set");
-                        return true;
-                    }
-                    if (config.getBoolean("freeze-on-start")) {
-                        (new BukkitRunnable() {
-                            int i = config.getInt("countdown-time");
+                        if (config.getBoolean("freeze-on-start")) {
+                            (new BukkitRunnable() {
+                                int i = config.getInt("countdown-time");
 
-                            public void run() {
-                                temporary.add(fighter);
-                                player.setWalkSpeed(WALK_SPEED_ZERO);
-                                if (i == 0) {
-                                    temporary.clear();
-                                    player.setWalkSpeed(WALK_SPEED_NORMAL);
-                                    if (Main.version >= 18)
-                                        fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-                                    else
-                                        fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
-                                    cancel();
-                                } else {
-                                    if (cancelled) {
+                                public void run() {
+                                    temporary.add(fighter);
+                                    player.setWalkSpeed(WALK_SPEED_ZERO);
+                                    if (i == 0) {
                                         temporary.clear();
                                         player.setWalkSpeed(WALK_SPEED_NORMAL);
+                                        if (Main.version >= 18)
+                                            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+                                        else
+                                            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
                                         cancel();
                                     } else {
-                                        if (Main.version >= 18)
-                                            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
-                                        else
-                                            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
+                                        if (cancelled) {
+                                            temporary.clear();
+                                            player.setWalkSpeed(WALK_SPEED_NORMAL);
+                                            cancel();
+                                        } else {
+                                            if (Main.version >= 18)
+                                                fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+                                            else
+                                                fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
+                                        }
                                     }
+
+                                    --i;
                                 }
-
-                                --i;
-                            }
-                        }).runTaskTimer(getPlugin(), 0L, 20L);
+                            }).runTaskTimer(getPlugin(), 0L, 20L);
+                        }
+                    } else {
+                        send(player, "fighter-error");
+                        return false;
                     }
-                } else {
-                    send(player, "fighter-error");
-                    return false;
                 }
-            }
-            if (config.getBoolean("count-fights")) config.set("fight-count", ++fightCount);
-            if (config.getBoolean("create-fights-folder")) {
-                duration = 0;
-                MyListener.stopper = 0;
-                new BukkitRunnable() {
-                    public void run() {
-                        if (MyListener.stopper == 1 || cancelled) cancel();
-                        else duration++;
-                    }
-                }.runTaskTimer(getPlugin(), 0L, 20L);
-                createFightsFolder(fightCount);
-                FightsConfig.set("ArenaName", currentArena);
-                FightsConfig.set("KitName", currentKit);
-                FightsConfig.set("Team1", teamList(team1, new ArrayList<>()));
-                FightsConfig.set("Team2", teamList(team2, new ArrayList<>()));
-                FightsConfig.set("net.flex.ManualTournaments.Fight-duration", 0);
-            }
-            if (config.getBoolean("freeze-on-start")) {
-                (new BukkitRunnable() {
-                    int i = config.getInt("countdown-time");
+                if (config.getBoolean("count-fights")) config.set("fight-count", ++fightCount);
+                if (config.getBoolean("mysql-enabled")) sqlFights();
+                if (config.getBoolean("create-fights-folder")) {
+                    duration = 0;
+                    MyListener.stopper = 0;
+                    new BukkitRunnable() {
+                        public void run() {
+                            if (MyListener.stopper == 1 || cancelled) cancel();
+                            else duration++;
+                        }
+                    }.runTaskTimer(getPlugin(), 0L, 20L);
+                    createFightsFolder(fightCount);
+                    FightsConfig.set("arena-name", currentArena);
+                    FightsConfig.set("kit-name", currentKit);
+                    FightsConfig.set("team1", teamList(team1, team1String));
+                    FightsConfig.set("team2", teamList(team2, team2String));
+                    FightsConfig.set("Fight-duration", 0);
+                }
+                if (config.getBoolean("freeze-on-start")) {
+                    (new BukkitRunnable() {
+                        int i = config.getInt("countdown-time");
 
-                    public void run() {
-                        if (i == 0) {
-                            if (config.getBoolean("fight-good-luck-enabled"))
-                                Bukkit.broadcastMessage(message("fight-good-luck"));
-                            cancel();
-                        } else
-                            if (cancelled) cancel();
-                            else Bukkit.broadcastMessage(message("fight-will-start") + i + message("fight-will-start-seconds"));
-                        --i;
-                    }
-                }).runTaskTimer(getPlugin(), 0L, 20L);
-            } else if (config.getBoolean("fight-good-luck-enabled"))
-                Bukkit.broadcastMessage(message("fight-good-luck"));
+                        public void run() {
+                            if (i == 0) {
+                                if (config.getBoolean("fight-good-luck-enabled"))
+                                    Bukkit.broadcastMessage(message("fight-good-luck"));
+                                cancel();
+                            } else if (cancelled) cancel();
+                            else
+                                Bukkit.broadcastMessage(message("fight-will-start") + i + message("fight-will-start-seconds"));
+                            --i;
+                        }
+                    }).runTaskTimer(getPlugin(), 0L, 20L);
+                } else if (config.getBoolean("fight-good-luck-enabled"))
+                    Bukkit.broadcastMessage(message("fight-good-luck"));
+            } else send(player, "fight-concurrent-arenas");
         } else {
             send(player, "fight-wrong-arguments");
             return false;
@@ -209,15 +213,35 @@ public class Fight implements CommandExecutor, TabCompleter {
         YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
 
+    public void sqlFights() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String host = config.getString("mysql.url");
+            String username = config.getString("mysql.username");
+            String password = config.getString("mysql.password");
+            String url = String.format("jdbc:mysql://%s", host);
+            Connection connection = DriverManager.getConnection(url, username, password);
+            Statement statement = connection.createStatement();
+            statement.executeUpdate("CREATE DATABASE IF NOT EXISTS ManualTournaments");
+            try (PreparedStatement useDatabaseStatement = connection.prepareStatement("USE ManualTournaments")) {
+                useDatabaseStatement.execute();
+            }
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS ManualTournaments.Fights (team1 TEXT)");
+            String sql = "INSERT INTO Fights VALUES (?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, teamList(team1, team1String));
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+            connection.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
     private void Kit(Player p) {
         if (config.getString("current-kit") != null) {
             Kit.setKit(p, config.getString("current-kit"));
         }
-    }
-
-    static String teamList(Iterable<UUID> team, Collection<String> teamString) {
-        for (UUID uuid : team) teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
-        return String.join(", ", teamString);
     }
 
     @SneakyThrows

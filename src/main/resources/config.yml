@@ -6,6 +6,11 @@ countdown-time: 10
 #If true folder saving info for every fight will be created and the names of next files will be based on fight-count (count-fights has to be true for that!)
 create-fights-folder: false
 count-fights: false
+mysql-enabled: true
+mysql:
+  url: localhost:3306
+  username:
+  password:
 #Switch to true if you have automatic spawn teleport on server join but not this option on to avoid spectator errors
 default-gamemode-on-join: false
 #If true fighters will be able to drop their items during the fight
@@ -61,6 +66,7 @@ config-options: "&6Only possible options are true and false"
 config-updated-successfully: "&aConfig was updated successfully"
 current-arena-not-set: "&6You have to set &e&lcurrent arena &r&6using &e&l/settings current_arena &r&6before starting the fight"
 current-kit-not-set: "&6You have to set &e&lcurrent kit &r&6using &e&l/settings current_kit &r&6before starting the fight"
+fight-concurrent-arenas: "&6There can only be one fight taking place at the same time"
 fight-death: "&e&l{killer} &r&7killed &e&l{player}"
 fighter-error: "&6One or more players can't be found"
 fight-good-luck: "&7Good luck :)"
