@@ -171,11 +171,16 @@ public class Fight implements CommandExecutor, TabCompleter {
                         }
                     }.runTaskTimer(getPlugin(), 0L, 20L);
                     createFightsFolder(fightCount);
-                    FightsConfig.set("arena-name", currentArena);
-                    FightsConfig.set("kit-name", currentKit);
                     FightsConfig.set("team1", teamList(team1, team1String));
                     FightsConfig.set("team2", teamList(team2, team2String));
-                    FightsConfig.set("Fight-duration", 0);
+                    FightsConfig.set("damageTeam1", 0);
+                    FightsConfig.set("damageTeam2", 0);
+                    FightsConfig.set("regeneratedTeam1", 0);
+                    FightsConfig.set("regeneratedTeam2", 0);
+                    FightsConfig.set("arena", currentArena);
+                    FightsConfig.set("kit", currentKit);
+                    FightsConfig.set("duration", 0);
+                    FightsConfig.set("winners", "");
                 }
                 if (config.getBoolean("freeze-on-start")) {
                     (new BukkitRunnable() {

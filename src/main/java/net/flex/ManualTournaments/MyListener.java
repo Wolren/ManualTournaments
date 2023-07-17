@@ -25,8 +25,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.commands.Fight.cancelled;
-import static net.flex.ManualTournaments.commands.Fight.duration;
+import static net.flex.ManualTournaments.commands.Fight.*;
 import static net.flex.ManualTournaments.utils.SharedMethods.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
@@ -67,11 +66,11 @@ public final class MyListener implements Listener {
     @SneakyThrows
     private void endCounter() {
         if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
-            Fight.FightsConfig.load(Fight.FightsConfigFile);
-            Fight.FightsConfig.set("Fight-duration", Fight.duration - 3);
+            FightsConfig.load(Fight.FightsConfigFile);
+            FightsConfig.set("duration", Fight.duration - 3);
             durationUpdate(duration - 3);
             stopper = 1;
-            Fight.FightsConfig.save(Fight.FightsConfigFile);
+            FightsConfig.save(Fight.FightsConfigFile);
         }
     }
 
@@ -82,17 +81,33 @@ public final class MyListener implements Listener {
             if (team1.isEmpty() && !team2.isEmpty()) {
                 winners.clear();
                 regeneratedUpdate(regeneratedTeam1, regeneratedTeam2);
+                damageUpdate(damageTeam1, damageTeam2);
+                FightsConfig.set("damageTeam1", damageTeam1);
+                FightsConfig.set("damageTeam2", damageTeam2);
+                FightsConfig.set("regeneratedTeam1", regeneratedTeam1);
+                FightsConfig.set("regeneratedTeam2", regeneratedTeam2);
+                FightsConfig.save(Fight.FightsConfigFile);
                 regeneratedTeam1 = 0;
                 regeneratedTeam2 = 0;
-                damageUpdate(damageTeam1, damageTeam2);
                 damageTeam1 = 0;
                 damageTeam2 = 0;
-                if (Fight.team1.isEmpty()) winnersUpdate(teamList(Fight.team2, winners));
-                else if (Fight.team2.isEmpty()) winnersUpdate(teamList(Fight.team1, winners));
-                if (config.getBoolean("create-fights-folder")) {
-                    Fight.FightsConfig.load(Fight.FightsConfigFile);
-                    Fight.FightsConfig.set("Fight-winners", teamList(team2, winners));
-                    Fight.FightsConfig.save(Fight.FightsConfigFile);
+                if (Fight.team1.isEmpty()) {
+                    winnersUpdate(teamList(Fight.team2, winners));
+                    winners.clear();
+                    if (config.getBoolean("create-fights-folder")) {
+                        FightsConfig.load(Fight.FightsConfigFile);
+                        FightsConfig.set("winners", teamList(Fight.team2, winners));
+                        FightsConfig.save(Fight.FightsConfigFile);
+                    }
+                }
+                else if (Fight.team2.isEmpty()) {
+                    winnersUpdate(teamList(Fight.team1, winners));
+                    winners.clear();
+                    if (config.getBoolean("create-fights-folder")) {
+                        FightsConfig.load(Fight.FightsConfigFile);
+                        FightsConfig.set("winners", teamList(Fight.team1, winners));
+                        FightsConfig.save(Fight.FightsConfigFile);
+                    }
                 }
                 Collection<String> array = new ArrayList<>();
                 for (UUID uuid : team2) array.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());

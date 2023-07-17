@@ -20,29 +20,31 @@ public class SqlMethods {
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS ManualTournaments");
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS ManualTournaments.Fights" +
                     " (id INT AUTO_INCREMENT," +
-                    " team1 TEXT, team2 TEXT," +
-                    " arena TEXT, kit TEXT," +
+                    " team1 VARCHAR(1000), team2 VARCHAR(1000)," +
+                    " damageTeam1 DOUBLE, damageTeam2 DOUBLE," +
+                    " regeneratedTeam1 DOUBLE, regeneratedTeam2 DOUBLE," +
+                    " arena VARCHAR(50), kit VARCHAR(50)," +
                     " duration INT," +
-                    " damageTeam1 DOUBLE(9, 2), damageTeam2 DOUBLE(9, 2)," +
-                    " regeneratedTeam1 DOUBLE(9, 2), regeneratedTeam2 DOUBLE(9, 2)," +
-                    " winners TEXT, PRIMARY KEY(id))");
+                    " winners VARCHAR(1000), PRIMARY KEY(id))");
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO Fights(" +
                     "team1, team2," +
-                    " arena, kit," +
-                    " duration," +
                     " damageTeam1, damageTeam2," +
                     " regeneratedTeam1, regeneratedTeam2," +
+                    " arena, kit," +
+                    " duration," +
                     " winners)" +
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             preparedStatement.setString(1, teamList(team1, team1String));
+            team1String.clear();
             preparedStatement.setString(2, teamList(team2, team2String));
-            preparedStatement.setString(3, currentArena);
-            preparedStatement.setString(4, currentKit);
-            preparedStatement.setInt(5, duration);
+            team2String.clear();
+            preparedStatement.setDouble(3, 0);
+            preparedStatement.setDouble(4, 0);
+            preparedStatement.setDouble(5, 0);
             preparedStatement.setDouble(6, 0);
-            preparedStatement.setDouble(7, 0);
-            preparedStatement.setDouble(8, 0);
-            preparedStatement.setDouble(9, 0);
+            preparedStatement.setString(7, currentArena);
+            preparedStatement.setString(8, currentKit);
+            preparedStatement.setInt(9, duration);
             preparedStatement.setString(10, "");
             preparedStatement.executeUpdate();
             preparedStatement.close();
