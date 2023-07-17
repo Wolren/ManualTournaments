@@ -1,6 +1,8 @@
-package net.flex.ManualTournaments;
+package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
+import net.flex.ManualTournaments.MyListener;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,33 +17,30 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.*;
 import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.*;
+import static net.flex.ManualTournaments.utils.SharedMethods.*;
+import static net.flex.ManualTournaments.utils.SqlMethods.sqlFights;
 
 public class Fight implements CommandExecutor, TabCompleter {
     private static final FileConfiguration config = getPlugin().getConfig();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    private static final Collection<String> team1String = new ArrayList<>();
-    private static final Collection<String> team2String = new ArrayList<>();
+    public static final Collection<String> team1String = new ArrayList<>();
+    public static final Collection<String> team2String = new ArrayList<>();
     private static final float WALK_SPEED_ZERO = 0.0F;
     private static final float WALK_SPEED_NORMAL = 0.2F;
     public static List<UUID> team1 = new ArrayList<>();
     public static List<UUID> team2 = new ArrayList<>();
     public static Team team1Board = board.registerNewTeam(message("team1"));
     public static Team team2Board = board.registerNewTeam(message("team2"));
-    static File FightsConfigFile;
-    static FileConfiguration FightsConfig;
-    static List<Player> temporary = new ArrayList<>();
-    static int duration;
-    static boolean cancelled = false;
-    private static int fightCount = config.getInt("fight-count");
+    public static File FightsConfigFile;
+    public static FileConfiguration FightsConfig;
+    public static List<Player> temporary = new ArrayList<>();
+    public static int duration;
+    public static boolean cancelled = false;
+    public static int fightCount = config.getInt("fight-count");
     private final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
     private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
@@ -74,9 +73,13 @@ public class Fight implements CommandExecutor, TabCompleter {
             }
             team1.clear();
             team2.clear();
+            team1String.clear();
+            team2String.clear();
             return true;
         } else if (args.length > 1 && args.length % 2 == 0 && distinctElements.stream().distinct().count() == args.length) {
             if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
+                team1String.clear();
+                team2String.clear();
                 cancelled = false;
                 team1Board.setPrefix(message("team1-prefix"));
                 team2Board.setPrefix(message("team2-prefix"));
@@ -211,31 +214,6 @@ public class Fight implements CommandExecutor, TabCompleter {
         FightsConfigFile = new File(getPlugin().getDataFolder(), "fights/fight" + i + ".yml");
         FightsConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(FightsConfigFile);
-    }
-
-    public void sqlFights() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            String host = config.getString("mysql.url");
-            String username = config.getString("mysql.username");
-            String password = config.getString("mysql.password");
-            String url = String.format("jdbc:mysql://%s", host);
-            Connection connection = DriverManager.getConnection(url, username, password);
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("CREATE DATABASE IF NOT EXISTS ManualTournaments");
-            try (PreparedStatement useDatabaseStatement = connection.prepareStatement("USE ManualTournaments")) {
-                useDatabaseStatement.execute();
-            }
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS ManualTournaments.Fights (team1 TEXT)");
-            String sql = "INSERT INTO Fights VALUES (?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, teamList(team1, team1String));
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-            connection.close();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
     }
 
     private void Kit(Player p) {

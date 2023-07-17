@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments;
+package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
 import org.bukkit.command.Command;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.utils.Shared.*;
+import static net.flex.ManualTournaments.utils.SharedMethods.*;
 
 public class Arena implements CommandExecutor, TabCompleter {
     private static final FileConfiguration config = getPlugin().getConfig();

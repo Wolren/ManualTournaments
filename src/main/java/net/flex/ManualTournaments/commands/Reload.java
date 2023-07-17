@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils;
+package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
 import org.bukkit.command.Command;

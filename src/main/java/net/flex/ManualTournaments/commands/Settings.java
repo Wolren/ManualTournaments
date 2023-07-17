@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments;
+package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
 import org.bukkit.command.Command;
@@ -15,9 +15,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.*;
+import static net.flex.ManualTournaments.utils.SharedMethods.*;
 
-public final class Settings implements TabCompleter, CommandExecutor {
+public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
     Player player = null;
 

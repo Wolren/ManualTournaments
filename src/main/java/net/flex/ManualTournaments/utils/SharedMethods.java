@@ -1,6 +1,6 @@
 package net.flex.ManualTournaments.utils;
 
-import net.flex.ManualTournaments.Fight;
+import net.flex.ManualTournaments.commands.Fight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 
-public final class Shared {
+public final class SharedMethods {
     public static String message(String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }

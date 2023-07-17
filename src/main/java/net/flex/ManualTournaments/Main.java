@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments;
 
+import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
-import net.flex.ManualTournaments.utils.Reload;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,7 +15,8 @@ import java.util.Objects;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
-    List<String> kitNames, arenaNames;
+    public List<String> kitNames;
+    public List<String> arenaNames;
     public File KitsConfigfile;
     public File ArenaConfigFile;
     public File customConfigFile;

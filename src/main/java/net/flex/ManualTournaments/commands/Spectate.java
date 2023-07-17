@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments;
+package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.*;
+import static net.flex.ManualTournaments.utils.SharedMethods.*;
 
 @SuppressWarnings("deprecation")
 public class Spectate implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
     private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
-    static List<Player> spectators = new ArrayList<>();
+    public static List<Player> spectators = new ArrayList<>();
     GameMode gameMode = Bukkit.getServer().getDefaultGameMode();
     Player player = null;
 

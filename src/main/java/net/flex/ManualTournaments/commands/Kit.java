@@ -1,6 +1,7 @@
-package net.flex.ManualTournaments;
+package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.*;
+import static net.flex.ManualTournaments.utils.SharedMethods.*;
 
 @SuppressWarnings("deprecation")
 public class Kit implements TabCompleter, CommandExecutor {

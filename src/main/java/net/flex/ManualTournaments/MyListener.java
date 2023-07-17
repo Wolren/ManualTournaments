@@ -1,6 +1,8 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.commands.Fight;
+import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,14 +22,16 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
-import static net.flex.ManualTournaments.Fight.cancelled;
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.Shared.*;
+import static net.flex.ManualTournaments.commands.Fight.*;
+import static net.flex.ManualTournaments.utils.SharedMethods.*;
+import static net.flex.ManualTournaments.utils.SqlMethods.durationUpdate;
 
 
-final class MyListener implements Listener {
+public final class MyListener implements Listener {
     static FileConfiguration config = getPlugin().getConfig();
-    static int stopper;
+    Collection<String> winners = new ArrayList<>();
+    public static int stopper;
 
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
@@ -57,7 +61,8 @@ final class MyListener implements Listener {
     private void endCounter() {
         if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
             Fight.FightsConfig.load(Fight.FightsConfigFile);
-            Fight.FightsConfig.set("net.flex.ManualTournaments.Fight-duration", Fight.duration - 3);
+            Fight.FightsConfig.set("Fight-duration", Fight.duration - 3);
+            durationUpdate(fightCount, duration - 3);
             stopper = 1;
             Fight.FightsConfig.save(Fight.FightsConfigFile);
         }
@@ -69,7 +74,6 @@ final class MyListener implements Listener {
             team1.remove(player.getUniqueId());
             if (team1.isEmpty() && !team2.isEmpty()) {
                 if (config.getBoolean("create-fights-folder")) {
-                    Collection<String> winners = new ArrayList<>();
                     Fight.FightsConfig.load(Fight.FightsConfigFile);
                     Fight.FightsConfig.set("Fight-winners", teamList(team2, winners));
                     Fight.FightsConfig.save(Fight.FightsConfigFile);
