@@ -2,10 +2,7 @@ package net.flex.ManualTournaments.utils;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.commands.Fight.*;
@@ -15,27 +12,38 @@ public class SqlMethods {
     private static final FileConfiguration config = getPlugin().getConfig();
     private static final String currentArena = config.getString("current-arena");
     private static final String currentKit = config.getString("current-kit");
+
     public static void sqlFights() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            String host = config.getString("mysql.url");
-            String username = config.getString("mysql.username");
-            String password = config.getString("mysql.password");
-            String url = String.format("jdbc:mysql://%s", host);
-            Connection connection = DriverManager.getConnection(url, username, password);
+            Connection connection = load();
             Statement statement = connection.createStatement();
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS ManualTournaments");
-            try (PreparedStatement useDatabaseStatement = connection.prepareStatement("USE ManualTournaments")) {
-                useDatabaseStatement.execute();
-            }
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS ManualTournaments.Fights (id INT AUTO_INCREMENT, team1 TEXT, team2 TEXT, arena TEXT, kit TEXT, duration INT, PRIMARY KEY(id))");
-            String sql = "INSERT INTO Fights(team1, team2, arena, kit, duration) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS ManualTournaments.Fights" +
+                    " (id INT AUTO_INCREMENT," +
+                    " team1 TEXT, team2 TEXT," +
+                    " arena TEXT, kit TEXT," +
+                    " duration INT," +
+                    " damageTeam1 DOUBLE(9, 2), damageTeam2 DOUBLE(9, 2)," +
+                    " regeneratedTeam1 DOUBLE(9, 2), regeneratedTeam2 DOUBLE(9, 2)," +
+                    " winners TEXT, PRIMARY KEY(id))");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO Fights(" +
+                    "team1, team2," +
+                    " arena, kit," +
+                    " duration," +
+                    " damageTeam1, damageTeam2," +
+                    " regeneratedTeam1, regeneratedTeam2," +
+                    " winners)" +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             preparedStatement.setString(1, teamList(team1, team1String));
             preparedStatement.setString(2, teamList(team2, team2String));
             preparedStatement.setString(3, currentArena);
             preparedStatement.setString(4, currentKit);
             preparedStatement.setInt(5, duration);
+            preparedStatement.setDouble(6, 0);
+            preparedStatement.setDouble(7, 0);
+            preparedStatement.setDouble(8, 0);
+            preparedStatement.setDouble(9, 0);
+            preparedStatement.setString(10, "");
             preparedStatement.executeUpdate();
             preparedStatement.close();
             connection.close();
@@ -44,30 +52,108 @@ public class SqlMethods {
         }
     }
 
-    public static void durationUpdate(int id, int newDuration) {
+    public static void durationUpdate(int newDuration) {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            String host = config.getString("mysql.url");
-            String username = config.getString("mysql.username");
-            String password = config.getString("mysql.password");
-            String url = String.format("jdbc:mysql://%s", host);
-            Connection connection = DriverManager.getConnection(url, username, password);
-            try (PreparedStatement useDatabaseStatement = connection.prepareStatement("USE ManualTournaments")) {
-                useDatabaseStatement.execute();
+            Connection connection = load();
+            Statement maxIdStatement = connection.createStatement();
+            ResultSet resultSet = maxIdStatement.executeQuery("SELECT MAX(id) AS max_id FROM Fights");
+            if (resultSet.next()) {
+                int maxId = resultSet.getInt("max_id");
+                PreparedStatement updateStatement = connection.prepareStatement("UPDATE Fights SET duration = ? WHERE id = ?");
+                updateStatement.setInt(1, newDuration);
+                updateStatement.setInt(2, maxId);
+                updateStatement.executeUpdate();
+                updateStatement.close();
             }
-            String sql = "UPDATE Fights SET duration = ? WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, newDuration);
-            preparedStatement.setInt(2, id);
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
+            resultSet.close();
+            maxIdStatement.close();
             connection.close();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
 
-    public void winnersUpdate() {
+    public static void damageUpdate(double newDamageTeam1, double newDamageTeam2) {
+        try {
+            Connection connection = load();
+            Statement maxIdStatement = connection.createStatement();
+            ResultSet resultSet = maxIdStatement.executeQuery("SELECT MAX(id) AS max_id FROM Fights");
+            if (resultSet.next()) {
+                int maxId = resultSet.getInt("max_id");
+                PreparedStatement updateStatement = connection.prepareStatement("UPDATE Fights SET" +
+                        " damageTeam1 = ?," +
+                        " damageTeam2 = ?" +
+                        " WHERE id = ?");
+                updateStatement.setDouble(1, newDamageTeam1);
+                updateStatement.setDouble(2, newDamageTeam2);
+                updateStatement.setInt(3, maxId);
+                updateStatement.executeUpdate();
+                updateStatement.close();
+            }
+            resultSet.close();
+            maxIdStatement.close();
+            connection.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
 
+    public static void regeneratedUpdate(double newRegeneratedTeam1, double newRegeneratedTeam2) {
+        try {
+            Connection connection = load();
+            Statement maxIdStatement = connection.createStatement();
+            ResultSet resultSet = maxIdStatement.executeQuery("SELECT MAX(id) AS max_id FROM Fights");
+            if (resultSet.next()) {
+                int maxId = resultSet.getInt("max_id");
+                PreparedStatement updateStatement = connection.prepareStatement("UPDATE Fights SET" +
+                        " regeneratedTeam1 = ?," +
+                        " regeneratedTeam2 = ?" +
+                        " WHERE id = ?");
+                updateStatement.setDouble(1, newRegeneratedTeam1);
+                updateStatement.setDouble(2, newRegeneratedTeam2);
+                updateStatement.setInt(3, maxId);
+                updateStatement.executeUpdate();
+                updateStatement.close();
+            }
+            resultSet.close();
+            maxIdStatement.close();
+            connection.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public static void winnersUpdate(String newWinners) {
+        try {
+            Connection connection = load();
+            Statement maxIdStatement = connection.createStatement();
+            ResultSet resultSet = maxIdStatement.executeQuery("SELECT MAX(id) AS max_id FROM Fights");
+            if (resultSet.next()) {
+                int maxId = resultSet.getInt("max_id");
+                PreparedStatement updateStatement = connection.prepareStatement("UPDATE Fights SET winners = ? WHERE id = ?");
+                updateStatement.setString(1, newWinners);
+                updateStatement.setInt(2, maxId);
+                updateStatement.executeUpdate();
+                updateStatement.close();
+            }
+            resultSet.close();
+            maxIdStatement.close();
+            connection.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    private static Connection load() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String host = config.getString("mysql.url");
+        String username = config.getString("mysql.username");
+        String password = config.getString("mysql.password");
+        String url = String.format("jdbc:mysql://%s", host);
+        Connection connection = DriverManager.getConnection(url, username, password);
+        try (PreparedStatement useDatabaseStatement = connection.prepareStatement("USE ManualTournaments")) {
+            useDatabaseStatement.execute();
+        }
+        return connection;
     }
 }
