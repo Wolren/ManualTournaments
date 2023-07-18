@@ -35,7 +35,7 @@ public class Arena implements CommandExecutor, TabCompleter {
             switch (args[0].toUpperCase()) {
                 case "CREATE":
                     if (!arenaExists) {
-                        Objects.requireNonNull(ArenaConfig.getConfigurationSection("Arenas")).createSection(arenaName);
+                        ArenaConfig.set("Arenas" + arenaName, null);
                         arenas.add(arenaName);
                         if (config.getString("current-arena") == null) config.set("current-arena", arenaName);
                         send(player, "arena-create");

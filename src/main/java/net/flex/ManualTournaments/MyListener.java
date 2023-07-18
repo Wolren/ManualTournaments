@@ -2,7 +2,6 @@ package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.commands.Fight;
-import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,7 +12,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.commands.Fight.*;
+import static net.flex.ManualTournaments.commands.Spectate.spectators;
 import static net.flex.ManualTournaments.utils.SharedMethods.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
@@ -150,6 +152,10 @@ public final class MyListener implements Listener {
             if (from.getX() != Objects.requireNonNull(event.getTo()).getX() || from.getY() != event.getTo().getY())
                 player.teleport(from);
         }
+        if (spectators.contains(player)) {
+            player.setAllowFlight(true);
+            player.setFlying(true);
+        }
     }
 
     @EventHandler
@@ -164,7 +170,14 @@ public final class MyListener implements Listener {
         if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
             if (!config.getBoolean("drop-items")) event.setCancelled(true);
         }
-        if (Spectate.spectators.contains(player)) event.setCancelled(true);
+        if (spectators.contains(player)) event.setCancelled(true);
+    }
+
+    @EventHandler
+    private void onPickup(EntityPickupItemEvent event){
+        if (!(event.getEntity() instanceof Player)) return;
+        Player player = (Player) event.getEntity();
+        if (spectators.contains(player)) event.setCancelled(true);
     }
 
     @EventHandler
@@ -173,7 +186,13 @@ public final class MyListener implements Listener {
         if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
             if (!config.getBoolean("break-blocks")) event.setCancelled(true);
         }
-        if (Spectate.spectators.contains(player)) event.setCancelled(true);
+        if (spectators.contains(player)) event.setCancelled(true);
+    }
+
+    @EventHandler
+    private void onPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if (spectators.contains(player)) event.setCancelled(true);
     }
 
     @EventHandler
@@ -183,9 +202,15 @@ public final class MyListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if (spectators.contains(player)) event.setCancelled(true);
+    }
+
+    @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player) || Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId()) || Spectate.spectators.contains(player)) {
+        if (Fight.temporary.contains(player) || Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId()) || spectators.contains(player)) {
             if (config.getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 player.setHealth(0);
@@ -204,7 +229,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        if (Spectate.spectators.contains(player)) {
+        if (spectators.contains(player)) {
             if (event.getMessage().startsWith("/spec") || event.getMessage().contains("spectate") || event.getMessage().startsWith("/mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage())) {
                 event.setCancelled(false);
             } else {
@@ -218,8 +243,8 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onWorldChange(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
-        if (Spectate.spectators.contains(player)) {
-            Spectate.spectators.remove(player);
+        if (spectators.contains(player)) {
+            spectators.remove(player);
             player.setGameMode(Bukkit.getServer().getDefaultGameMode());
             for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
         }
@@ -233,12 +258,7 @@ public final class MyListener implements Listener {
             if (Fight.team1.contains(player.getUniqueId())) damageTeam1 += event.getFinalDamage();
             else if (Fight.team2.contains(player.getUniqueId())) damageTeam2 += event.getFinalDamage();
         }
-        if (Spectate.spectators.contains(player)) {
-            if (player.getHealth() - event.getFinalDamage() > 0) return;
-            event.setCancelled(true);
-            teleportSpawn(player);
-            Spectate.spectators.remove(player);
-        }
+        if (spectators.contains(player)) event.setCancelled(true);
     }
 
     @EventHandler

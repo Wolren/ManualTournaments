@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedMethods.*;
@@ -29,7 +28,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
     Player player = null;
 
     @SneakyThrows
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         loadConfigs();
@@ -37,6 +36,12 @@ public class Spectate implements TabCompleter, CommandExecutor {
             if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
                 String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
                 if (ArenaConfig.isSet(path)) {
+                    spectators.add(player);
+                    for (Player p : Bukkit.getOnlinePlayers()) p.hidePlayer(player);
+                    player.setAllowFlight(true);
+                    player.setFlying(true);
+                    player.setCollidable(false);
+                    player.setGameMode(GameMode.SURVIVAL);
                     player.teleport(location(path, ArenaConfig));
                     send(player, "spectator-started-spectating");
                 } else {
@@ -47,25 +52,12 @@ public class Spectate implements TabCompleter, CommandExecutor {
                 send(player, "current-arena-not-set");
                 return true;
             }
-            if (!config.getBoolean("spectator-visibility")) {
-                for (Player other : Bukkit.getServer().getOnlinePlayers()) other.hidePlayer(player);
-            } else {
-                for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
-            }
-            if (Objects.equals(config.getString("spectator-gamemode"), "spectator"))
-                player.setGameMode(GameMode.SPECTATOR);
-            else if (Objects.equals(config.getString("spectator-gamemode"), "adventure"))
-                player.setGameMode(GameMode.ADVENTURE);
-            else if (Objects.equals(config.getString("spectator-gamemode"), "survival"))
-                player.setGameMode(GameMode.SURVIVAL);
-            else if (Objects.equals(config.getString("spectator-gamemode"), "creative"))
-                player.setGameMode(GameMode.CREATIVE);
-            else send(player, "spectator-wrong-arguments");
-            spectators.add(player);
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {
                 if (config.getBoolean("kill-on-fight-end")) {
                     player.setGameMode(gameMode);
+                    player.setAllowFlight(false);
+                    player.setFlying(false);
                     player.damage(10000);
                     send(player, "spectator-stopped-spectating");
                 } else {

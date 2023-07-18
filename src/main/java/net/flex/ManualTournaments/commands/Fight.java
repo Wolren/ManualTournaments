@@ -17,6 +17,8 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -83,10 +85,6 @@ public class Fight implements CommandExecutor, TabCompleter {
                 cancelled = false;
                 team1Board.setPrefix(message("team1-prefix"));
                 team2Board.setPrefix(message("team2-prefix"));
-                if (Main.version >= 14) {
-                    team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                    team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                }
                 if (!config.getBoolean("friendly-fire")) {
                     team1Board.setAllowFriendlyFire(false);
                     team2Board.setAllowFriendlyFire(false);
@@ -102,16 +100,25 @@ public class Fight implements CommandExecutor, TabCompleter {
                             if (getPlugin().kitNames.contains(currentKit)) {
                                 String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
                                 String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
+                                fighter.setGameMode(GameMode.SURVIVAL);
+                                if (Main.version >= 14) fighter.setCollidable(false);
+                                else {
+                                    try {
+                                        Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
+                                        Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
+                                        setCollidesWithEntities.invoke(player.spigot(), false);
+                                    } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+                                        throw new RuntimeException(exception);
+                                    }
+                                }
                                 if (i < (args.length / 2)) {
                                     team1Board.addEntry(fighter.getDisplayName());
                                     team1.add(fighter.getUniqueId());
                                     fighter.teleport(location(pathPos1, ArenaConfig));
-                                    fighter.setGameMode(GameMode.SURVIVAL);
                                 } else if (i >= (args.length / 2)) {
                                     team2Board.addEntry(fighter.getDisplayName());
                                     team2.add(fighter.getUniqueId());
                                     fighter.teleport(location(pathPos2, ArenaConfig));
-                                    fighter.setGameMode(GameMode.SURVIVAL);
                                 }
                                 Kit(fighter);
                             } else {
