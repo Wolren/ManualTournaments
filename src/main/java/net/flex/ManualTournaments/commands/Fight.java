@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedMethods.*;
 
+
 public class Fight implements CommandExecutor, TabCompleter {
     public static List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>(), temporary = new ArrayList<>();
     public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
@@ -33,41 +34,57 @@ public class Fight implements CommandExecutor, TabCompleter {
     public static final Collection<String> team1String = new ArrayList<>(), team2String = new ArrayList<>();
     public static File FightsConfigFile;
     public static FileConfiguration FightsConfig;
-    public static int duration, fightCount = config.getInt("fight-count") ;
+    public static int duration, fightCount = config.getInt("fight-count");
     public static boolean cancelled = false;
-    private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
+    private FightType currentFight;
+    private final TeamFight.FightFactory fightFactory = new TeamFight.FightFactory();
+    private final Collection<Player> distinctFighters = new java.util.ArrayList<>(Collections.emptyList());
+    private final List<Player> fighters = new ArrayList<>();
 
     @SneakyThrows
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         getKitsConfig().load(getPlugin().KitsConfigfile);
         getCustomConfig().load(getPlugin().customConfigFile);
         getArenaConfig().load(getPlugin().ArenaConfigFile);
-        distinctElements.clear();
-        for (String arg : args) {
-            Player fighter = Bukkit.getPlayer(arg);
-            if (fighter != null) distinctElements.add(fighter.toString());
+        distinctFighters.clear();
+        fighters.clear();
+        for (int i = 1; i < args.length; i++) {
+            Player fighter = Bukkit.getPlayer(args[i]);
+            if (fighter != null) {
+                distinctFighters.add(fighter);
+                fighters.add(fighter);
+            }
         }
         if (args.length == 1 && args[0].equals("stop")) {
-            player.setWalkSpeed(0.2F);
-            removeEntries();
-            cancelled = true;
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                if (team1.contains(online.getUniqueId()) || team2.contains(online.getUniqueId())) {
-                    online.setHealth(0);
-                } else if (!config.getBoolean("kill-on-fight-end")) {
-                    String path = "fight-end-spawn.";
-                    clear(online);
-                    online.teleport(location(path, config));
-                }
-            }
-            team1.clear();
-            team2.clear();
-            team1String.clear();
-            team2String.clear();
-            return true;
-        } else if (args.length > 1 && args.length % 2 == 0 && distinctElements.stream().distinct().count() == args.length) {
+            return currentFight.stopFight();
+        } else if (args.length > 2 && distinctFighters.stream().distinct().count() == args.length - 1) {
+            currentFight = fightFactory.createFight(args[0]);
+            currentFight.startFight(fighters);
+        }
+        return false;
+    }
+
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+        List<String> list = new ArrayList<>();
+        if (args.length == 1) {
+            list.add("stop");
+            for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
+        } else for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
+        return list;
+    }
+
+    public interface FightType {
+        void startFight(List<Player> players);
+
+        boolean stopFight();
+    }
+
+    public static class TeamFight implements FightType {
+        @SneakyThrows
+        public void startFight(List<Player> fighters) {
             if (team1.isEmpty() && team2.isEmpty()) {
                 team1String.clear();
                 team2String.clear();
@@ -86,8 +103,8 @@ public class Fight implements CommandExecutor, TabCompleter {
                     team2Board.setAllowFriendlyFire(true);
                 }
                 for (Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
-                for (int i = 0; i < args.length; i++) {
-                    Player fighter = Bukkit.getPlayer(args[i]);
+                for (int i = 0; i < fighters.toArray().length; i++) {
+                    Player fighter = fighters.get(i);
                     if (fighter != null) {
                         if (getPlugin().arenaNames.contains(currentArena)) {
                             if (getPlugin().kitNames.contains(currentKit)) {
@@ -99,15 +116,16 @@ public class Fight implements CommandExecutor, TabCompleter {
                                         Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
                                         Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
                                         setCollidesWithEntities.invoke(fighter.spigot(), false);
-                                    } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+                                    } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                                             InvocationTargetException exception) {
                                         throw new RuntimeException(exception);
                                     }
                                 }
-                                if (i < (args.length / 2)) {
+                                if (i < (fighters.toArray().length / 2)) {
                                     team1Board.addEntry(fighter.getDisplayName());
                                     team1.add(fighter.getUniqueId());
                                     fighter.teleport(location(pathPos1, getArenaConfig()));
-                                } else if (i >= (args.length / 2)) {
+                                } else if (i >= (fighters.toArray().length / 2)) {
                                     team2Board.addEntry(fighter.getDisplayName());
                                     team2.add(fighter.getUniqueId());
                                     fighter.teleport(location(pathPos2, getArenaConfig()));
@@ -115,11 +133,11 @@ public class Fight implements CommandExecutor, TabCompleter {
                                 Kit(fighter);
                             } else {
                                 send(player, "current-kit-not-set");
-                                return true;
+                                return;
                             }
                         } else {
                             send(player, "current-arena-not-set");
-                            return true;
+                            return;
                         }
                         if (config.getBoolean("freeze-on-start")) {
                             (new BukkitRunnable() {
@@ -155,7 +173,7 @@ public class Fight implements CommandExecutor, TabCompleter {
                         }
                     } else {
                         send(player, "fighter-error");
-                        return false;
+                        return;
                     }
                 }
                 if (config.getBoolean("count-fights")) config.set("fight-count", ++fightCount);
@@ -198,40 +216,56 @@ public class Fight implements CommandExecutor, TabCompleter {
                     }).runTaskTimer(getPlugin(), 0L, 20L);
                 } else if (config.getBoolean("fight-good-luck-enabled"))
                     Bukkit.broadcastMessage(message("fight-good-luck"));
-            } else send(player, "fight-concurrent-arenas");
-        } else {
-            send(player, "fight-wrong-arguments");
-            return false;
-        }
-        if (config.getBoolean("create-fights-folder")) FightsConfig.save(FightsConfigFile);
-        config.save(getPlugin().customConfigFile);
-        return true;
-    }
-
-    private void createFightsFolder(int i) {
-        File fightsConfigFolder = new File(getPlugin().getDataFolder(), "fights");
-        if (!fightsConfigFolder.exists()) {
-            boolean create = fightsConfigFolder.mkdir();
-            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create fights directory");
+            } else send(player, "fight-wrong-arguments");
+            if (config.getBoolean("create-fights-folder")) FightsConfig.save(FightsConfigFile);
+            config.save(getPlugin().customConfigFile);
         }
 
-        FightsConfigFile = new File(getPlugin().getDataFolder(), "fights/fight" + i + ".yml");
-        FightsConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(FightsConfigFile);
-    }
-
-    private void Kit(Player p) {
-        if (config.getString("current-kit") != null) {
-            Kit.setKit(p, config.getString("current-kit"));
+        public boolean stopFight() {
+            player.setWalkSpeed(0.2F);
+            removeEntries();
+            cancelled = true;
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (team1.contains(online.getUniqueId()) || team2.contains(online.getUniqueId())) {
+                    online.setHealth(0);
+                } else if (!config.getBoolean("kill-on-fight-end")) {
+                    String path = "fight-end-spawn.";
+                    clear(online);
+                    online.teleport(location(path, config));
+                }
+            }
+            team1.clear();
+            team2.clear();
+            team1String.clear();
+            team2String.clear();
+            return true;
         }
-    }
 
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
-        List<String> list = new ArrayList<>();
-        if (args.length == 1) {
-            list.add("stop");
-            for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
-        } else for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
-        return list;
+        public static class FightFactory {
+            public FightType createFight(String type) {
+                if (type.equalsIgnoreCase("team")) {
+                    return new TeamFight();
+                }
+                return null;
+            }
+        }
+
+        private static void createFightsFolder(int i) {
+            File fightsConfigFolder = new File(getPlugin().getDataFolder(), "fights");
+            if (!fightsConfigFolder.exists()) {
+                boolean create = fightsConfigFolder.mkdir();
+                if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create fights directory");
+            }
+
+            FightsConfigFile = new File(getPlugin().getDataFolder(), "fights/fight" + i + ".yml");
+            FightsConfig = new YamlConfiguration();
+            YamlConfiguration.loadConfiguration(FightsConfigFile);
+        }
+
+        private static void Kit(Player p) {
+            if (config.getString("current-kit") != null) {
+                Kit.setKit(p, config.getString("current-kit"));
+            }
+        }
     }
 }
