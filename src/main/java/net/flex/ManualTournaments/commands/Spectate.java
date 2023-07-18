@@ -4,12 +4,15 @@ import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
@@ -75,17 +78,29 @@ public class Spectate implements TabCompleter, CommandExecutor {
                     other.hidePlayer(player);
                 }
             }
+            player.getInventory().clear();
+            player.updateInventory();
+            player.setHealth(20.0D);
+            player.setFoodLevel(20);
+            player.setSaturation(0);
+            if (Main.version >= 22) player.setAbsorptionAmount(0);
+            player.setFireTicks(0);
+            for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
+            ItemStack[] inventory = player.getInventory().getContents();
+            inventory[8] = new ItemStack(Material.RED_DYE);
+            player.getInventory().setContents(inventory);
+            player.updateInventory();
             spectators.add(player.getUniqueId());
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {
                 player.setGameMode(gameMode);
                 player.setAllowFlight(false);
                 player.setFlying(false);
-                player.setHealth(0);
+                player.getInventory().clear();
                 for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
                 send(player, "spectator-stopped-spectating");
                 spectatorsBoard.removeEntry(player.getName());
-                if (Main.version >= 14)player.setCollidable(true);
+                if (Main.version >= 14) player.setCollidable(true);
                 spectators.remove(player.getUniqueId());
             } else send(player, "not-allowed");
         } else return false;
