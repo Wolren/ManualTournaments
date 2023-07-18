@@ -32,9 +32,6 @@ import static net.flex.ManualTournaments.utils.SqlMethods.*;
 public final class MyListener implements Listener {
     static FileConfiguration config = getPlugin().getConfig();
     public static Collection<String> winners = new ArrayList<>();
-    private final Map<UUID, Long> flyEnable = new HashMap<>();
-    private final Map<UUID, Long> flyDisable = new HashMap<>();
-    private static final long DOUBLE_CLICK_TIME_THRESHOLD = 500;
     public static double regeneratedTeam1 = 0;
     public static double regeneratedTeam2 = 0;
     public static double damageTeam1 = 0;
@@ -62,7 +59,6 @@ public final class MyListener implements Listener {
             teamRemover(player, Fight.team1, Fight.team2);
             teamRemover(player, Fight.team2, Fight.team1);
         }
-        if (config.getBoolean("create-fights-folder")) endCounter();
     }
 
     @SneakyThrows
@@ -122,6 +118,7 @@ public final class MyListener implements Listener {
                         if (i == 0) {
                             String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
                             Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
+                            if (config.getBoolean("create-fights-folder")) endCounter();
                             if (config.getBoolean("kill-on-fight-end")) {
                                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                                     if (team2.contains(p.getUniqueId())) p.setHealth(0);
