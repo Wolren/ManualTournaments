@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -9,12 +10,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedMethods.*;
@@ -23,7 +26,9 @@ import static net.flex.ManualTournaments.utils.SharedMethods.*;
 public class Spectate implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
     private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
-    public static List<Player> spectators = new ArrayList<>();
+    public static List<UUID> spectators = new ArrayList<>();
+    private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
+    public static Team spectatorsBoard = board.registerNewTeam("spectators");
     GameMode gameMode = Bukkit.getServer().getDefaultGameMode();
     Player player = null;
 
@@ -36,12 +41,20 @@ public class Spectate implements TabCompleter, CommandExecutor {
             if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
                 String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
                 if (ArenaConfig.isSet(path)) {
-                    spectators.add(player);
-                    for (Player p : Bukkit.getOnlinePlayers()) p.hidePlayer(player);
-                    player.setAllowFlight(true);
-                    player.setFlying(true);
-                    player.setCollidable(false);
-                    player.setGameMode(GameMode.SURVIVAL);
+                    if (Main.version >= 14) {
+                        spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                        player.setCollidable(false);
+                    }
+                    else {
+                        try {
+                            Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
+                            Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
+                            setCollidesWithEntities.invoke(player.spigot(), false);
+                        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                                 InvocationTargetException exception) {
+                            throw new RuntimeException(exception);
+                        }
+                    }
                     player.teleport(location(path, ArenaConfig));
                     send(player, "spectator-started-spectating");
                 } else {
@@ -52,21 +65,28 @@ public class Spectate implements TabCompleter, CommandExecutor {
                 send(player, "current-arena-not-set");
                 return true;
             }
+            player.setGameMode(GameMode.ADVENTURE);
+            player.setAllowFlight(true);
+            player.setFoodLevel(20);
+            player.setHealth(20.0D);
+            spectatorsBoard.addEntry(player.getName());
+            if (!config.getBoolean("spectator-visibility")) {
+                for (Player other : Bukkit.getServer().getOnlinePlayers()) {
+                    other.hidePlayer(player);
+                }
+            }
+            spectators.add(player.getUniqueId());
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {
-                if (config.getBoolean("kill-on-fight-end")) {
-                    player.setGameMode(gameMode);
-                    player.setAllowFlight(false);
-                    player.setFlying(false);
-                    player.damage(10000);
-                    send(player, "spectator-stopped-spectating");
-                } else {
-                    player.setGameMode(gameMode);
-                    for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
-                    player.teleport(location("fight-end-spawn.", config));
-                    send(player, "spectator-stopped-spectating");
-                }
-                spectators.remove(player);
+                player.setGameMode(gameMode);
+                player.setAllowFlight(false);
+                player.setFlying(false);
+                player.setHealth(0);
+                for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
+                send(player, "spectator-stopped-spectating");
+                spectatorsBoard.removeEntry(player.getName());
+                if (Main.version >= 14)player.setCollidable(true);
+                spectators.remove(player.getUniqueId());
             } else send(player, "not-allowed");
         } else return false;
         return true;

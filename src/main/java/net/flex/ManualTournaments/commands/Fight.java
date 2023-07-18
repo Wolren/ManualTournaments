@@ -85,6 +85,10 @@ public class Fight implements CommandExecutor, TabCompleter {
                 cancelled = false;
                 team1Board.setPrefix(message("team1-prefix"));
                 team2Board.setPrefix(message("team2-prefix"));
+                if (Main.version >= 14) {
+                    team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                    team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                }
                 if (!config.getBoolean("friendly-fire")) {
                     team1Board.setAllowFriendlyFire(false);
                     team2Board.setAllowFriendlyFire(false);
@@ -101,12 +105,11 @@ public class Fight implements CommandExecutor, TabCompleter {
                                 String pathPos1 = "Arenas." + currentArena + "." + "pos1" + ".";
                                 String pathPos2 = "Arenas." + currentArena + "." + "pos2" + ".";
                                 fighter.setGameMode(GameMode.SURVIVAL);
-                                if (Main.version >= 14) fighter.setCollidable(false);
-                                else {
+                                if (Main.version <= 13) {
                                     try {
                                         Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
                                         Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
-                                        setCollidesWithEntities.invoke(player.spigot(), false);
+                                        setCollidesWithEntities.invoke(fighter.spigot(), false);
                                     } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
                                         throw new RuntimeException(exception);
                                     }

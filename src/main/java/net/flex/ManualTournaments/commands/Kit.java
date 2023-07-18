@@ -183,7 +183,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         player.setHealth(20.0D);
         player.setFoodLevel(20);
         player.setSaturation(0);
-        player.setAbsorptionAmount(0);
+        if (Main.version >= 22) player.setAbsorptionAmount(0);
         player.setFireTicks(0);
         for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
         ConfigurationSection itemsSection = KitsConfig.getConfigurationSection(path + "items");

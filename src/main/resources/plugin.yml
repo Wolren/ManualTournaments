@@ -1,6 +1,7 @@
 main: net.flex.ManualTournaments.Main
 name: ManualTournaments
 version: 1.1.0
+depend: [ ProtocolLib ]
 description: Plugin you can use to make manual tournaments
 api-version: 1.13
 load: POSTWORLD
