@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.utils;
 
+import lombok.SneakyThrows;
 import net.flex.ManualTournaments.commands.Fight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -13,9 +14,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 
 public final class SharedMethods {
+
+    public static final FileConfiguration config = getPlugin().getConfig();
+    public static Player player = null;
+    public static final String currentArena = config.getString("current-arena");
+    public static final String currentKit = config.getString("current-kit");
+
     public static String message(String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
     }
@@ -32,6 +40,11 @@ public final class SharedMethods {
         } else return playerOptional.get();
     }
 
+    public static void sendNotExists(Player player) {
+        player.sendMessage(message("arena-not-exists"));
+    }
+
+    @SneakyThrows
     public static void getLocation(String pathing, Player player, ConfigurationSection cfg) {
         double x = player.getLocation().getX();
         double y = player.getLocation().getY();
@@ -45,6 +58,7 @@ public final class SharedMethods {
         cfg.set(pathing + "yaw", yaw);
         cfg.set(pathing + "pitch", pitch);
         cfg.set(pathing + "world", world);
+        getArenaConfig().save(getPlugin().ArenaConfigFile);
     }
 
     public static Location location(String path, FileConfiguration cfg) {

@@ -15,24 +15,20 @@ import java.util.Objects;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
-    public List<String> kitNames;
-    public List<String> arenaNames;
-    public File KitsConfigfile;
-    public File ArenaConfigFile;
-    public File customConfigFile;
-    FileConfiguration KitsConfig, ArenaConfig, customConfig;
-    public static int version = Main.formatNMSVersion(Main.getNMSVersion());
-
     public static Main getPlugin() {
         return getPlugin(Main.class);
     }
 
-    public FileConfiguration getKitsConfig() {
+    public static int version = Main.formatNMSVersion(Main.getNMSVersion());
+    public List<String> kitNames, arenaNames;
+    public File KitsConfigfile, ArenaConfigFile, customConfigFile;
+    static FileConfiguration KitsConfig, ArenaConfig, customConfig;
+    public static FileConfiguration getKitsConfig() {
         return KitsConfig;
     }
-
-    public FileConfiguration getArenaConfig() {
-        return ArenaConfig;
+    public static FileConfiguration getArenaConfig() { return ArenaConfig;}
+    public static FileConfiguration getCustomConfig() {
+        return customConfig;
     }
 
     public void onEnable() {

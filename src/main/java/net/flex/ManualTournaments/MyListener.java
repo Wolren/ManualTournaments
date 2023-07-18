@@ -144,7 +144,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player)) {
+        if (Fight.temporary.contains(player.getUniqueId())) {
             Location from = event.getFrom();
             if (from.getX() != Objects.requireNonNull(event.getTo()).getX() || from.getY() != event.getTo().getY())
                 player.teleport(from);
@@ -154,7 +154,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onJump(PlayerJumpEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player)) event.setCancelled(true);
+        if (Fight.temporary.contains(player.getUniqueId())) event.setCancelled(true);
     }
 
     @EventHandler
@@ -247,7 +247,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player) || Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId()) || spectators.contains(player.getUniqueId())) {
+        if (Fight.temporary.contains(player.getUniqueId()) || Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId()) || spectators.contains(player.getUniqueId())) {
             if (config.getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 player.setHealth(0);

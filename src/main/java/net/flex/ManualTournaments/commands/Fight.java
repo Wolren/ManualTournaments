@@ -3,6 +3,7 @@ package net.flex.ManualTournaments.commands;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.MyListener;
+import net.flex.ManualTournaments.utils.SqlMethods;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,46 +23,34 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedMethods.*;
-import static net.flex.ManualTournaments.utils.SqlMethods.sqlFights;
 
 public class Fight implements CommandExecutor, TabCompleter {
-    private static final FileConfiguration config = getPlugin().getConfig();
-    private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    public static final Collection<String> team1String = new ArrayList<>();
-    public static final Collection<String> team2String = new ArrayList<>();
-    private static final float WALK_SPEED_ZERO = 0.0F;
-    private static final float WALK_SPEED_NORMAL = 0.2F;
-    public static List<UUID> team1 = new ArrayList<>();
-    public static List<UUID> team2 = new ArrayList<>();
-    public static Team team1Board = board.registerNewTeam(message("team1"));
-    public static Team team2Board = board.registerNewTeam(message("team2"));
+    public static List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>(), temporary = new ArrayList<>();
+    public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
+    public static Team team1Board = board.registerNewTeam(message("team1")), team2Board = board.registerNewTeam(message("team2"));
+    public static final Collection<String> team1String = new ArrayList<>(), team2String = new ArrayList<>();
     public static File FightsConfigFile;
     public static FileConfiguration FightsConfig;
-    public static List<Player> temporary = new ArrayList<>();
-    public static int duration;
+    public static int duration, fightCount = config.getInt("fight-count") ;
     public static boolean cancelled = false;
-    public static int fightCount = config.getInt("fight-count");
-    private final FileConfiguration KitsConfig = getPlugin().getKitsConfig();
-    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     private final Collection<String> distinctElements = new java.util.ArrayList<>(Collections.emptyList());
-    private final String currentArena = config.getString("current-arena");
-    private final String currentKit = config.getString("current-kit");
-    Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        loadConfigs();
+        getKitsConfig().load(getPlugin().KitsConfigfile);
+        getCustomConfig().load(getPlugin().customConfigFile);
+        getArenaConfig().load(getPlugin().ArenaConfigFile);
         distinctElements.clear();
         for (String arg : args) {
             Player fighter = Bukkit.getPlayer(arg);
             if (fighter != null) distinctElements.add(fighter.toString());
         }
         if (args.length == 1 && args[0].equals("stop")) {
-            player.setWalkSpeed(WALK_SPEED_NORMAL);
+            player.setWalkSpeed(0.2F);
             removeEntries();
             cancelled = true;
             for (Player online : Bukkit.getOnlinePlayers()) {
@@ -79,7 +68,7 @@ public class Fight implements CommandExecutor, TabCompleter {
             team2String.clear();
             return true;
         } else if (args.length > 1 && args.length % 2 == 0 && distinctElements.stream().distinct().count() == args.length) {
-            if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
+            if (team1.isEmpty() && team2.isEmpty()) {
                 team1String.clear();
                 team2String.clear();
                 cancelled = false;
@@ -117,11 +106,11 @@ public class Fight implements CommandExecutor, TabCompleter {
                                 if (i < (args.length / 2)) {
                                     team1Board.addEntry(fighter.getDisplayName());
                                     team1.add(fighter.getUniqueId());
-                                    fighter.teleport(location(pathPos1, ArenaConfig));
+                                    fighter.teleport(location(pathPos1, getArenaConfig()));
                                 } else if (i >= (args.length / 2)) {
                                     team2Board.addEntry(fighter.getDisplayName());
                                     team2.add(fighter.getUniqueId());
-                                    fighter.teleport(location(pathPos2, ArenaConfig));
+                                    fighter.teleport(location(pathPos2, getArenaConfig()));
                                 }
                                 Kit(fighter);
                             } else {
@@ -137,11 +126,11 @@ public class Fight implements CommandExecutor, TabCompleter {
                                 int i = config.getInt("countdown-time");
 
                                 public void run() {
-                                    temporary.add(fighter);
-                                    player.setWalkSpeed(WALK_SPEED_ZERO);
+                                    temporary.add(fighter.getUniqueId());
+                                    player.setWalkSpeed(0.0F);
                                     if (i == 0) {
                                         temporary.clear();
-                                        player.setWalkSpeed(WALK_SPEED_NORMAL);
+                                        player.setWalkSpeed(0.2F);
                                         if (Main.version >= 18)
                                             fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                                         else
@@ -150,7 +139,7 @@ public class Fight implements CommandExecutor, TabCompleter {
                                     } else {
                                         if (cancelled) {
                                             temporary.clear();
-                                            player.setWalkSpeed(WALK_SPEED_NORMAL);
+                                            player.setWalkSpeed(0.2F);
                                             cancel();
                                         } else {
                                             if (Main.version >= 18)
@@ -170,7 +159,7 @@ public class Fight implements CommandExecutor, TabCompleter {
                     }
                 }
                 if (config.getBoolean("count-fights")) config.set("fight-count", ++fightCount);
-                if (config.getBoolean("mysql-enabled")) sqlFights();
+                if (config.getBoolean("mysql-enabled")) SqlMethods.sqlFights();
                 if (config.getBoolean("create-fights-folder")) {
                     duration = 0;
                     MyListener.stopper = 0;
@@ -235,13 +224,6 @@ public class Fight implements CommandExecutor, TabCompleter {
         if (config.getString("current-kit") != null) {
             Kit.setKit(p, config.getString("current-kit"));
         }
-    }
-
-    @SneakyThrows
-    private void loadConfigs() {
-        KitsConfig.load(getPlugin().KitsConfigfile);
-        config.load(getPlugin().customConfigFile);
-        ArenaConfig.load(getPlugin().ArenaConfigFile);
     }
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
