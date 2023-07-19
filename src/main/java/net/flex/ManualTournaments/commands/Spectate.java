@@ -29,7 +29,7 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 @SuppressWarnings("deprecation")
-public class Spectate implements TabCompleter, CommandExecutor {
+public final class Spectate implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
     public static List<UUID> spectators = new ArrayList<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();

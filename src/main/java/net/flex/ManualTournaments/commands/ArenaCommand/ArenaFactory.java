@@ -3,7 +3,7 @@ package net.flex.ManualTournaments.commands.ArenaCommand;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ArenaCommandFactory {
+public class ArenaFactory {
     private static final Map<String, ArenaCommand> arenaCommandMap;
 
     static {

@@ -8,7 +8,7 @@ import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
-public class CreateArena implements ArenaCommand {
+public final class CreateArena implements ArenaCommand {
     @SneakyThrows
     @Override
     public void execute(Player player, String arenaName, boolean arenaExists) {

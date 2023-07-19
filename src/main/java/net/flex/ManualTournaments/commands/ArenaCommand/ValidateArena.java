@@ -6,7 +6,7 @@ import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 import static net.flex.ManualTournaments.utils.SharedComponents.sendNotExists;
 
-public class ValidateArena implements ArenaCommand {
+public final class ValidateArena implements ArenaCommand {
     @Override
     public void execute(Player player, String arenaName, boolean arenaExists) {
         if (arenaExists) {

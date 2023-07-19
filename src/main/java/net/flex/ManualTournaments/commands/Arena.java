@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.ArenaCommand.ArenaCommandFactory;
+import net.flex.ManualTournaments.commands.ArenaCommand.ArenaFactory;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,7 +31,7 @@ public class Arena implements CommandExecutor, TabCompleter {
                 player.sendMessage(message("arena-list") + getPlugin().arenaNames.toString());
             } else return false;
         } else if (args.length == 2) {
-            ArenaCommandFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], getPlugin().arenaNames.contains(args[1]));
+            ArenaFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], getPlugin().arenaNames.contains(args[1]));
             getArenaConfig().save(getPlugin().ArenaConfigFile);
         } else return false;
         return true;

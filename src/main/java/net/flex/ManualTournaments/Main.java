@@ -4,14 +4,14 @@ import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
@@ -19,21 +19,67 @@ public final class Main extends JavaPlugin {
         return getPlugin(Main.class);
     }
 
-    public static int version = Main.formatNMSVersion(Main.getNMSVersion());
+    public static int version;
     public List<String> kitNames, arenaNames;
     public File KitsConfigfile, ArenaConfigFile, customConfigFile;
     static FileConfiguration KitsConfig, ArenaConfig, customConfig;
+    private static final Map<String, Integer> versionMap = new HashMap<>();
+
+    static {
+        versionMap.put("v1_8_R1", 11);
+        versionMap.put("v1_8_R2", 12);
+        versionMap.put("v1_8_R3", 13);
+        versionMap.put("v1_9_R1", 14);
+        versionMap.put("v1_9_R2", 15);
+        versionMap.put("v1_10_R1", 16);
+        versionMap.put("v1_11_R1", 17);
+        versionMap.put("v1_12_R1", 18);
+        versionMap.put("v1_13_R1", 19);
+        versionMap.put("v1_13_R2", 20);
+        versionMap.put("v1_14_R1", 21);
+        versionMap.put("v1_15_R1", 22);
+        versionMap.put("v1_16_R1", 23);
+        versionMap.put("v1_16_R2", 24);
+        versionMap.put("v1_16_R3", 25);
+        versionMap.put("v1_17_R1", 26);
+        versionMap.put("v1_18_R1", 27);
+        versionMap.put("v1_18_R2", 28);
+        versionMap.put("v1_19_R1", 29);
+        versionMap.put("v1_19_R2", 30);
+        versionMap.put("v1_19_R3", 31);
+        versionMap.put("v1_20_R1", 32);
+    }
+
     public static FileConfiguration getKitsConfig() {
         return KitsConfig;
     }
-    public static FileConfiguration getArenaConfig() { return ArenaConfig;}
+
+    public static FileConfiguration getArenaConfig() {
+        return ArenaConfig;
+    }
+
     public static FileConfiguration getCustomConfig() {
         return customConfig;
+    }
+
+    @Override
+    public void onLoad() {
+        version = Main.formatNMSVersion(Main.getNMSVersion());
     }
 
     public void onEnable() {
         super.onEnable();
         new UpdateChecker();
+        initializeData();
+        setCommands();
+        registerEvents();
+    }
+
+    public void onDisable() {
+        super.onDisable();
+    }
+
+    private void initializeData() {
         kitNames = new ArrayList<>();
         arenaNames = new ArrayList<>();
         createKitsConfig();
@@ -48,23 +94,26 @@ public final class Main extends JavaPlugin {
         if (Arenas.getConfigurationSection("Arenas") != null) {
             arenaNames.addAll(Objects.requireNonNull(Arenas.getConfigurationSection("Arenas")).getKeys(false));
         }
-        Objects.requireNonNull(getCommand("manualtournaments_arena")).setExecutor(new Arena());
-        Objects.requireNonNull(getCommand("manualtournaments_arena")).setTabCompleter(new Arena());
-        Objects.requireNonNull(getCommand("manualtournaments_fight")).setExecutor(new Fight());
-        Objects.requireNonNull(getCommand("manualtournaments_fight")).setTabCompleter(new Fight());
-        Objects.requireNonNull(getCommand("manualtournaments_kit")).setExecutor(new Kit());
-        Objects.requireNonNull(getCommand("manualtournaments_kit")).setTabCompleter(new Kit());
-        Objects.requireNonNull(getCommand("manualtournaments_reload")).setExecutor(new Reload());
-        Objects.requireNonNull(getCommand("manualtournaments_settings")).setExecutor(new Settings());
-        Objects.requireNonNull(getCommand("manualtournaments_settings")).setTabCompleter(new Settings());
-        Objects.requireNonNull(getCommand("manualtournaments_spectate")).setExecutor(new Spectate());
-        Objects.requireNonNull(getCommand("manualtournaments_spectate")).setTabCompleter(new Spectate());
-        getServer().getPluginManager().registerEvents(new MyListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 
-    public void onDisable() {
-        super.onDisable();
+    private void setCommands() {
+        Map<String, CommandExecutor> commandsMap = new HashMap<>();
+        commandsMap.put("manualtournaments_arena", new Arena());
+        commandsMap.put("manualtournaments_fight", new Fight());
+        commandsMap.put("manualtournaments_kit", new Kit());
+        commandsMap.put("manualtournaments_reload", new Reload());
+        commandsMap.put("manualtournaments_settings", new Settings());
+        commandsMap.put("manualtournaments_spectate", new Spectate());
+
+        commandsMap.forEach((command, executor) -> {
+            Objects.requireNonNull(getCommand(command)).setExecutor(executor);
+            Objects.requireNonNull(getCommand(command)).setTabCompleter((TabCompleter) executor);
+        });
+    }
+
+    private void registerEvents() {
+        getServer().getPluginManager().registerEvents(new MyListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 
     static String getNMSVersion() {
@@ -73,65 +122,9 @@ public final class Main extends JavaPlugin {
     }
 
     static int formatNMSVersion(String nms) {
-        switch (nms) {
-            case "1_4_R1":
-            case "1_5_R2":
-            case "1_5_R3":
-            case "1_6_R2":
-            case "1_6_R3":
-            case "1_6_R4":
-            case "1_7_R1":
-            case "1_7_R2":
-            case "1_7_R3":
-            case "1_7_R4":
-                throw new IllegalArgumentException(nms + " isn't supported");
-            case "v1_8_R1":
-                return 11;
-            case "v1_8_R2":
-                return 12;
-            case "v1_8_R3":
-                return 13;
-            case "v1_9_R1":
-                return 14;
-            case "v1_9_R2":
-                return 15;
-            case "v1_10_R1":
-                return 16;
-            case "v1_11_R1":
-                return 17;
-            case "v1_12_R1":
-                return 18;
-            case "v1_13_R1":
-                return 19;
-            case "v1_13_R2":
-                return 20;
-            case "v1_14_R1":
-                return 21;
-            case "v1_15_R1":
-                return 22;
-            case "v1_16_R1":
-                return 23;
-            case "v1_16_R2":
-                return 24;
-            case "v1_16_R3":
-                return 25;
-            case "v1_17_R1":
-                return 26;
-            case "v1_18_R1":
-                return 27;
-            case "v1_18_R2":
-                return 28;
-            case "v1_19_R1":
-                return 29;
-            case "v1_19_R2":
-                return 30;
-            case "v1_19_R3":
-                return 31;
-            case "v1_20_R1":
-                return 32;
-            default:
-                return 100;
-        }
+        if (Objects.requireNonNull(versionMap).containsKey(nms)) return versionMap.get(nms);
+        else if (nms.matches("v1_[4-7]_R[1-4]")) throw new IllegalArgumentException(nms + " isn't supported");
+        else return 100;
     }
 
     private void createCustomConfig() {
@@ -139,8 +132,7 @@ public final class Main extends JavaPlugin {
         customConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(customConfigFile);
         if (!customConfigFile.exists()) {
-            boolean create = customConfigFile.getParentFile().mkdirs();
-            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
+            created(customConfigFile.getParentFile().mkdirs());
             saveResource("config.yml", false);
         }
     }
@@ -150,8 +142,7 @@ public final class Main extends JavaPlugin {
         ArenaConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(ArenaConfigFile);
         if (!ArenaConfigFile.exists()) {
-            boolean create = ArenaConfigFile.getParentFile().mkdirs();
-            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
+            created(ArenaConfigFile.getParentFile().mkdirs());
             saveResource("arenas.yml", false);
         }
     }
@@ -161,9 +152,13 @@ public final class Main extends JavaPlugin {
         KitsConfig = new YamlConfiguration();
         YamlConfiguration.loadConfiguration(KitsConfigfile);
         if (!KitsConfigfile.exists()) {
-            boolean create = KitsConfigfile.getParentFile().mkdirs();
-            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
+            created(KitsConfigfile.getParentFile().mkdirs());
             saveResource("kits.yml", false);
         }
     }
+
+    private void created(boolean create) {
+        if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
+    }
+
 }

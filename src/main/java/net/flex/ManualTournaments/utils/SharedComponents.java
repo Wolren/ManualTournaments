@@ -9,6 +9,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,6 +61,17 @@ public final class SharedComponents {
         cfg.set(pathing + "pitch", pitch);
         cfg.set(pathing + "world", world);
         getArenaConfig().save(getPlugin().ArenaConfigFile);
+    }
+
+    public static void collidableReflection(Player fighter) {
+        try {
+            Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
+            Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
+            setCollidesWithEntities.invoke(fighter.spigot(), false);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     public static Location location(String path, FileConfiguration cfg) {

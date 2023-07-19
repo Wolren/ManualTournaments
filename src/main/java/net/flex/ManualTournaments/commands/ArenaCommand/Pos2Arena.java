@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
-public class Pos2Arena implements ArenaCommand {
+public final class Pos2Arena implements ArenaCommand {
     @Override
     public void execute(Player player, String arenaName, boolean arenaExists) {
         if (arenaExists) {

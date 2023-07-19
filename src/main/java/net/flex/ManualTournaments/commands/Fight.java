@@ -54,7 +54,6 @@ public class Fight implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             list.add("stop");
             list.add("team");
-            for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
         } else for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
         return list;
     }
