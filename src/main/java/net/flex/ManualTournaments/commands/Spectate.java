@@ -24,13 +24,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 @SuppressWarnings("deprecation")
 public class Spectate implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
-    private final FileConfiguration ArenaConfig = getPlugin().getArenaConfig();
     public static List<UUID> spectators = new ArrayList<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team spectatorsBoard = board.registerNewTeam("spectators");
@@ -45,7 +45,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
         if (args.length == 0) {
             if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
                 String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
-                if (ArenaConfig.isSet(path)) {
+                if (getArenaConfig().isSet(path)) {
                     if (Main.version >= 14) {
                         spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                         player.setCollidable(false);
@@ -60,7 +60,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
                             throw new RuntimeException(exception);
                         }
                     }
-                    player.teleport(location(path, ArenaConfig));
+                    player.teleport(location(path, getArenaConfig()));
                     send(player, "spectator-started-spectating");
                 } else {
                     send(player, "arena-not-set");
@@ -116,7 +116,7 @@ public class Spectate implements TabCompleter, CommandExecutor {
     @SneakyThrows
     private void loadConfigs() {
         config.load(getPlugin().customConfigFile);
-        ArenaConfig.load(getPlugin().ArenaConfigFile);
+        getArenaConfig().load(getPlugin().ArenaConfigFile);
     }
 
     @Nullable
