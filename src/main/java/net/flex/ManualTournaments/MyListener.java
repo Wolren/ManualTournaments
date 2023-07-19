@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.Fight;
+import net.flex.ManualTournaments.commands.FightCommand.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,12 +20,16 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.commands.Fight.*;
+import static net.flex.ManualTournaments.commands.FightCommand.TeamFight.FightsConfig;
+import static net.flex.ManualTournaments.commands.FightCommand.TeamFight.cancelled;
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
-import static net.flex.ManualTournaments.utils.SharedMethods.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
 
@@ -43,12 +47,12 @@ public final class MyListener implements Listener {
         Player player = event.getEntity();
         Player killer = player.getKiller();
         removeEntries();
-        if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
+        if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
             event.setDroppedExp(0);
             event.setDeathMessage("");
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
             if (killer != null && !cancelled) {
-                if (Fight.team1.contains(killer.getUniqueId()) || Fight.team2.contains(killer.getUniqueId())) {
+                if (TeamFight.team1.contains(killer.getUniqueId()) || TeamFight.team2.contains(killer.getUniqueId())) {
                     String replacePlayer = Objects.requireNonNull(config.getString("fight-death")).replace("{player}", player.getDisplayName());
                     String replaceKiller = replacePlayer.replace("{killer}", killer.getDisplayName());
                     event.setDeathMessage(ChatColor.translateAlternateColorCodes('&', replaceKiller));
@@ -56,19 +60,19 @@ public final class MyListener implements Listener {
             }
         }
         if (!cancelled) {
-            teamRemover(player, Fight.team1, Fight.team2);
-            teamRemover(player, Fight.team2, Fight.team1);
+            teamRemover(player, TeamFight.team1, TeamFight.team2);
+            teamRemover(player, TeamFight.team2, TeamFight.team1);
         }
     }
 
     @SneakyThrows
     private void endCounter() {
-        if (Fight.team1.isEmpty() && Fight.team2.isEmpty()) {
-            FightsConfig.load(Fight.FightsConfigFile);
-            FightsConfig.set("duration", Fight.duration - 3);
-            durationUpdate(duration - 3);
+        if (TeamFight.team1.isEmpty() && TeamFight.team2.isEmpty()) {
+            FightsConfig.load(TeamFight.FightsConfigFile);
+            FightsConfig.set("duration", TeamFight.duration - 3);
+            durationUpdate(TeamFight.duration - 3);
             stopper = 1;
-            FightsConfig.save(Fight.FightsConfigFile);
+            FightsConfig.save(TeamFight.FightsConfigFile);
         }
     }
 
@@ -84,27 +88,27 @@ public final class MyListener implements Listener {
                 FightsConfig.set("damageTeam2", damageTeam2);
                 FightsConfig.set("regeneratedTeam1", regeneratedTeam1);
                 FightsConfig.set("regeneratedTeam2", regeneratedTeam2);
-                FightsConfig.save(Fight.FightsConfigFile);
+                FightsConfig.save(TeamFight.FightsConfigFile);
                 regeneratedTeam1 = 0;
                 regeneratedTeam2 = 0;
                 damageTeam1 = 0;
                 damageTeam2 = 0;
-                if (Fight.team1.isEmpty()) {
-                    winnersUpdate(teamList(Fight.team2, winners));
+                if (TeamFight.team1.isEmpty()) {
+                    winnersUpdate(teamList(TeamFight.team2, winners));
                     winners.clear();
                     if (config.getBoolean("create-fights-folder")) {
-                        FightsConfig.load(Fight.FightsConfigFile);
-                        FightsConfig.set("winners", teamList(Fight.team2, winners));
-                        FightsConfig.save(Fight.FightsConfigFile);
+                        FightsConfig.load(TeamFight.FightsConfigFile);
+                        FightsConfig.set("winners", teamList(TeamFight.team2, winners));
+                        FightsConfig.save(TeamFight.FightsConfigFile);
                     }
                 }
-                else if (Fight.team2.isEmpty()) {
-                    winnersUpdate(teamList(Fight.team1, winners));
+                else if (TeamFight.team2.isEmpty()) {
+                    winnersUpdate(teamList(TeamFight.team1, winners));
                     winners.clear();
                     if (config.getBoolean("create-fights-folder")) {
-                        FightsConfig.load(Fight.FightsConfigFile);
-                        FightsConfig.set("winners", teamList(Fight.team1, winners));
-                        FightsConfig.save(Fight.FightsConfigFile);
+                        FightsConfig.load(TeamFight.FightsConfigFile);
+                        FightsConfig.set("winners", teamList(TeamFight.team1, winners));
+                        FightsConfig.save(TeamFight.FightsConfigFile);
                     }
                 }
                 Collection<String> array = new ArrayList<>();
@@ -144,7 +148,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player.getUniqueId())) {
+        if (TeamFight.temporary.contains(player.getUniqueId())) {
             Location from = event.getFrom();
             if (from.getX() != Objects.requireNonNull(event.getTo()).getX() || from.getY() != event.getTo().getY())
                 player.teleport(from);
@@ -154,13 +158,13 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onJump(PlayerJumpEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player.getUniqueId())) event.setCancelled(true);
+        if (TeamFight.temporary.contains(player.getUniqueId())) event.setCancelled(true);
     }
 
     @EventHandler
     private void onDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
+        if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
             if (!config.getBoolean("drop-items")) event.setCancelled(true);
         }
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
@@ -176,7 +180,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        if (Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId())) {
+        if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
             if (!config.getBoolean("break-blocks")) event.setCancelled(true);
         }
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
@@ -247,7 +251,7 @@ public final class MyListener implements Listener {
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (Fight.temporary.contains(player.getUniqueId()) || Fight.team1.contains(player.getUniqueId()) || Fight.team2.contains(player.getUniqueId()) || spectators.contains(player.getUniqueId())) {
+        if (TeamFight.temporary.contains(player.getUniqueId()) || TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId()) || spectators.contains(player.getUniqueId())) {
             if (config.getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 player.setHealth(0);
@@ -287,8 +291,8 @@ public final class MyListener implements Listener {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
         if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK && event.getEntityType() == EntityType.PLAYER) {
-            if (Fight.team1.contains(player.getUniqueId())) damageTeam1 += event.getFinalDamage();
-            else if (Fight.team2.contains(player.getUniqueId())) damageTeam2 += event.getFinalDamage();
+            if (TeamFight.team1.contains(player.getUniqueId())) damageTeam1 += event.getFinalDamage();
+            else if (TeamFight.team2.contains(player.getUniqueId())) damageTeam2 += event.getFinalDamage();
         }
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
     }
@@ -297,9 +301,9 @@ public final class MyListener implements Listener {
     public void onHealthRegain(EntityRegainHealthEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        if (Fight.team1.contains(player.getUniqueId())) {
+        if (TeamFight.team1.contains(player.getUniqueId())) {
             regeneratedTeam1 += event.getAmount();
-        } else if (Fight.team2.contains(player.getUniqueId())) {
+        } else if (TeamFight.team2.contains(player.getUniqueId())) {
             regeneratedTeam2 += event.getAmount();
         }
     }

@@ -1,12 +1,12 @@
 package net.flex.ManualTournaments.utils;
 
+import net.flex.ManualTournaments.commands.FightCommand.TeamFight;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.commands.Fight.*;
-import static net.flex.ManualTournaments.utils.SharedMethods.teamList;
+import static net.flex.ManualTournaments.utils.SharedComponents.teamList;
 
 public class SqlMethods {
     private static final FileConfiguration config = getPlugin().getConfig();
@@ -34,17 +34,17 @@ public class SqlMethods {
                     " duration," +
                     " winners)" +
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            preparedStatement.setString(1, teamList(team1, team1String));
-            team1String.clear();
-            preparedStatement.setString(2, teamList(team2, team2String));
-            team2String.clear();
+            preparedStatement.setString(1, teamList(TeamFight.team1, TeamFight.team1String));
+            TeamFight.team1String.clear();
+            preparedStatement.setString(2, teamList(TeamFight.team2, TeamFight.team2String));
+            TeamFight.team2String.clear();
             preparedStatement.setDouble(3, 0);
             preparedStatement.setDouble(4, 0);
             preparedStatement.setDouble(5, 0);
             preparedStatement.setDouble(6, 0);
             preparedStatement.setString(7, currentArena);
             preparedStatement.setString(8, currentKit);
-            preparedStatement.setInt(9, duration);
+            preparedStatement.setInt(9, TeamFight.duration);
             preparedStatement.setString(10, "");
             preparedStatement.executeUpdate();
             preparedStatement.close();

@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.utils;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.Fight;
+import net.flex.ManualTournaments.commands.FightCommand.TeamFight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,7 +17,7 @@ import java.util.UUID;
 import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 
-public final class SharedMethods {
+public final class SharedComponents {
 
     public static final FileConfiguration config = getPlugin().getConfig();
     public static Player player = null;
@@ -88,8 +88,8 @@ public final class SharedMethods {
 
     public static void removeEntries() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (Fight.team1.contains(player.getUniqueId())) Fight.team1Board.removeEntry(player.getDisplayName());
-            else if (Fight.team2.contains(player.getUniqueId())) Fight.team2Board.removeEntry(player.getDisplayName());
+            if (TeamFight.team1.contains(player.getUniqueId())) TeamFight.team1Board.removeEntry(player.getDisplayName());
+            else if (TeamFight.team2.contains(player.getUniqueId())) TeamFight.team2Board.removeEntry(player.getDisplayName());
         }
     }
 }

@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedMethods.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 @SuppressWarnings("deprecation")
 public class Spectate implements TabCompleter, CommandExecutor {

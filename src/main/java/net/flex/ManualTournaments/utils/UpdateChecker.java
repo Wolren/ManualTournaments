@@ -27,7 +27,6 @@ public final class UpdateChecker {
     private CompletableFuture<Boolean> checkUpdate() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         getPlugin().getLogger().log(Level.INFO, "Checking for Updates...");
-        String versionString = getPlugin().getDescription().getVersion();
         try {
             URL url = new URL("https://api.spigotmc.org/legacy/update.php?resource=105850");
             HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
@@ -36,7 +35,7 @@ public final class UpdateChecker {
             else {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 version = reader.readLine();
-                result.complete(!versionString.equalsIgnoreCase(version));
+                result.complete(!getPlugin().getDescription().getVersion().equalsIgnoreCase(version));
             }
             return result;
         } catch (IOException exception) {

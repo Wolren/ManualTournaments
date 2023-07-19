@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedMethods.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
