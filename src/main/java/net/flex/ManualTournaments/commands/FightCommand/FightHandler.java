@@ -1,10 +1,12 @@
 package net.flex.ManualTournaments.commands.FightCommand;
 
+import net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight;
+
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.currentKit;
 
-public class FightFactory {
+public class FightHandler {
     public FightType createFight(String type) {
         if (type.equalsIgnoreCase("team")) {
             if (TeamFight.team1.isEmpty() && TeamFight.team2.isEmpty()) {

@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.utils;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.FightCommand.TeamFight;
+import net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;

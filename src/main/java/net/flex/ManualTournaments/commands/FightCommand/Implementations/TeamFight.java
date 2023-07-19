@@ -1,9 +1,10 @@
-package net.flex.ManualTournaments.commands.FightCommand;
+package net.flex.ManualTournaments.commands.FightCommand.Implementations;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.MyListener;
-import net.flex.ManualTournaments.commands.Kit;
+import net.flex.ManualTournaments.commands.FightCommand.FightType;
+import net.flex.ManualTournaments.commands.KitCommand.Implementations.GiveKit;
 import net.flex.ManualTournaments.utils.SqlMethods;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -53,7 +54,7 @@ public final class TeamFight implements FightType {
                 team2.add(fighterId);
                 fighter.teleport(location("Arenas." + currentArena + ".pos2.", getArenaConfig()));
             }
-            Kit.setKit(fighter, config.getString("current-kit"));
+            GiveKit.setKit(fighter, config.getString("current-kit"));
             if (config.getBoolean("freeze-on-start")) freezeOnStart(fighter, fighterId);
         }
         if (config.getBoolean("count-fights")) countFights();

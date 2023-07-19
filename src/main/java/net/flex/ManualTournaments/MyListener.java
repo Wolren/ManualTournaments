@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.FightCommand.TeamFight;
+import net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,8 +26,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.commands.FightCommand.TeamFight.FightsConfig;
-import static net.flex.ManualTournaments.commands.FightCommand.TeamFight.cancelled;
+import static net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight.FightsConfig;
+import static net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight.cancelled;
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;

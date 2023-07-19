@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.FightCommand.FightFactory;
+import net.flex.ManualTournaments.commands.FightCommand.FightHandler;
 import net.flex.ManualTournaments.commands.FightCommand.FightType;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -41,7 +41,7 @@ public class Fight implements CommandExecutor, TabCompleter {
                 fighters.add(fighter);
             }
         }
-        FightType currentFight = new FightFactory().createFight(args[0]);
+        FightType currentFight = new FightHandler().createFight(args[0]);
         if (args.length == 1 && args[0].equals("stop")) {
             return currentFight.stopFight();
         } else if (args.length > 2 && distinctFighters.stream().distinct().count() == args.length - 1) {

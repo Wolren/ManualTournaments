@@ -1,7 +1,8 @@
-package net.flex.ManualTournaments.commands.ArenaCommand;
+package net.flex.ManualTournaments.commands.ArenaCommand.Implementations;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.commands.Arena;
+import net.flex.ManualTournaments.commands.ArenaCommand.ArenaCommand;
 import org.bukkit.entity.Player;
 
 import static net.flex.ManualTournaments.Main.getArenaConfig;

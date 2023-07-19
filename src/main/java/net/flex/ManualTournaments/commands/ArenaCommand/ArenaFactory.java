@@ -1,5 +1,7 @@
 package net.flex.ManualTournaments.commands.ArenaCommand;
 
+import net.flex.ManualTournaments.commands.ArenaCommand.Implementations.*;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,7 +20,6 @@ public class ArenaFactory {
     }
 
     public static ArenaCommand getCommand(String command) {
-        return arenaCommandMap.getOrDefault(command, (player, arenaName, arenaExists) -> {
-        });
+        return arenaCommandMap.getOrDefault(command, (player, arenaName, arenaExists) -> {});
     }
 }
