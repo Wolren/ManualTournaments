@@ -5,7 +5,7 @@ import net.flex.ManualTournaments.commands.ArenaCommand.Implementations.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ArenaFactory {
+public final class ArenaFactory {
     private static final Map<String, ArenaCommand> arenaCommandMap;
 
     static {

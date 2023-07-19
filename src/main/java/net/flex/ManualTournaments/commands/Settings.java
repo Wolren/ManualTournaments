@@ -29,6 +29,7 @@ public class Settings implements TabCompleter, CommandExecutor {
         if (args.length == 1 && args[0].equalsIgnoreCase("endspawn")) {
             getLocation("fight-end-spawn.", player, config);
             send(player, "config-updated-successfully");
+            config.save(getPlugin().customConfigFile);
         } else if (args.length == 2) {
             switch (args[0].toUpperCase()) {
                 case "DROP_ITEMS":
@@ -72,20 +73,16 @@ public class Settings implements TabCompleter, CommandExecutor {
                     return false;
             }
         } else return false;
-        config.save(getPlugin().customConfigFile);
         return true;
     }
 
+    @SneakyThrows
     private void updateConfigAndNotify(Player player, String configKey, String value) {
-        if (value.equals("true")) {
+        if (value.equals("true") || value.equals("false")) {
             config.set(configKey, true);
             send(player, "config-updated-successfully");
-        } else if (value.equals("false")) {
-            config.set(configKey, false);
-            send(player, "config-updated-successfully");
-        } else {
-            send(player, "config-options");
-        }
+            config.save(getPlugin().customConfigFile);
+        } else send(player, "config-options");
     }
 
     public @NotNull List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {

@@ -21,7 +21,7 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.message;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
-public class CreateKit implements KitCommand {
+public final class CreateKit implements KitCommand {
     @SneakyThrows
     @Override
     public void execute(Player player, String kitName, boolean kitExists) {
