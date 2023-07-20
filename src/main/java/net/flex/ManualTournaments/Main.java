@@ -4,6 +4,9 @@ import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
+import net.flex.ManualTournaments.listeners.SpectateListener;
+import net.flex.ManualTournaments.listeners.TeamFightListener;
+import net.flex.ManualTournaments.listeners.TemporaryListener;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -124,7 +127,9 @@ public final class Main extends JavaPlugin {
     }
 
     private void registerEvents() {
-        getServer().getPluginManager().registerEvents(new MyListener(), this);
+        getServer().getPluginManager().registerEvents(new SpectateListener(), this);
+        getServer().getPluginManager().registerEvents(new TeamFightListener(), this);
+        getServer().getPluginManager().registerEvents(new TemporaryListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 

@@ -2,7 +2,7 @@ package net.flex.ManualTournaments.commands.fightCommands;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
-import net.flex.ManualTournaments.MyListener;
+import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
 import net.flex.ManualTournaments.utils.SqlMethods;
@@ -173,10 +173,10 @@ public class TeamFight implements FightType {
     @SneakyThrows
     private void setFightsFolder() {
         duration = 0;
-        MyListener.stopper = 0;
+        TeamFightListener.stopper = 0;
         new BukkitRunnable() {
             public void run() {
-                if (MyListener.stopper == 1 || cancelled) cancel();
+                if (TeamFightListener.stopper == 1 || cancelled) cancel();
                 else duration++;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);

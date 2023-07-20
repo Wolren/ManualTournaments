@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments;
+package net.flex.ManualTournaments.listeners;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
@@ -31,7 +31,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
 
-public class MyListener implements Listener {
+public class TeamFightListener implements Listener {
     static FileConfiguration config = getPlugin().getConfig();
     public static Collection<String> winners = new ArrayList<>();
     public static double regeneratedTeam1 = 0;
@@ -103,6 +103,7 @@ public class MyListener implements Listener {
                     if (config.getBoolean("create-fights-folder")) {
                         FightsConfig.load(TeamFight.FightsConfigFile);
                         FightsConfig.set("winners", teamList(TeamFight.team2, winners));
+                        winners.clear();
                         FightsConfig.set("cancelled", false);
                         FightsConfig.save(TeamFight.FightsConfigFile);
                     }
@@ -115,6 +116,8 @@ public class MyListener implements Listener {
                     if (config.getBoolean("create-fights-folder")) {
                         FightsConfig.load(TeamFight.FightsConfigFile);
                         FightsConfig.set("winners", teamList(TeamFight.team1, winners));
+                        winners.clear();
+                        FightsConfig.set("cancelled", false);
                         FightsConfig.save(TeamFight.FightsConfigFile);
                     }
                 }
@@ -202,6 +205,7 @@ public class MyListener implements Listener {
 
     @EventHandler
     private void onCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
         if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
             if (config.getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
                 event.setCancelled(false);

@@ -18,11 +18,13 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class SpectateListener implements Listener {
     @EventHandler
     private void onBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
     }
 
     @EventHandler
     private void onPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
     }
 
@@ -76,6 +78,7 @@ public class SpectateListener implements Listener {
 
     @EventHandler
     private void onDrop(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
     }
 
