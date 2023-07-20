@@ -1,6 +1,8 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.commands.SettingsCommand.SettingsFactory;
+import net.flex.ManualTournaments.commands.SettingsCommand.Short.SettingsShortFactory;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedComponents.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.optional;
 
 public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
@@ -26,63 +28,12 @@ public class Settings implements TabCompleter, CommandExecutor {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getPlugin().customConfigFile);
-        if (args.length == 1 && args[0].equalsIgnoreCase("endspawn")) {
-            getLocation("fight-end-spawn.", player, config);
-            send(player, "config-updated-successfully");
-            config.save(getPlugin().customConfigFile);
+        if (args.length == 1) {
+            SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
-            switch (args[0].toUpperCase()) {
-                case "DROP_ITEMS":
-                    updateConfigAndNotify(player, "drop-items", args[1]);
-                    break;
-                case "BREAK_BLOCKS":
-                    updateConfigAndNotify(player, "break-blocks", args[1]);
-                    break;
-                case "PLACE_BLOCKS":
-                    updateConfigAndNotify(player, "place_blocks", args[1]);
-                    break;
-                case "FRIENDLY_FIRE":
-                    updateConfigAndNotify(player, "friendly-fire", args[1]);
-                    break;
-                case "DROP_ON_DEATH":
-                    updateConfigAndNotify(player, "drop-on-death", args[1]);
-                    break;
-                case "KILL_ON_FIGHT_END":
-                    updateConfigAndNotify(player, "kill-on-fight-end", args[1]);
-                    break;
-                case "FREEZE_ON_START":
-                    updateConfigAndNotify(player, "freeze-on-start", args[1]);
-                    break;
-                case "CURRENT_ARENA":
-                    if (getPlugin().arenaNames.contains(args[1])) {
-                        config.set("current-arena", args[1]);
-                        send(player, "config-updated-successfully");
-                    } else {
-                        send(player, "arena-not-exists");
-                    }
-                    break;
-                case "CURRENT_KIT":
-                    if (getPlugin().kitNames.contains(args[1])) {
-                        config.set("current-kit", args[1]);
-                        send(player, "config-updated-successfully");
-                    } else {
-                        send(player, "kit-not-exists");
-                    }
-                    break;
-                default:
-                    return false;
-            }
+            SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, args[0], args[1]);
         } else return false;
         return true;
-    }
-
-    @SneakyThrows
-    private void updateConfigAndNotify(Player player, String configKey, String value) {
-        if (value.equals("true") || value.equals("false")) {
-            config.set(configKey, true);
-            send(player, "config-updated-successfully");
-            config.save(getPlugin().customConfigFile);
-        } else send(player, "config-options");
     }
 
     public @NotNull List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {

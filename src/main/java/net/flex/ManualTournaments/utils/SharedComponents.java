@@ -22,6 +22,7 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 public final class SharedComponents {
 
     public static final FileConfiguration config = getPlugin().getConfig();
+
     public static Player player = null;
     public static final String currentArena = config.getString("current-arena");
     public static final String currentKit = config.getString("current-kit");
@@ -101,8 +102,10 @@ public final class SharedComponents {
 
     public static void removeEntries() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (TeamFight.team1.contains(player.getUniqueId())) TeamFight.team1Board.removeEntry(player.getDisplayName());
-            else if (TeamFight.team2.contains(player.getUniqueId())) TeamFight.team2Board.removeEntry(player.getDisplayName());
+            if (TeamFight.team1.contains(player.getUniqueId()))
+                TeamFight.team1Board.removeEntry(player.getDisplayName());
+            else if (TeamFight.team2.contains(player.getUniqueId()))
+                TeamFight.team2Board.removeEntry(player.getDisplayName());
         }
     }
 }

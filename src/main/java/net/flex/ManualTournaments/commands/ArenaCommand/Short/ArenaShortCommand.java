@@ -2,6 +2,6 @@ package net.flex.ManualTournaments.commands.ArenaCommand.Short;
 
 import org.bukkit.entity.Player;
 
-public interface ArenaCommandType {
-    boolean arenaCommand(Player player, String arg);
+public interface ArenaShortCommand {
+    void execute(Player player, String arg);
 }

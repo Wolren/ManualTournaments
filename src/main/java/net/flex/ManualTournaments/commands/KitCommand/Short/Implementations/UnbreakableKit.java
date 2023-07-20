@@ -1,16 +1,16 @@
 package net.flex.ManualTournaments.commands.KitCommand.Short.Implementations;
 
 import net.flex.ManualTournaments.Main;
-import net.flex.ManualTournaments.commands.KitCommand.Short.KitCommandType;
+import net.flex.ManualTournaments.commands.KitCommand.Short.KitShortCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
-public class UnbreakableKit implements KitCommandType {
+public class UnbreakableKit implements KitShortCommand {
     @Override
-    public boolean kitCommand(Player player, String arg) {
+    public void execute(Player player, String arg) {
         if (Main.version >= 17) {
             for (ItemStack im : player.getInventory().getContents()) {
                 if (im != null && im.getType().getMaxDurability() != 0) {
@@ -22,6 +22,5 @@ public class UnbreakableKit implements KitCommandType {
             player.updateInventory();
             send(player, "kit-set-unbreakable");
         } else send(player, "not-supported");
-        return true;
     }
 }

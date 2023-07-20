@@ -22,9 +22,8 @@ public class KitFactory {
         return kitCommandMap.getOrDefault(command, new KitCommand() {
             @Override
             public void execute(Player player, String kitName, boolean kitExists) {
-                // Default implementation for execute(Player player, String kitName, boolean kitExists)
-            }
 
+            }
         });
     }
 }
