@@ -33,27 +33,29 @@ public class TeamFight implements FightType {
     public static boolean cancelled = false;
 
     @SneakyThrows
-    public void startFight(List<Player> fighters) {
+    public void startFight(Player player, List<Player> fighters) {
         clearBeforeFight();
         setBoard();
         for (int i = 0; i < fighters.toArray().length; i++) {
             Player fighter = fighters.get(i);
             if (fighter == null) send(player, "fighter-error");
-            UUID fighterId = fighter.getUniqueId();
-            fighter.setGameMode(GameMode.SURVIVAL);
-            if (Main.version <= 13) collidableReflection(fighter);
-            config.load(getPlugin().customConfigFile);
-            if (i < (fighters.toArray().length / 2)) {
-                team1Board.addEntry(fighter.getDisplayName());
-                team1.add(fighterId);
-                fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig()));
-            } else if (i >= (fighters.toArray().length / 2)) {
-                team2Board.addEntry(fighter.getDisplayName());
-                team2.add(fighterId);
-                fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos2.", getArenaConfig()));
+            else {
+                UUID fighterId = fighter.getUniqueId();
+                fighter.setGameMode(GameMode.SURVIVAL);
+                if (Main.version <= 13) collidableReflection(fighter);
+                config.load(getPlugin().customConfigFile);
+                if (i < (fighters.toArray().length / 2)) {
+                    team1Board.addEntry(fighter.getDisplayName());
+                    team1.add(fighterId);
+                    fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig()));
+                } else if (i >= (fighters.toArray().length / 2)) {
+                    team2Board.addEntry(fighter.getDisplayName());
+                    team2.add(fighterId);
+                    fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos2.", getArenaConfig()));
+                }
+                GiveKit.setKit(fighter, config.getString("current-kit"));
+                if (config.getBoolean("freeze-on-start")) freezeOnStart(fighter, fighterId);
             }
-            GiveKit.setKit(fighter, config.getString("current-kit"));
-            if (config.getBoolean("freeze-on-start")) freezeOnStart(fighter, fighterId);
         }
         if (config.getBoolean("count-fights")) countFights();
         if (config.getBoolean("create-fights-folder")) createFightsFolder();
@@ -81,6 +83,29 @@ public class TeamFight implements FightType {
         team2.clear();
         team1String.clear();
         team2String.clear();
+    }
+
+    @Override
+    public boolean canStartFight(String type) {
+        if (getPlugin().kitNames.contains(config.getString("current-kit"))) {
+            if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
+                if (type.equalsIgnoreCase("team")) {
+                    if (TeamFight.team1.isEmpty() && TeamFight.team2.isEmpty()) {
+                        String path = "Arenas." + config.getString("current-arena") + ".";
+                        boolean pos1 = getArenaConfig().isSet(path + "pos1");
+                        boolean pos2 = getArenaConfig().isSet(path + "pos2");
+                        boolean spectator = getArenaConfig().isSet(path + "spectator");
+                        if (pos1 && pos2 && spectator) return true;
+                        else {
+                            if (!pos1) send(player, "arena-lacks-pos1");
+                            if (!pos2) send(player, "arena-lacks-pos2");
+                            if (!spectator) send(player, "arena-lacks-spectator");
+                        }
+                    } else send(player, "fight-wrong-arguments");
+                }
+            } else send(player, "current-arena-not-set");
+        } else send(player, "current-kit-not-set");
+        return false;
     }
 
     private static void clearBeforeFight() {

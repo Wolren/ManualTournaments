@@ -1,8 +1,9 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.FightCommand.FightHandler;
+import net.flex.ManualTournaments.commands.FightCommand.FightFactory;
 import net.flex.ManualTournaments.commands.FightCommand.FightType;
+import net.flex.ManualTournaments.commands.FightCommand.NullFight;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -40,14 +41,16 @@ public class Fight implements CommandExecutor, TabCompleter {
                 fighters.add(fighter);
             }
         }
-        FightType currentFight = new FightHandler().createFight(args[0]);
         if (args.length == 1 && args[0].equals("stop")) {
-            currentFight.stopFight();
+            FightFactory.fight.stopFight();
+            FightFactory.fight = new NullFight();
         } else if (args.length > 2 && distinctFighters.stream().distinct().count() == args.length - 1) {
-            currentFight.startFight(fighters);
+            FightType currentFight = new FightFactory().createFight(args[0]);
+            if (!FightFactory.fight.equals(new NullFight())) currentFight.startFight(player, fighters);
         } else send(player, "fight-usage");
         return true;
     }
+
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         List<String> list = new ArrayList<>();
