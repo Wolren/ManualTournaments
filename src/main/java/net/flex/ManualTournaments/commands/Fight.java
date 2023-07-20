@@ -44,9 +44,9 @@ public class Fight implements CommandExecutor, TabCompleter {
         if (args.length == 1 && args[0].equals("stop")) {
             FightFactory.fight.stopFight();
             FightFactory.fight = new NullFight();
-        } else if (args.length > 2 && distinctFighters.stream().distinct().count() == args.length - 1) {
+        } else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop")) && distinctFighters.stream().distinct().count() == args.length - 1) {
             FightType currentFight = new FightFactory().createFight(args[0]);
-            if (!FightFactory.fight.equals(new NullFight())) currentFight.startFight(player, fighters);
+            currentFight.startFight(player, fighters);
         } else send(player, "fight-usage");
         return true;
     }
