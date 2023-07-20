@@ -3,10 +3,11 @@ package net.flex.ManualTournaments.commands.KitCommand;
 import net.flex.ManualTournaments.commands.KitCommand.Implementations.CreateKit;
 import net.flex.ManualTournaments.commands.KitCommand.Implementations.GiveKit;
 import net.flex.ManualTournaments.commands.KitCommand.Implementations.RemoveKit;
-import org.bukkit.entity.Player;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class KitFactory {
     private static final Map<String, KitCommand> kitCommandMap;
@@ -19,11 +20,6 @@ public class KitFactory {
     }
 
     public static KitCommand getCommand(String command) {
-        return kitCommandMap.getOrDefault(command, new KitCommand() {
-            @Override
-            public void execute(Player player, String kitName, boolean kitExists) {
-
-            }
-        });
+        return kitCommandMap.getOrDefault(command, (player, kitName, kitExists) -> send(player, "kit-usage"));
     }
 }

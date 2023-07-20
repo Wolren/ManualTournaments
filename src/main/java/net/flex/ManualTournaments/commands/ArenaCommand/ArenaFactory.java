@@ -5,7 +5,9 @@ import net.flex.ManualTournaments.commands.ArenaCommand.Implementations.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class ArenaFactory {
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
+
+public class ArenaFactory {
     private static final Map<String, ArenaCommand> arenaCommandMap;
 
     static {
@@ -20,6 +22,6 @@ public final class ArenaFactory {
     }
 
     public static ArenaCommand getCommand(String command) {
-        return arenaCommandMap.getOrDefault(command, (player, arenaName, arenaExists) -> {});
+        return arenaCommandMap.getOrDefault(command, (player, arenaName, arenaExists) -> send(player, "arena-usage"));
     }
 }

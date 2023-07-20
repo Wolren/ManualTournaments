@@ -18,6 +18,7 @@ import java.util.List;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.optional;
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class Settings implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
@@ -32,7 +33,7 @@ public class Settings implements TabCompleter, CommandExecutor {
             SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
             SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, args[0], args[1]);
-        } else return false;
+        } else send(player, "settings-usage");
         return true;
     }
 

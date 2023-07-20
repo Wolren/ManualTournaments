@@ -10,8 +10,7 @@ public final class Pos2Arena implements ArenaCommand {
     @Override
     public void execute(Player player, String arenaName, boolean arenaExists) {
         if (arenaExists) {
-            String pathPos2 = "Arenas." + arenaName + ".pos2.";
-            getLocation(pathPos2, player, getArenaConfig());
+            getLocation("Arenas." + arenaName + ".pos2.", player, getArenaConfig());
             send(player, "arena-pos2");
         } else sendNotExists(player);
     }

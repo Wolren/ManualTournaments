@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public interface FightType {
-    boolean startFight(List<Player> players);
-    boolean stopFight();
+    void startFight(List<Player> players);
+    void stopFight();
 }
 

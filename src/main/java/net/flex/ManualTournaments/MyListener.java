@@ -33,7 +33,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
 
-public final class MyListener implements Listener {
+public class MyListener implements Listener {
     static FileConfiguration config = getPlugin().getConfig();
     public static Collection<String> winners = new ArrayList<>();
     public static double regeneratedTeam1 = 0;

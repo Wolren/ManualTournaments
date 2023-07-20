@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.utils;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -19,13 +20,11 @@ import java.util.UUID;
 import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 
-public final class SharedComponents {
+public class SharedComponents {
 
     public static final FileConfiguration config = getPlugin().getConfig();
 
     public static Player player = null;
-    public static final String currentArena = config.getString("current-arena");
-    public static final String currentKit = config.getString("current-kit");
 
     public static String message(String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
@@ -94,9 +93,9 @@ public final class SharedComponents {
         player.getInventory().clear();
         player.setHealth(20.0D);
         player.setFoodLevel(20);
-        player.setAbsorptionAmount(0);
         player.setSaturation(0);
         player.setFireTicks(0);
+        if (Main.version >= 22) player.setAbsorptionAmount(0);
         for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
     }
 

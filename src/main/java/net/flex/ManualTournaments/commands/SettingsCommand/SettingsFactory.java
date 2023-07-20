@@ -27,7 +27,7 @@ public class SettingsFactory {
     }
 
     public static SettingsCommand getCommand(String command) {
-        return settingsCommandMap.getOrDefault(command, (player, setting, value) -> {});
+        return settingsCommandMap.getOrDefault(command, (player, setting, value) -> send(player, "settings-usage"));
     }
 
     @SneakyThrows

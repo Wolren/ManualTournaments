@@ -31,8 +31,7 @@ public class Arena implements CommandExecutor, TabCompleter {
             ArenaShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
             ArenaFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], getPlugin().arenaNames.contains(args[1]));
-            getArenaConfig().save(getPlugin().ArenaConfigFile);
-        } else return false;
+        } else send(player, "arena-usage");
         return true;
     }
 

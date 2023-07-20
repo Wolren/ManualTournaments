@@ -5,6 +5,8 @@ import net.flex.ManualTournaments.commands.SettingsCommand.Short.Implementations
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
+
 public class SettingsShortFactory {
     private static final Map<String, SettingsShortCommand> settingsShortCommandMap;
 
@@ -14,6 +16,6 @@ public class SettingsShortFactory {
     }
 
     public static SettingsShortCommand getCommand(String command) {
-        return settingsShortCommandMap.getOrDefault(command, (player, setting) -> {});
+        return settingsShortCommandMap.getOrDefault(command, (player, setting) -> send(player, "settings-usage"));
     }
 }

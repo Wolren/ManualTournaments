@@ -6,10 +6,10 @@ countdown-time: 10
 #If true folder saving info for every fight will be created and the names of next files will be based on fight-count (count-fights has to be true for that!)
 create-fights-folder: false
 count-fights: false
-mysql-enabled: true
+mysql-enabled: false
 mysql:
   url: localhost:3306
-  username:
+  username: root
   password:
 #Switch to true if you have automatic spawn teleport on server join but not this option on to avoid spectator errors
 default-gamemode-on-join: false
@@ -56,12 +56,13 @@ arena-lacks-pos2: "&7Arena lacks &e&lpos2"
 arena-lacks-spectator: "&7Arena lacks &e&lspectator position"
 arena-list: "&7Arenas: &e&l"
 arena-not-exists: "&6Arena with this name doesn't exist"
-arena-not-set: "&6You have to set &e&lspectator position &r&6before teleporting!"
 arena-pos1: "&aPosition for &e&lTeam 1 &r&aset successfully"
-arena-pos2: "&aPosition for &e&lTeam 1 &r&aset successfully"
+arena-pos2: "&aPosition for &e&lTeam 2 &r&aset successfully"
 arena-removed: "&aArena removed successfully"
 arena-set-correctly: "&7Arena is set correctly"
 arena-spectator: "&aPosition for &e&lspectator &r&aset successfully"
+arena-spectator-not-set: "&6You have to set &e&lspectator position &r&6before teleporting!"
+arena-usage: "&7Usage: /arena &e&l(command) (arena name) "
 config-options: "&6Only possible options are true and false"
 config-updated-successfully: "&aConfig was updated successfully"
 current-arena-not-set: "&6You have to set &e&lcurrent arena &r&6using &e&l/settings current_arena &r&6before starting the fight"
@@ -71,6 +72,7 @@ fight-death: "&e&l{killer} &r&7killed &e&l{player}"
 fighter-error: "&6One or more players can't be found"
 fight-good-luck: "&7Good luck :)"
 fight-good-luck-enabled: true
+fight-usage: "&7Usage: /fight &e&l(fight type) [fighters]"
 fight-will-start: "&7Fight will start in &e&l"
 fight-will-start-seconds: " &r&7seconds"
 fight-winners: "&7Congratulations to &e&l{team} &r&7for winning the fight!"
@@ -82,9 +84,12 @@ kit-made: "&aKit made successfully"
 kit-not-exists: "&6Kit doesn't exist"
 kit-removed: "&aKit removed successfully"
 kit-set-unbreakable: "&7Items in inventory set unbreakable"
+kit-usage: "&7Usage: /kit &e&l(command/kit name) (kit name)"
 not-allowed: "&6You are not allowed to use this command during spectator mode"
 not-supported: "&6This command is not supported for this version"
 sender-not-a-player: "&4Sender must be a player"
+settings-usage: "&7Usage: /settings &e&l(setting) (value)"
 spectator-started-spectating: "&7Started spectating the fight, to leave it use &e&l/spectate stop"
 spectator-stopped-spectating: "&7Stopped spectating the fight"
+spectator-usage: "&7Usage: /spectate | /spectate &e&lstop"
 spectator-wrong-arguments: "&6Invalid gamemode"

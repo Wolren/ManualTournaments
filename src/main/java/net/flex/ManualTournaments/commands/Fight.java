@@ -17,8 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.utils.SharedComponents.optional;
-import static net.flex.ManualTournaments.utils.SharedComponents.player;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Fight implements CommandExecutor, TabCompleter {
     private final Collection<Player> distinctFighters = new java.util.ArrayList<>(Collections.emptyList());
@@ -43,10 +42,11 @@ public class Fight implements CommandExecutor, TabCompleter {
         }
         FightType currentFight = new FightHandler().createFight(args[0]);
         if (args.length == 1 && args[0].equals("stop")) {
-            return currentFight.stopFight();
+            currentFight.stopFight();
         } else if (args.length > 2 && distinctFighters.stream().distinct().count() == args.length - 1) {
-            return currentFight.startFight(fighters);
-        } else return false;
+            currentFight.startFight(fighters);
+        } else send(player, "fight-usage");
+        return true;
     }
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {

@@ -11,8 +11,8 @@ public final class TeleportArena implements ArenaCommand {
     public void execute(Player player, String arenaName, boolean arenaExists) {
         if (arenaExists) {
             if (getArenaConfig().isSet("Arenas." + arenaName + ".spectator")) {
-                player.teleport(location("Arenas." + arenaName + "." + "spectator.", getArenaConfig()));
-            } else send(player, "arena-not-set");
+                player.teleport(location("Arenas." + arenaName + ".spectator.", getArenaConfig()));
+            } else send(player, "arena-spectator-not-set");
         } else sendNotExists(player);
     }
 }

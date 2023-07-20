@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
-public class UnbreakableKit implements KitShortCommand {
+public final class UnbreakableKit implements KitShortCommand {
     @Override
     public void execute(Player player, String arg) {
         if (Main.version >= 17) {

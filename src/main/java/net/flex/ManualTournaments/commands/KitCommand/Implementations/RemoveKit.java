@@ -7,7 +7,7 @@ import static net.flex.ManualTournaments.Main.getKitsConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
-public class RemoveKit implements KitCommand {
+public final class RemoveKit implements KitCommand {
     @Override
     public void execute(Player player, String kitName, boolean kitExists) {
         if (kitExists) {
@@ -16,5 +16,4 @@ public class RemoveKit implements KitCommand {
             send(player, "kit-removed");
         } else send(player, "kit-not-exists");
     }
-
 }

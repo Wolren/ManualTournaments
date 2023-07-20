@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
-public class EndspawnSettings implements SettingsShortCommand {
+public final class EndspawnSettings implements SettingsShortCommand {
     @SneakyThrows
     @Override
     public void execute(Player player, String setting) {

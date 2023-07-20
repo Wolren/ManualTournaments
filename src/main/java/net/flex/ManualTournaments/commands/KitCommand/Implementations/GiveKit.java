@@ -11,10 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
+import org.bukkit.potion.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +20,7 @@ import java.util.Objects;
 import static net.flex.ManualTournaments.Main.getKitsConfig;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
-public class GiveKit implements KitCommand {
+public final class GiveKit implements KitCommand {
     @Override
     public void execute(Player player, String kitName, boolean kitExists) {
         if (kitExists) {
@@ -60,7 +57,7 @@ public class GiveKit implements KitCommand {
             String name = getKitsConfig().getString(slotPath + "name");
             List<String> enchants = getKitsConfig().getStringList(slotPath + "enchants");
             ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(getKitsConfig().getString(slotPath + "type")))), getKitsConfig().getInt(slotPath + "amount"));
-            if (getKitsConfig().getString(slotPath + "potion") != null && Main.version >= 14) {
+            if (getKitsConfig().getString(slotPath + "potion") != null) {
                 effect(slotPath, is);
                 player.getInventory().setItem(slot, is);
             } else if (is.getType().equals(Material.ENCHANTED_BOOK)) {
@@ -143,12 +140,21 @@ public class GiveKit implements KitCommand {
     }
 
     private static void effect(String pathing, ItemStack is) {
-        PotionType potionType = PotionType.valueOf(getKitsConfig().getString(pathing + "potion.type"));
-        boolean extended = getKitsConfig().getBoolean(pathing + "potion.extended");
-        boolean upgraded = getKitsConfig().getBoolean(pathing + "potion.upgraded");
+        PotionType potionMetaType = PotionType.valueOf(getKitsConfig().getString(pathing + "potion.type"));
+        boolean metaExtended = getKitsConfig().getBoolean(pathing + "potion.extended");
+        boolean metaUpgraded = getKitsConfig().getBoolean(pathing + "potion.upgraded");
         PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
-        if (Main.version >= 14 && potionMeta != null) potionMeta.setBasePotionData(new PotionData(potionType, extended, upgraded));
-        is.setItemMeta(potionMeta);
+        if (Main.version >= 14 && potionMeta != null) {
+            potionMeta.setBasePotionData(new PotionData(potionMetaType, metaExtended, metaUpgraded));
+            is.setItemMeta(potionMeta);
+        } else if (Main.version >= 13) {
+            PotionType potionType = PotionType.valueOf(getKitsConfig().getString(pathing + "potion.type"));
+            int level = getKitsConfig().getInt(pathing + "potion.level");
+            boolean splash = getKitsConfig().getBoolean(pathing + "potion.splash");
+            boolean extended = getKitsConfig().getBoolean(pathing + "potion.extended");
+            Potion potion = new Potion(potionType, level, splash, extended);
+            is.setItemMeta(potion.toItemStack(is.getAmount()).getItemMeta());
+        }
     }
 
     private static void storageEnchant(ItemStack is, String s) {

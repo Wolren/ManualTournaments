@@ -9,6 +9,6 @@ import static net.flex.ManualTournaments.utils.SharedComponents.message;
 public final class ListArena implements ArenaShortCommand {
     @Override
     public void execute(Player player, String arg) {
-        player.sendMessage(message("arena-list") + getPlugin().arenaNames.toString());
+        player.sendMessage(message("arena-list") + String.join(", ", getPlugin().arenaNames));
     }
 }

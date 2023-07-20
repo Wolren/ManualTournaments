@@ -20,6 +20,7 @@ import java.util.List;
 import static net.flex.ManualTournaments.Main.getKitsConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.optional;
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class Kit implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
@@ -36,9 +37,7 @@ public class Kit implements TabCompleter, CommandExecutor {
             KitShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
             KitFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], getPlugin().kitNames.contains(args[1]));
-            getKitsConfig().save(getPlugin().KitsConfigfile);
-            return true;
-        } else return false;
+        } else send(player, "kit-usage");
         return true;
     }
 
