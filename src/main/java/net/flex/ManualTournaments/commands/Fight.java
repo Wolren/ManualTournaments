@@ -1,9 +1,9 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.FightCommand.FightFactory;
-import net.flex.ManualTournaments.commands.FightCommand.FightType;
-import net.flex.ManualTournaments.commands.FightCommand.NullFight;
+import net.flex.ManualTournaments.factories.FightFactory;
+import net.flex.ManualTournaments.interfaces.FightType;
+import net.flex.ManualTournaments.commands.fightCommands.NullFight;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

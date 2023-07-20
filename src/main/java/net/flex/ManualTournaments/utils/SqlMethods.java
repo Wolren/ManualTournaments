@@ -1,6 +1,6 @@
 package net.flex.ManualTournaments.utils;
 
-import net.flex.ManualTournaments.commands.FightCommand.Implementations.TeamFight;
+import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.*;

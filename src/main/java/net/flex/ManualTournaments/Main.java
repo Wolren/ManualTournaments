@@ -1,13 +1,16 @@
 package net.flex.ManualTournaments;
 
 import net.flex.ManualTournaments.commands.*;
+import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
+import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -76,6 +79,15 @@ public final class Main extends JavaPlugin {
     }
 
     public void onDisable() {
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
+                player.getInventory().clear();
+            }
+        }
+        FightFactory.fight.stopFight();
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            if (Spectate.spectators.contains(player.getUniqueId())) Spectate.stopSpectator(player);
+        }
         super.onDisable();
     }
 

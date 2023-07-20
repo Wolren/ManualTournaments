@@ -1,0 +1,17 @@
+package net.flex.ManualTournaments.commands.arenaCommands;
+
+import net.flex.ManualTournaments.interfaces.ArenaCommand;
+import org.bukkit.entity.Player;
+
+import static net.flex.ManualTournaments.Main.getArenaConfig;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
+
+public final class Pos2Arena implements ArenaCommand {
+    @Override
+    public void execute(Player player, String arenaName, boolean arenaExists) {
+        if (arenaExists) {
+            getLocation("Arenas." + arenaName + ".pos2.", player, getArenaConfig());
+            send(player, "arena-pos2");
+        } else sendNotExists(player);
+    }
+}

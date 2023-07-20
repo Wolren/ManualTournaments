@@ -31,17 +31,20 @@ public final class Spectate implements TabCompleter, CommandExecutor {
     public static List<UUID> spectators = new ArrayList<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team spectatorsBoard = board.registerNewTeam("spectators");
-    GameMode gameMode = Bukkit.getServer().getDefaultGameMode();
     Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        loadConfigs();
+        config.load(getPlugin().customConfigFile);
+        getArenaConfig().load(getPlugin().ArenaConfigFile);
         if (args.length == 0) setSpectator(player);
-        else if (args.length == 1) stopSpectator(player, args[0]);
-        else send(player, "spectator-usage");
+        else if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("stop")) {
+                stopSpectator(player);
+            } else send(player, "not-allowed");
+        } else send(player, "spectator-usage");
         return true;
     }
 
@@ -80,24 +83,16 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         spectators.add(player.getUniqueId());
     }
 
-    private void stopSpectator(Player player, String arg) {
-        if (arg.equalsIgnoreCase("stop")) {
-            player.setGameMode(gameMode);
-            player.setAllowFlight(false);
-            player.setFlying(false);
-            player.getInventory().clear();
-            for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
-            send(player, "spectator-stopped-spectating");
-            spectatorsBoard.removeEntry(player.getName());
-            if (Main.version >= 14) player.setCollidable(true);
-            spectators.remove(player.getUniqueId());
-        } else send(player, "not-allowed");
-    }
-
-    @SneakyThrows
-    private void loadConfigs() {
-        config.load(getPlugin().customConfigFile);
-        getArenaConfig().load(getPlugin().ArenaConfigFile);
+    public static void stopSpectator(Player player) {
+        player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+        player.setAllowFlight(false);
+        player.setFlying(false);
+        player.getInventory().clear();
+        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
+        send(player, "spectator-stopped-spectating");
+        spectatorsBoard.removeEntry(player.getName());
+        if (Main.version >= 14) player.setCollidable(true);
+        spectators.remove(player.getUniqueId());
     }
 
     @Nullable

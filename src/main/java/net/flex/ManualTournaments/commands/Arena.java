@@ -1,8 +1,8 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.ArenaCommand.ArenaFactory;
-import net.flex.ManualTournaments.commands.ArenaCommand.Short.ArenaShortFactory;
+import net.flex.ManualTournaments.factories.ArenaFactory;
+import net.flex.ManualTournaments.factories.ArenaShortFactory;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

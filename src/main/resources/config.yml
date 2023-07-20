@@ -1,35 +1,37 @@
 fight-count: 0
 #If true fighters will be able to destroy blocks during the fight (you have to set WorldGuard flags to prevent arena from being destroyed separately)
 break-blocks: false
+#If true fighters will be able to place blocks during the fight
+place-blocks: false
 #Time (in seconds) to prepare before the fight during which players will be frozen (if freeze-on-start is true)
 countdown-time: 10
-#If true folder saving info for every fight will be created and the names of next files will be based on fight-count (count-fights has to be true for that!)
+#If true folder saving info for every fight will be created and the names of next files will be based on fight-count (count-fights has to be true and synced for that!)
 create-fights-folder: false
 count-fights: false
 mysql-enabled: false
 mysql:
   url: localhost:3306
   username: root
-  password:
-#Switch to true if you have automatic spawn teleport on server join but not this option on to avoid spectator errors
+  password: ""
+#Switch to true if you have automatic spawn teleport on server join to avoid spectator errors
 default-gamemode-on-join: false
 #If true fighters will be able to drop their items during the fight
 drop-items: false
-#If true fighter's items will drop on the ground after their death
+#If true fighters' items will drop on the ground after their death
 drop-on-death: false
-#If true fighters will be frozen in the beginning of the fight for countdown-time: seconds
+#If true fighters will be frozen at the beginning of the fight for countdown-time
 freeze-on-start: true
 #If true friendly fire inside team will be turned on
 friendly-fire: false
-#If kill_on_fight_end is false fighters will be teleported to location below, you can specify it manually or using /mt_settings endspawn
+#If true winners will be killed after the fight
+kill-on-fight-end: true
+#If kill_on_fight_end is false fighters will be teleported to location below, you can specify it using /mt_settings endspawn
 fight-end-spawn:
   x:
   y:
   z:
   yaw:
   pitch:
-#If true winners will be killed after the fight
-kill-on-fight-end: true
 #List of allowed commands other than /spectate stop you can use while spectating
 spectator-allowed-commands: []
 #Valid values are: spectator, survival, adventure, creative
@@ -41,12 +43,12 @@ teleport-countdown-time: 3
 #Set these two below using /mt_settings current_kit/arena
 current-kit: ""
 current-arena: ""
-#Team names (for now they don't really matter)
+#Scoreboard team names, functionality to be implemented in future versions
 team1: "Red"
 team2: "Blue"
-#Prefix visible on tab and nickname
-team1-prefix: "Red "
-team2-prefix: "Blue "
+#Scoreboard prefix visible on tab and nickname
+team1-prefix: "&cRed&r "
+team2-prefix: "&9Blue&r "
 
 #Language section
 arena-already-exists: "&6Arena with this name already exists"
