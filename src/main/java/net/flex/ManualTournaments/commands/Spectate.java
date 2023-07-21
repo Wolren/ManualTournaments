@@ -25,7 +25,6 @@ import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
-@SuppressWarnings("deprecation")
 public final class Spectate implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
     public static List<UUID> spectators = new ArrayList<>();
@@ -67,7 +66,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         spectatorsBoard.addEntry(player.getName());
         if (!config.getBoolean("spectator-visibility")) {
             for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                other.hidePlayer(player);
+                other.hidePlayer(getPlugin(), player);
             }
         }
         clear(player);
@@ -79,7 +78,6 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         itemStack.setItemMeta(itemMeta);
         inventory[8] = itemStack;
         player.getInventory().setContents(inventory);
-        player.updateInventory();
         spectators.add(player.getUniqueId());
     }
 
@@ -88,7 +86,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         player.setAllowFlight(false);
         player.setFlying(false);
         player.getInventory().clear();
-        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
+        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(getPlugin(), player);
         send(player, "spectator-stopped-spectating");
         spectatorsBoard.removeEntry(player.getName());
         if (Main.version >= 14) player.setCollidable(true);

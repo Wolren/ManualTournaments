@@ -200,6 +200,8 @@ public class TeamFightListener implements Listener {
                     player.teleport(location(path, config));
                 }
             }
+            teamRemover(player, TeamFight.team1, TeamFight.team2);
+            teamRemover(player, TeamFight.team2, TeamFight.team1);
         }
     }
 

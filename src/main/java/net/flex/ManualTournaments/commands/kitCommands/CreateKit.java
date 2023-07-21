@@ -88,19 +88,19 @@ public final class CreateKit implements KitCommand {
                 Collection<String> enchantList = new ArrayList<>();
                 for (Enchantment e : storageMeta.getStoredEnchants().keySet()) {
                     int level = enchants.get(e);
-                    enchantList.add(e.getName().toUpperCase() + ":" + level);
+                    enchantList.add(e.getKey().toString().toLowerCase() + " =: " + level);
                 }
                 getKitsConfig().set(path + ".enchants", enchantList);
                 if (storageMeta.hasLore()) getKitsConfig().set(path + ".lore", storageMeta.getLore());
                 if (storageMeta.hasDisplayName()) getKitsConfig().set(path + ".name", storageMeta.getDisplayName());
                 else getKitsConfig().set(path + ".name", "&e" + "Enchanted Book");
-            } else if (is.getItemMeta() instanceof PotionMeta && Main.version >= 14) {
+            } else if (Main.version >= 14 && is.getItemMeta() instanceof PotionMeta) {
                 PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
                 getKitsConfig().set(path + ".potion.type", potionMeta.getBasePotionData().getType().name());
                 getKitsConfig().set(path + ".potion.extended", potionMeta.getBasePotionData().isExtended());
                 getKitsConfig().set(path + ".potion.upgraded", potionMeta.getBasePotionData().isUpgraded());
                 getKitsConfig().set(path + ".lore", potionMeta.getLore());
-            } else if (is.getItemMeta() instanceof Potion && Main.version <= 13) {
+            } else if (Main.version <= 13 && is.getItemMeta() instanceof Potion) {
                 Potion potion = (Potion) is.getItemMeta();
                 getKitsConfig().set(path + ".potion.type", potion.getType().name());
                 getKitsConfig().set(path + ".potion.extended", potion.hasExtendedDuration());
@@ -112,7 +112,7 @@ public final class CreateKit implements KitCommand {
                 Collection<String> enchantList = new ArrayList<>();
                 for (Enchantment e : is.getEnchantments().keySet()) {
                     int level = enchants.get(e);
-                    enchantList.add(e.getName().toUpperCase() + ":" + level);
+                    enchantList.add(e.getKey().toString().toLowerCase() + " =: " + level);
                 }
                 getKitsConfig().set(path + ".enchants", enchantList);
             }

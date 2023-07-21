@@ -4,6 +4,7 @@ import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.interfaces.KitCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -46,7 +47,6 @@ public final class GiveKit implements KitCommand {
         setArmor(player, path, armorSection);
         if (Main.version >= 15) setOffhand(player, path, offhandSection);
         setPlayerEffects(player, path, effectsSection);
-        player.updateInventory();
     }
 
     private static void setItems(Player player, String path, ConfigurationSection itemSection) {
@@ -158,10 +158,13 @@ public final class GiveKit implements KitCommand {
     }
 
     private static void storageEnchant(ItemStack is, String s) {
-        String[] stringEnchants = s.split(":");
+        String[] stringEnchants = s.split(" =: ");
+        NamespacedKey enchantmentKey = NamespacedKey.minecraft(stringEnchants[0].toLowerCase());
+        Enchantment enchantment = Enchantment.getByKey(enchantmentKey);
         EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
-        if (storageMeta != null)
-            storageMeta.addStoredEnchant(Objects.requireNonNull(Enchantment.getByName(stringEnchants[0])), Integer.parseInt(stringEnchants[1]), true);
+        if (storageMeta != null && enchantment != null) {
+            storageMeta.addStoredEnchant(enchantment, Integer.parseInt(stringEnchants[1]), true);
+        }
         is.setItemMeta(storageMeta);
     }
 
@@ -170,8 +173,12 @@ public final class GiveKit implements KitCommand {
         im.setLore(getKitsConfig().getStringList(slotPath + "lore"));
         if (getKitsConfig().getBoolean(slotPath + "unbreakable") && Main.version >= 14) im.setUnbreakable(true);
         for (String s1 : enchants) {
-            String[] stringEnchants = s1.split(":");
-            im.addEnchant(Objects.requireNonNull(Enchantment.getByName(stringEnchants[0])), Integer.parseInt(stringEnchants[1]), true);
+            String[] stringEnchants = s1.split(" =: ");
+            NamespacedKey enchantmentKey = NamespacedKey.minecraft(stringEnchants[0].toLowerCase());
+            Enchantment enchantment = Enchantment.getByKey(enchantmentKey);
+            if (enchantment != null) {
+                im.addEnchant(enchantment, Integer.parseInt(stringEnchants[1]), true);
+            }
         }
     }
 }

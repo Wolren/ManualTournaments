@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.listeners;
 
+import net.flex.ManualTournaments.commands.Spectate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
@@ -67,7 +69,8 @@ public class SpectateListener implements Listener {
     private void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
-            if (event.getMessage().startsWith("/spec") || event.getMessage().contains("spectate") || event.getMessage().startsWith("/mt_spec") || config.getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
+            if (event.getMessage().startsWith("/spec") || event.getMessage().contains("spectate") || event.getMessage().startsWith("/mt_spec")
+                    || config.getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
                 event.setCancelled(false);
             } else {
                 player.sendMessage(message("not-allowed"));
@@ -106,6 +109,16 @@ public class SpectateListener implements Listener {
     }
 
     @EventHandler
+    private void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        for (Player other : Bukkit.getServer().getOnlinePlayers()) {
+            if (spectators.contains(other.getUniqueId())) {
+                player.hidePlayer(getPlugin(), other);
+            }
+        }
+    }
+
+    @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
@@ -121,5 +134,6 @@ public class SpectateListener implements Listener {
                 }
             }
         }
+        Spectate.stopSpectator(player);
     }
 }

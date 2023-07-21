@@ -19,7 +19,6 @@ public final class UnbreakableKit implements KitShortCommand {
                     im.setItemMeta(unbreakable);
                 }
             }
-            player.updateInventory();
             send(player, "kit-set-unbreakable");
         } else send(player, "not-supported");
     }
