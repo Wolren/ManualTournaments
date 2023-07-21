@@ -49,36 +49,35 @@ public final class Spectate implements TabCompleter, CommandExecutor {
 
     private void setSpectator(Player player) {
         if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
-            String path = "Arenas." + config.getString("current-arena") + "." + "spectator" + ".";
+            String path = "Arenas." + config.getString("current-arena") + ".spectator.";
             if (getArenaConfig().isSet(path)) {
                 if (Main.version >= 14) {
                     spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                     player.setCollidable(false);
                 } else collidableReflection(player);
+                player.setGameMode(GameMode.ADVENTURE);
+                player.setAllowFlight(true);
+                player.setFoodLevel(20);
+                player.setHealth(20.0D);
+                spectatorsBoard.addEntry(player.getName());
+                for (Player other : Bukkit.getServer().getOnlinePlayers()) {
+                    other.hidePlayer(getPlugin(), player);
+                }
+                clear(player);
+                ItemStack[] inventory = player.getInventory().getContents();
+                ItemStack itemStack = new ItemStack(Material.RED_DYE);
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (itemMeta != null)
+                    itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
+                itemStack.setItemMeta(itemMeta);
+                inventory[8] = itemStack;
+                player.getInventory().setContents(inventory);
+                spectators.add(player.getUniqueId());
                 player.teleport(location(path, getArenaConfig()));
                 send(player, "spectator-started-spectating");
-            } else send(player, "arena-not-set");
+            } else send(player, "arena-spectator-not-set");
         } else send(player, "current-arena-not-set");
-        player.setGameMode(GameMode.ADVENTURE);
-        player.setAllowFlight(true);
-        player.setFoodLevel(20);
-        player.setHealth(20.0D);
-        spectatorsBoard.addEntry(player.getName());
-        if (!config.getBoolean("spectator-visibility")) {
-            for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                other.hidePlayer(getPlugin(), player);
-            }
-        }
-        clear(player);
-        ItemStack[] inventory = player.getInventory().getContents();
-        ItemStack itemStack = new ItemStack(Material.RED_DYE);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        if (itemMeta != null)
-            itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
-        itemStack.setItemMeta(itemMeta);
-        inventory[8] = itemStack;
-        player.getInventory().setContents(inventory);
-        spectators.add(player.getUniqueId());
+
     }
 
     public static void stopSpectator(Player player) {

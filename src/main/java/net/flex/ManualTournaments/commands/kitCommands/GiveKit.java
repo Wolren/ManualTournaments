@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getKitsConfig;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public final class GiveKit implements KitCommand {
@@ -158,8 +159,8 @@ public final class GiveKit implements KitCommand {
     }
 
     private static void storageEnchant(ItemStack is, String s) {
-        String[] stringEnchants = s.split(" =: ");
-        NamespacedKey enchantmentKey = NamespacedKey.minecraft(stringEnchants[0].toLowerCase());
+        String[] stringEnchants = s.split(" = ");
+        NamespacedKey enchantmentKey = NamespacedKey.fromString(stringEnchants[0], getPlugin());
         Enchantment enchantment = Enchantment.getByKey(enchantmentKey);
         EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
         if (storageMeta != null && enchantment != null) {
@@ -172,9 +173,9 @@ public final class GiveKit implements KitCommand {
         if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
         im.setLore(getKitsConfig().getStringList(slotPath + "lore"));
         if (getKitsConfig().getBoolean(slotPath + "unbreakable") && Main.version >= 14) im.setUnbreakable(true);
-        for (String s1 : enchants) {
-            String[] stringEnchants = s1.split(" =: ");
-            NamespacedKey enchantmentKey = NamespacedKey.minecraft(stringEnchants[0].toLowerCase());
+        for (String enchant : enchants) {
+            String[] stringEnchants = enchant.split(" = ");
+            NamespacedKey enchantmentKey = NamespacedKey.fromString(stringEnchants[0], getPlugin());
             Enchantment enchantment = Enchantment.getByKey(enchantmentKey);
             if (enchantment != null) {
                 im.addEnchant(enchantment, Integer.parseInt(stringEnchants[1]), true);

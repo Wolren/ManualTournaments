@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffect;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getKitsConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
@@ -27,7 +28,7 @@ public final class CreateKit implements KitCommand {
     @Override
     public void execute(Player player, String kitName, boolean kitExists) {
         if (!kitExists) {
-            if (config.getString("current-kit") == null)  {
+            if (Objects.equals(config.getString("current-kit"), ""))  {
                 config.set("current-kit", kitName);
                 config.save(getPlugin().customConfigFile);
             }
@@ -88,7 +89,7 @@ public final class CreateKit implements KitCommand {
                 Collection<String> enchantList = new ArrayList<>();
                 for (Enchantment e : storageMeta.getStoredEnchants().keySet()) {
                     int level = enchants.get(e);
-                    enchantList.add(e.getKey().toString().toLowerCase() + " =: " + level);
+                    enchantList.add(e.getKey() + " = " + level);
                 }
                 getKitsConfig().set(path + ".enchants", enchantList);
                 if (storageMeta.hasLore()) getKitsConfig().set(path + ".lore", storageMeta.getLore());
@@ -112,7 +113,7 @@ public final class CreateKit implements KitCommand {
                 Collection<String> enchantList = new ArrayList<>();
                 for (Enchantment e : is.getEnchantments().keySet()) {
                     int level = enchants.get(e);
-                    enchantList.add(e.getKey().toString().toLowerCase() + " =: " + level);
+                    enchantList.add(e.getKey() + " = " + level);
                 }
                 getKitsConfig().set(path + ".enchants", enchantList);
             }

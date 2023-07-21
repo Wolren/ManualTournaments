@@ -107,7 +107,7 @@ public class TeamFight implements FightType {
                             if (!pos2) send(player, "arena-lacks-pos2");
                             if (!spectator) send(player, "arena-lacks-spectator");
                         }
-                    } else send(player, "fight-wrong-arguments");
+                    } else send(player, "fight-concurrent");
                 }
             } else send(player, "current-arena-not-set");
         } else send(player, "current-kit-not-set");
@@ -219,7 +219,7 @@ public class TeamFight implements FightType {
                     cancel();
                 } else if (cancelled) cancel();
                 else
-                    Bukkit.broadcastMessage(message("fight-will-start") + i + message("fight-will-start-seconds"));
+                    Bukkit.broadcastMessage(String.format(message("fight-will-start"), i));
                 --i;
             }
         }).runTaskTimer(getPlugin(), 0L, 20L);
