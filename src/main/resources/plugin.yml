@@ -22,7 +22,7 @@ commands:
       - fight
     permission: mt.fight
     permission-message: "You don't have permission to use that command"
-    usage: "Usage: /fight [player1] [player2]..."
+    usage: "Usage: /fight {type}/stop [player1] [player2]..."
   manualtournaments_kit:
     aliases:
       - mt_kit
@@ -67,6 +67,7 @@ permissions:
     description: Allows for changing settings
   mt.spectate:
     description: Allows for spectating arenas
+    default: true
   mt.*:
     description: Permission allowing using all ManualTournaments commands
     children:
