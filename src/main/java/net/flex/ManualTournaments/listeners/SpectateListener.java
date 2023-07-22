@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.listeners;
 
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Spectate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,9 +12,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.EquipmentSlot;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
@@ -52,9 +51,8 @@ public class SpectateListener implements Listener {
     }
 
     @EventHandler
-    private void onPickup(EntityPickupItemEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
-        Player player = (Player) event.getEntity();
+    private void onPickup(PlayerPickupItemEvent event) {
+        Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
     }
 
@@ -80,6 +78,23 @@ public class SpectateListener implements Listener {
     }
 
     @EventHandler
+    private void onDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        if (spectators.contains(player.getUniqueId())) {
+            event.setDeathMessage(null);
+            player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+            if (Main.version <= 13) collidableReflection(player, true);
+            player.setAllowFlight(false);
+            player.setFlying(false);
+            player.getInventory().clear();
+            for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
+            Spectate.spectatorsBoard.removeEntry(player.getName());
+            if (Main.version >= 14) player.setCollidable(true);
+            spectators.remove(player.getUniqueId());
+        }
+    }
+
+    @EventHandler
     private void onDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
@@ -101,7 +116,7 @@ public class SpectateListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
-            if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getMaterial() == Material.RED_DYE && event.getHand() == EquipmentSlot.HAND) {
+            if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getMaterial() == Material.REDSTONE_BLOCK) {
                 player.performCommand("spectate stop");
             }
             event.setCancelled(true);
@@ -113,7 +128,7 @@ public class SpectateListener implements Listener {
         Player player = event.getPlayer();
         for (Player other : Bukkit.getServer().getOnlinePlayers()) {
             if (spectators.contains(other.getUniqueId())) {
-                player.hidePlayer(getPlugin(), other);
+                player.hidePlayer(other);
             }
         }
     }

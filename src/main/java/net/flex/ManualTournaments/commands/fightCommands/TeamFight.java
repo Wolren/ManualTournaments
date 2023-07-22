@@ -43,7 +43,7 @@ public class TeamFight implements FightType {
                 UUID fighterId = fighter.getUniqueId();
                 fighter.setTotalExperience(0);
                 fighter.setGameMode(GameMode.SURVIVAL);
-                if (Main.version <= 13) collidableReflection(fighter);
+                if (Main.version <= 13) collidableReflection(fighter, false);
                 config.load(getPlugin().customConfigFile);
                 if (i < (fighters.toArray().length / 2)) {
                     team1Board.addEntry(fighter.getDisplayName());
@@ -73,6 +73,7 @@ public class TeamFight implements FightType {
         cancelled = true;
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {
             if (team1.contains(online.getUniqueId()) || team2.contains(online.getUniqueId())) {
+                if (Main.version <= 13) collidableReflection(player, true);
                 if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
                 else if (!config.getBoolean("kill-on-fight-end")) {
                     String path = "fight-end-spawn.";

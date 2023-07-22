@@ -63,11 +63,11 @@ public class SharedComponents {
         getArenaConfig().save(getPlugin().ArenaConfigFile);
     }
 
-    public static void collidableReflection(Player fighter) {
+    public static void collidableReflection(Player fighter, boolean value) {
         try {
             Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
             Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
-            setCollidesWithEntities.invoke(fighter.spigot(), false);
+            setCollidesWithEntities.invoke(fighter.spigot(), value);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
                  InvocationTargetException exception) {
             throw new RuntimeException(exception);

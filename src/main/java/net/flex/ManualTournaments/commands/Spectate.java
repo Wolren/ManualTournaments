@@ -54,18 +54,18 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 if (Main.version >= 14) {
                     spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                     player.setCollidable(false);
-                } else collidableReflection(player);
+                } else collidableReflection(player, false);
                 player.setGameMode(GameMode.ADVENTURE);
                 player.setAllowFlight(true);
                 player.setFoodLevel(20);
                 player.setHealth(20.0D);
                 spectatorsBoard.addEntry(player.getName());
                 for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                    other.hidePlayer(getPlugin(), player);
+                    other.hidePlayer(player);
                 }
                 clear(player);
                 ItemStack[] inventory = player.getInventory().getContents();
-                ItemStack itemStack = new ItemStack(Material.RED_DYE);
+                ItemStack itemStack = new ItemStack(Material.REDSTONE_BLOCK);
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 if (itemMeta != null)
                     itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
@@ -82,10 +82,20 @@ public final class Spectate implements TabCompleter, CommandExecutor {
 
     public static void stopSpectator(Player player) {
         player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+        if (Main.version <= 13) collidableReflection(player, true);
         player.setAllowFlight(false);
         player.setFlying(false);
         player.getInventory().clear();
-        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(getPlugin(), player);
+        if (config.getBoolean("kill-on-fight-end")) player.setHealth(0);
+        else {
+            String path = "fight-end-spawn.";
+            if (config.isSet(path)) {
+                player.setGameMode(Bukkit.getServer().getDefaultGameMode());
+                clear(player);
+                player.teleport(location(path, config));
+            }
+        }
+        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
         send(player, "spectator-stopped-spectating");
         spectatorsBoard.removeEntry(player.getName());
         if (Main.version >= 14) player.setCollidable(true);

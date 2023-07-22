@@ -46,7 +46,7 @@ public class TeamFightListener implements Listener {
         removeEntries();
         if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
             event.setDroppedExp(0);
-            event.setDeathMessage("");
+            event.setDeathMessage(null);
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
             if (killer != null && !TeamFight.cancelled) {
                 if (TeamFight.team1.contains(killer.getUniqueId()) || TeamFight.team2.contains(killer.getUniqueId())) {
