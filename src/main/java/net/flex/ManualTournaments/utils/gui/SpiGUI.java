@@ -65,7 +65,7 @@ public class SpiGUI {
         switch (type) {
             case PREV_BUTTON:
                 if (menu.getCurrentPage() > 0) return new Button(new ItemBuilder(Material.ARROW)
-                        .name("&a&l\u2190 Previous Page")
+                        .name("&a&l← Previous Page")
                         .lore(
                                 "&aClick to move back to",
                                 "&apage " + menu.getCurrentPage() + ".")
@@ -87,7 +87,7 @@ public class SpiGUI {
 
             case NEXT_BUTTON:
                 if (menu.getCurrentPage() < menu.getMaxPage() - 1) return new Button(new ItemBuilder(Material.ARROW)
-                        .name("&a&lNext Page \u2192")
+                        .name("&a&lNext Page →")
                         .lore(
                                 "&aClick to move forward to",
                                 "&apage " + (menu.getCurrentPage() + 2) + "."

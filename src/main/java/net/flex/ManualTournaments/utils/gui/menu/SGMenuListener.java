@@ -13,6 +13,8 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
+
 public class SGMenuListener implements Listener {
 
     private final JavaPlugin owner;
@@ -80,7 +82,7 @@ public class SGMenuListener implements Listener {
      * @see SpiGUI#SpiGUI(JavaPlugin)
      */
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) throws IOException {
 
         // This should only run for gui menus, so if the clicked
         // inventory was not a gui menu (i.e., an SGMenu), don't

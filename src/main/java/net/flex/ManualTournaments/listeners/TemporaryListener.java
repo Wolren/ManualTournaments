@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Objects;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class TemporaryListener implements Listener {
@@ -35,16 +36,16 @@ public class TemporaryListener implements Listener {
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (TeamFight.temporary.contains(player.getUniqueId())) {
-            if (config.getBoolean("kill-on-fight-end")) {
+            if (getPlugin().getConfig().getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 player.setHealth(0);
                 player.setWalkSpeed(0.2f);
             } else {
                 String path = "fight-end-spawn.";
-                if (config.isSet(path)) {
+                if (getPlugin().getConfig().isSet(path)) {
                     player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                     clear(player);
-                    player.teleport(location(path, config));
+                    player.teleport(location(path, getPlugin().getConfig()));
                     player.setWalkSpeed(0.2f);
                 }
             }

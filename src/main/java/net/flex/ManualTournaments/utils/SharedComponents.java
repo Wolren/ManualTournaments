@@ -22,8 +22,6 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 
 public class SharedComponents {
 
-    public static final FileConfiguration config = getPlugin().getConfig();
-
     public static Player player = null;
 
     public static String message(String s) {

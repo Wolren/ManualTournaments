@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public final class Reload implements CommandExecutor, TabCompleter {
     @SneakyThrows
@@ -21,7 +20,7 @@ public final class Reload implements CommandExecutor, TabCompleter {
         if ((args.length == 1 && args[0].equals("reload")) || args.length == 0) {
             getPlugin().getLogger().info("Reloading...");
             getKitsConfig().load(getPlugin().KitsConfigfile);
-            config.load(getPlugin().customConfigFile);
+            getPlugin().getConfig().load(getPlugin().customConfigFile);
             getArenaConfig().load(getPlugin().ArenaConfigFile);
             getPlugin().getLogger().info("Reloading complete");
             return true;

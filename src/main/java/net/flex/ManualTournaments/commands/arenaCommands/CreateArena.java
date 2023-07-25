@@ -16,9 +16,9 @@ public final class CreateArena implements ArenaCommand {
     @Override
     public void execute(Player player, String arenaName, boolean arenaExists) {
         if (!arenaExists) {
-            if (Objects.equals(config.getString("current-arena"), ""))  {
-                config.set("current-arena", arenaName);
-                config.save(getPlugin().customConfigFile);
+            if (Objects.equals(getPlugin().getConfig().getString("current-arena"), ""))  {
+                getPlugin().getConfig().set("current-arena", arenaName);
+                getPlugin().getConfig().save(getPlugin().customConfigFile);
             }
             getArenaConfig().set("Arenas." + arenaName, "");
             getArenaConfig().save(getPlugin().ArenaConfigFile);

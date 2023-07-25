@@ -3,6 +3,7 @@ package net.flex.ManualTournaments.commands;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.factories.SettingsFactory;
 import net.flex.ManualTournaments.factories.SettingsShortFactory;
+import net.flex.ManualTournaments.guis.SettingsGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,7 +30,9 @@ public class Settings implements TabCompleter, CommandExecutor {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getPlugin().customConfigFile);
-        if (args.length == 1) {
+        if (args.length == 0) {
+            SettingsGUI.settingsGUI(player);
+        } else if (args.length == 1) {
             SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
             SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, args[0], args[1]);

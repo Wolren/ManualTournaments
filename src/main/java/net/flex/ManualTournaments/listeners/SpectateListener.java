@@ -15,6 +15,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
 import static net.flex.ManualTournaments.commands.Spectate.stopSpectator;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
@@ -87,7 +88,7 @@ public class SpectateListener implements Listener {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
             if (event.getMessage().startsWith("/spec") || event.getMessage().contains("spectate") || event.getMessage().startsWith("/mt_spec")
-                    || config.getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
+                    || getPlugin().getConfig().getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
                 event.setCancelled(false);
             } else {
                 player.sendMessage(message("not-allowed"));
@@ -170,15 +171,15 @@ public class SpectateListener implements Listener {
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
-            if (config.getBoolean("kill-on-fight-end")) {
+            if (getPlugin().getConfig().getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 player.setHealth(0);
             } else {
                 String path = "fight-end-spawn.";
-                if (config.isSet(path)) {
+                if (getPlugin().getConfig().isSet(path)) {
                     player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                     clear(player);
-                    player.teleport(location(path, config));
+                    player.teleport(location(path, getPlugin().getConfig()));
                 }
             }
         }

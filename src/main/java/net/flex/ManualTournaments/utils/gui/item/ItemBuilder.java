@@ -3,6 +3,7 @@ package net.flex.ManualTournaments.utils.gui.item;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -10,6 +11,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class ItemBuilder {
     private final ItemStack stack;
@@ -39,7 +41,7 @@ public class ItemBuilder {
     }
 
     public String getName() {
-        if (!stack.hasItemMeta() || !stack.getItemMeta().hasDisplayName()) return null;
+        if (!stack.hasItemMeta() || !Objects.requireNonNull(stack.getItemMeta()).hasDisplayName()) return null;
         return stack.getItemMeta().getDisplayName();
     }
 
@@ -57,18 +59,15 @@ public class ItemBuilder {
     }
 
     public ItemBuilder lore(List<String> lore) {
-        for (int i = 0; i < lore.size(); i++) {
-            lore.set(i, ChatColor.translateAlternateColorCodes('&', lore.get(i)));
-        }
-
+        lore.replaceAll(textToTranslate -> ChatColor.translateAlternateColorCodes('&', textToTranslate));
         ItemMeta stackMeta = stack.getItemMeta();
-        stackMeta.setLore(lore);
+        if (stackMeta != null) stackMeta.setLore(lore);
         stack.setItemMeta(stackMeta);
         return this;
     }
 
     public List<String> getLore() {
-        if (!stack.hasItemMeta() || !stack.getItemMeta().hasLore()) return null;
+        if (!stack.hasItemMeta() || !Objects.requireNonNull(stack.getItemMeta()).hasLore()) return null;
         return stack.getItemMeta().getLore();
     }
 
@@ -92,19 +91,17 @@ public class ItemBuilder {
 
     public ItemBuilder flag(ItemFlag... flag) {
         ItemMeta meta = stack.getItemMeta();
-        meta.addItemFlags(flag);
+        if (meta != null) meta.addItemFlags(flag);
         stack.setItemMeta(meta);
         return this;
     }
 
-    public ItemBuilder skullOwner(String name) {
+    public ItemBuilder skullOwner(Player player) {
         if (!(stack.getItemMeta() instanceof SkullMeta)) return this;
-
         stack.setDurability((byte) 3);
         SkullMeta meta = (SkullMeta) stack.getItemMeta();
-        meta.setOwner(name);
+        meta.setOwningPlayer(player);
         stack.setItemMeta(meta);
-
         return this;
     }
 
@@ -115,5 +112,4 @@ public class ItemBuilder {
     public ItemStack get() {
         return stack;
     }
-
 }

@@ -1,9 +1,9 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.commands.fightCommands.NullFight;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
-import net.flex.ManualTournaments.commands.fightCommands.NullFight;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -50,7 +50,6 @@ public class Fight implements CommandExecutor, TabCompleter {
         } else send(player, "fight-usage");
         return true;
     }
-
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         List<String> list = new ArrayList<>();

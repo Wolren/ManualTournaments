@@ -25,7 +25,7 @@ public class Arena implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        config.load(getPlugin().customConfigFile);
+        getPlugin().getConfig().load(getPlugin().customConfigFile);
         getArenaConfig().load(getPlugin().ArenaConfigFile);
         if (args.length == 1) {
             ArenaShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);

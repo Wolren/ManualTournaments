@@ -16,9 +16,9 @@ public final class RemoveArena implements ArenaCommand {
     @Override
     public void execute(Player player, String arenaName, boolean arenaExists) {
         if (arenaExists) {
-            if (Objects.equals(config.getString("current-arena"), arenaName)) {
-                config.set("current-arena", null);
-                config.save(getPlugin().customConfigFile);
+            if (Objects.equals(getPlugin().getConfig().getString("current-arena"), arenaName)) {
+                getPlugin().getConfig().set("current-arena", null);
+                getPlugin().getConfig().save(getPlugin().customConfigFile);
             }
             getArenaConfig().set("Arenas." + arenaName, null);
             getArenaConfig().save(getPlugin().ArenaConfigFile);

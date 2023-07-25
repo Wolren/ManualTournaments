@@ -29,7 +29,7 @@ public class TeamFight implements FightType {
     public static final Collection<String> team1String = new ArrayList<>(), team2String = new ArrayList<>();
     public static File FightsConfigFile;
     public static FileConfiguration FightsConfig;
-    public static int duration, fightCount = config.getInt("fight-count");
+    public static int duration, fightCount = getPlugin().getConfig().getInt("fight-count");
     public static boolean cancelled = false;
 
     @SneakyThrows
@@ -44,25 +44,25 @@ public class TeamFight implements FightType {
                 fighter.setTotalExperience(0);
                 fighter.setGameMode(GameMode.SURVIVAL);
                 if (Main.version <= 13) collidableReflection(fighter, false);
-                config.load(getPlugin().customConfigFile);
+                getPlugin().getConfig().load(getPlugin().customConfigFile);
                 if (i < (fighters.toArray().length / 2)) {
                     team1Board.addEntry(fighter.getDisplayName());
                     team1.add(fighterId);
-                    fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig()));
+                    fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos1.", getArenaConfig()));
                 } else if (i >= (fighters.toArray().length / 2)) {
                     team2Board.addEntry(fighter.getDisplayName());
                     team2.add(fighterId);
-                    fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos2.", getArenaConfig()));
+                    fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos2.", getArenaConfig()));
                 }
-                GiveKit.setKit(fighter, config.getString("current-kit"));
-                if (config.getBoolean("freeze-on-start")) freezeOnStart(fighter, fighterId);
+                GiveKit.setKit(fighter, getPlugin().getConfig().getString("current-kit"));
+                if (getPlugin().getConfig().getBoolean("freeze-on-start")) freezeOnStart(fighter, fighterId);
             }
         }
-        if (config.getBoolean("count-fights")) countFights();
-        if (config.getBoolean("create-fights-folder")) setFightsFolder();
-        if (config.getBoolean("mysql-enabled")) SqlMethods.sqlFights();
-        if (config.getBoolean("freeze-on-start")) countdownBeforeFight();
-        else if (config.getBoolean("fight-good-luck-enabled"))
+        if (getPlugin().getConfig().getBoolean("count-fights")) countFights();
+        if (getPlugin().getConfig().getBoolean("create-fights-folder")) setFightsFolder();
+        if (getPlugin().getConfig().getBoolean("mysql-enabled")) SqlMethods.sqlFights();
+        if (getPlugin().getConfig().getBoolean("freeze-on-start")) countdownBeforeFight();
+        else if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
             Bukkit.broadcastMessage(message("fight-good-luck"));
     }
 
@@ -74,11 +74,11 @@ public class TeamFight implements FightType {
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {
             if (team1.contains(online.getUniqueId()) || team2.contains(online.getUniqueId())) {
                 if (Main.version <= 13) collidableReflection(player, true);
-                if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
-                else if (!config.getBoolean("kill-on-fight-end")) {
+                if (getPlugin().getConfig().getBoolean("kill-on-fight-end")) online.setHealth(0);
+                else if (!getPlugin().getConfig().getBoolean("kill-on-fight-end")) {
                     String path = "fight-end-spawn.";
                     clear(online);
-                    online.teleport(location(path, config));
+                    online.teleport(location(path, getPlugin().getConfig()));
                 }
             }
         }
@@ -94,11 +94,11 @@ public class TeamFight implements FightType {
 
     @Override
     public boolean canStartFight(String type) {
-        if (getPlugin().kitNames.contains(config.getString("current-kit"))) {
-            if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
+        if (getPlugin().kitNames.contains(getPlugin().getConfig().getString("current-kit"))) {
+            if (getPlugin().arenaNames.contains(getPlugin().getConfig().getString("current-arena"))) {
                 if (type.equalsIgnoreCase("team")) {
                     if (TeamFight.team1.isEmpty() && TeamFight.team2.isEmpty()) {
-                        String path = "Arenas." + config.getString("current-arena") + ".";
+                        String path = "Arenas." + getPlugin().getConfig().getString("current-arena") + ".";
                         boolean pos1 = getArenaConfig().isSet(path + "pos1");
                         boolean pos2 = getArenaConfig().isSet(path + "pos2");
                         boolean spectator = getArenaConfig().isSet(path + "spectator");
@@ -128,10 +128,10 @@ public class TeamFight implements FightType {
             team1Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
             team2Board.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         }
-        if (!config.getBoolean("friendly-fire")) {
+        if (!getPlugin().getConfig().getBoolean("friendly-fire")) {
             team1Board.setAllowFriendlyFire(false);
             team2Board.setAllowFriendlyFire(false);
-        } else if (config.getBoolean("friendly-fire")) {
+        } else if (getPlugin().getConfig().getBoolean("friendly-fire")) {
             team1Board.setAllowFriendlyFire(true);
             team2Board.setAllowFriendlyFire(true);
         }
@@ -140,7 +140,7 @@ public class TeamFight implements FightType {
 
     private void freezeOnStart(Player fighter, UUID fighterId) {
         (new BukkitRunnable() {
-            int i = config.getInt("countdown-time");
+            int i = getPlugin().getConfig().getInt("countdown-time");
 
             public void run() {
                 temporary.add(fighterId);
@@ -167,8 +167,8 @@ public class TeamFight implements FightType {
 
     @SneakyThrows
     private void countFights() {
-        config.set("fight-count", ++fightCount);
-        config.save(getPlugin().customConfigFile);
+        getPlugin().getConfig().set("fight-count", ++fightCount);
+        getPlugin().getConfig().save(getPlugin().customConfigFile);
     }
 
     @SneakyThrows
@@ -188,8 +188,8 @@ public class TeamFight implements FightType {
         FightsConfig.set("damageTeam2", 0);
         FightsConfig.set("regeneratedTeam1", 0);
         FightsConfig.set("regeneratedTeam2", 0);
-        FightsConfig.set("arena", config.getString("current-arena"));
-        FightsConfig.set("kit", config.getString("current-kit"));
+        FightsConfig.set("arena", getPlugin().getConfig().getString("current-arena"));
+        FightsConfig.set("kit", getPlugin().getConfig().getString("current-kit"));
         FightsConfig.set("duration", 0);
         FightsConfig.set("winners", "");
         FightsConfig.save(FightsConfigFile);
@@ -211,11 +211,11 @@ public class TeamFight implements FightType {
 
     private void countdownBeforeFight() {
         (new BukkitRunnable() {
-            int i = config.getInt("countdown-time");
+            int i = getPlugin().getConfig().getInt("countdown-time");
 
             public void run() {
                 if (i == 0) {
-                    if (config.getBoolean("fight-good-luck-enabled"))
+                    if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
                         Bukkit.broadcastMessage(message("fight-good-luck"));
                     cancel();
                 } else if (cancelled) cancel();

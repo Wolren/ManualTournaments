@@ -20,17 +20,17 @@ import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getKitsConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedComponents.*;
-import static net.flex.ManualTournaments.utils.SharedComponents.config;
+import static net.flex.ManualTournaments.utils.SharedComponents.message;
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public final class CreateKit implements KitCommand {
     @SneakyThrows
     @Override
     public void execute(Player player, String kitName, boolean kitExists) {
         if (!kitExists) {
-            if (Objects.equals(config.getString("current-kit"), ""))  {
-                config.set("current-kit", kitName);
-                config.save(getPlugin().customConfigFile);
+            if (Objects.equals(getPlugin().getConfig().getString("current-kit"), ""))  {
+                getPlugin().getConfig().set("current-kit", kitName);
+                getPlugin().getConfig().save(getPlugin().customConfigFile);
             }
             getKit(player, kitName);
             getPlugin().kitNames.add(kitName);

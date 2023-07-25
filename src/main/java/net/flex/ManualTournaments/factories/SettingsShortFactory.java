@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class SettingsShortFactory {
-    private static final Map<String, SettingsShortCommand> settingsShortCommandMap;
+    public static final Map<String, SettingsShortCommand> settingsShortCommandMap;
 
     static {
         settingsShortCommandMap = new ConcurrentHashMap<>();
-        settingsShortCommandMap.put("BREAK_BLOCKS", new EndspawnSettings());
+        settingsShortCommandMap.put("ENDSPAWN", new EndspawnSettings());
     }
 
     public static SettingsShortCommand getCommand(String command) {

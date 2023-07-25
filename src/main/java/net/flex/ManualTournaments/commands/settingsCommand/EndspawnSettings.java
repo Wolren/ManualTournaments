@@ -11,8 +11,8 @@ public final class EndspawnSettings implements SettingsShortCommand {
     @SneakyThrows
     @Override
     public void execute(Player player, String setting) {
-        getLocation("fight-end-spawn.", player, config);
+        getLocation("fight-end-spawn.", player, getPlugin().getConfig());
         send(player, "config-updated-successfully");
-        config.save(getPlugin().customConfigFile);
+        getPlugin().getConfig().save(getPlugin().customConfigFile);
     }
 }
