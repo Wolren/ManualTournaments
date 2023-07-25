@@ -1,9 +1,9 @@
-package net.flex.ManualTournaments.utils.SpiGUI.menu;
+package net.flex.ManualTournaments.utils.gui.menu;
 
-import net.flex.ManualTournaments.utils.SpiGUI.SpiGUI;
-import net.flex.ManualTournaments.utils.SpiGUI.buttons.SGButton;
-import net.flex.ManualTournaments.utils.SpiGUI.toolbar.SGToolbarBuilder;
-import net.flex.ManualTournaments.utils.SpiGUI.toolbar.SGToolbarButtonType;
+import net.flex.ManualTournaments.utils.gui.SpiGUI;
+import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
+import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarButtonType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
@@ -41,7 +41,7 @@ public class SGMenu implements InventoryHolder {
     private String tag;
     private int rowsPerPage;
 
-    private final Map<Integer, SGButton> items;
+    private final Map<Integer, Button> items;
     private final HashSet<Integer> stickiedSlots;
 
     private int currentPage;
@@ -59,7 +59,7 @@ public class SGMenu implements InventoryHolder {
      * The name parameter is color code translated.
      *
      * @param owner The plugin the inventory should be associated with.
-     * @param spiGUI The SpiGUI that created this inventory.
+     * @param spiGUI The gui that created this inventory.
      * @param name The display name of the inventory.
      * @param rowsPerPage The number of rows per page.
      * @param tag The inventory's tag.
@@ -198,25 +198,25 @@ public class SGMenu implements InventoryHolder {
     /// INVENTORY TAG ///
 
     /**
-     * This returns the GUI's tag.
+     * This returns the gui's tag.
      * <br><br>
      * The tag is used when getting all open inventories ({@link SpiGUI#findOpenWithTag(String)}) with your chosen tag.
-     * An example of where this might be useful is with a permission GUI - when
-     * the permissions are updated by one user in the GUI, it would be desirable to
-     * refresh the state of the permissions GUI for all users observing the GUI.
+     * An example of where this might be useful is with a permission gui - when
+     * the permissions are updated by one user in the gui, it would be desirable to
+     * refresh the state of the permissions gui for all users observing the gui.
      *
-     * @return The GUI's tag.
+     * @return The gui's tag.
      */
     public String getTag() {
         return tag;
     }
 
     /**
-     * This sets the GUI's tag.
+     * This sets the gui's tag.
      *
      * @see #getTag()
      * @see SpiGUI#findOpenWithTag(String)
-     * @param tag The GUI's tag.
+     * @param tag The gui's tag.
      */
     public void setTag(String tag) {
         this.tag = tag;
@@ -262,11 +262,11 @@ public class SGMenu implements InventoryHolder {
     /// BUTTONS ///
 
     /**
-     * Adds the provided {@link SGButton}.
+     * Adds the provided {@link Button}.
      *
      * @param button The button to add.
      */
-    public void addButton(SGButton button) {
+    public void addButton(Button button) {
         // If slot 0 is empty but it's the 'highest filled slot', then set slot 0 to contain button.
         // (This is an edge case for when the whole inventory is empty).
         if (getHighestFilledSlot() == 0 && getButton(0) == null) {
@@ -279,47 +279,47 @@ public class SGMenu implements InventoryHolder {
     }
 
     /**
-     * Adds the specified {@link SGButton}s consecutively.
+     * Adds the specified {@link Button}s consecutively.
      *
      * @param buttons The buttons to add.
      */
-    public void addButtons(SGButton... buttons) {
-        for (SGButton button : buttons) addButton(button);
+    public void addButtons(Button... buttons) {
+        for (Button button : buttons) addButton(button);
     }
 
     /**
-     * Adds the provided {@link SGButton} at the position denoted by the
+     * Adds the provided {@link Button} at the position denoted by the
      * supplied slot parameter.
      * <p>
      * If you specify a value larger than the value of the first page,
      * pagination will be automatically applied when the inventory is
-     * rendered. An alternative to this is to use {@link #setButton(int, int, SGButton)}.
+     * rendered. An alternative to this is to use {@link #setButton(int, int, Button)}.
      *
-     * @see #setButton(int, int, SGButton)
+     * @see #setButton(int, int, Button)
      * @param slot The desired location of the button.
      * @param button The button to add.
      */
-    public void setButton(int slot, SGButton button) {
+    public void setButton(int slot, Button button) {
         items.put(slot, button);
     }
 
     /**
-     * Adds the provided {@link SGButton} at the position denoted by the
+     * Adds the provided {@link Button} at the position denoted by the
      * supplied slot parameter <i>on the page denoted by the supplied page parameter</i>.
      * <p>
-     * This is an alias for {@link #setButton(int, SGButton)}, however one where the slot
+     * This is an alias for {@link #setButton(int, Button)}, however one where the slot
      * value is mapped to the specified page. So if page is 2 (the third page) and the
      * inventory row count was 3 (so a size of 27), a supplied slot value of 3 would actually map to
      * a slot value of (2 * 27) + 3 = 54. The mathematical formula for this is <code>(page * pageSize) + slot</code>.
      * <p>
      * If the slot value is out of the bounds of the specified page, this function will do nothing.
      *
-     * @see #setButton(int, SGButton)
+     * @see #setButton(int, Button)
      * @param page The page to which the button should be added.
      * @param slot The position on that page the button should be added at.
      * @param button The button to add.
      */
-    public void setButton(int page, int slot, SGButton button) {
+    public void setButton(int page, int slot, Button button) {
         if (slot < 0 || slot > getPageSize())
             return;
 
@@ -352,15 +352,15 @@ public class SGMenu implements InventoryHolder {
     }
 
     /**
-     * Returns the {@link SGButton} in the specified slot.
+     * Returns the {@link Button} in the specified slot.
      * <p>
      * If you attempt to get a slot less than 0 or greater than the slot containing
      * the button at the greatest slot value, this will return null.
      *
      * @param slot The slot containing the button you wish to get.
-     * @return The {@link SGButton} that was in that slot or null if the slot was invalid or if there was no button that slot.
+     * @return The {@link Button} that was in that slot or null if the slot was invalid or if there was no button that slot.
      */
-    public SGButton getButton(int slot) {
+    public Button getButton(int slot) {
         if (slot < 0 || slot > getHighestFilledSlot())
             return null;
 
@@ -373,9 +373,9 @@ public class SGMenu implements InventoryHolder {
      *
      * @param page The page containing the button.
      * @param slot The slot, on that page, containing the button.
-     * @return The {@link SGButton} that was in that slot or null if the slot was invalid or if there was no button that slot.
+     * @return The {@link Button} that was in that slot or null if the slot was invalid or if there was no button that slot.
      */
-    public SGButton getButton(int page, int slot) {
+    public Button getButton(int page, int slot) {
         if (slot < 0 || slot > getPageSize())
             return null;
 
@@ -407,7 +407,7 @@ public class SGMenu implements InventoryHolder {
     }
 
     /**
-     * Gets the page number of the final page of the GUI.
+     * Gets the page number of the final page of the gui.
      *
      * @return The highest page number that can be viewed.
      */
@@ -418,7 +418,7 @@ public class SGMenu implements InventoryHolder {
     /**
      * Returns the slot number of the highest filled slot.
      * This is mainly used to calculate the number of pages there needs to be to
-     * display the GUI's contents in the rendered inventory.
+     * display the gui's contents in the rendered inventory.
      *
      * @return The highest filled slot's number.
      */
@@ -609,10 +609,10 @@ public class SGMenu implements InventoryHolder {
     }
 
     /**
-     * Returns the Bukkit/Spigot {@link Inventory} that represents the GUI.
+     * Returns the Bukkit/Spigot {@link Inventory} that represents the gui.
      * This is shown to a player using {@link HumanEntity#openInventory(Inventory)}.
      *
-     * @return The created inventory used to display the GUI.
+     * @return The created inventory used to display the gui.
      */
     @Override
     public Inventory getInventory() {
@@ -661,7 +661,7 @@ public class SGMenu implements InventoryHolder {
             for (int i = pageSize; i < pageSize + 9; i++) {
                 int offset = i - pageSize;
 
-                SGButton paginationButton = toolbarButtonBuilder.buildToolbarButton(
+                Button paginationButton = toolbarButtonBuilder.buildToolbarButton(
                     offset, getCurrentPage(), SGToolbarButtonType.getDefaultForSlot(offset),this
                 );
                 inventory.setItem(i, paginationButton != null ? paginationButton.getIcon() : null);

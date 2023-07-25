@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.SpiGUI.toolbar;
+package net.flex.ManualTournaments.utils.gui.toolbar;
 
 import java.util.AbstractMap;
 import java.util.Map;

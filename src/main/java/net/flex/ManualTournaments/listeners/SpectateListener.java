@@ -2,6 +2,7 @@ package net.flex.ManualTournaments.listeners;
 
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Spectate;
+import net.flex.ManualTournaments.guis.SpectatorGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,6 +12,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
@@ -55,6 +57,22 @@ public class SpectateListener implements Listener {
     private void onPickup(PlayerPickupItemEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onEntityTarget(EntityTargetEvent event) {
+        if (event.getTarget() instanceof Player) {
+            Player player = (Player) event.getTarget();
+            if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onLivingEntityTarget(EntityTargetLivingEntityEvent event) {
+        if (event.getTarget() instanceof Player) {
+            Player player = (Player) event.getTarget();
+            if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -117,10 +135,24 @@ public class SpectateListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
-            if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getMaterial() == Material.REDSTONE_BLOCK && event.isBlockInHand()) {
-                stopSpectator(player);
+            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (event.getMaterial() == Material.REDSTONE_BLOCK) {
+                    stopSpectator(player);
+                } else if (event.getMaterial() == Material.COMPASS) {
+                    SpectatorGUI.teleportationGUI(player);
+                }
             }
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        if (spectators.contains(player.getUniqueId())) {
+            if (event.isLeftClick()) {
+                event.setCancelled(true);
+            }
         }
     }
 

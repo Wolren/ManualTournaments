@@ -1,11 +1,11 @@
-package net.flex.ManualTournaments.utils.SpiGUI;
+package net.flex.ManualTournaments.utils.gui;
 
-import net.flex.ManualTournaments.utils.SpiGUI.buttons.SGButton;
-import net.flex.ManualTournaments.utils.SpiGUI.item.ItemBuilder;
-import net.flex.ManualTournaments.utils.SpiGUI.menu.SGMenu;
-import net.flex.ManualTournaments.utils.SpiGUI.menu.SGMenuListener;
-import net.flex.ManualTournaments.utils.SpiGUI.menu.SGOpenMenu;
-import net.flex.ManualTournaments.utils.SpiGUI.toolbar.SGToolbarBuilder;
+import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
+import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.SGMenuListener;
+import net.flex.ManualTournaments.utils.gui.menu.SGOpenMenu;
+import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The core class for the SpiGUI library.<br>
- * One instance of the SpiGUI class is registered for each plugin using it.
+ * The core class for the gui library.<br>
+ * One instance of the gui class is registered for each plugin using it.
  * <p>
- * The expected usage of SpiGUI is that you register a SpiGUI instance for your
- * plugin with <code>new SpiGUI(this);</code> in your class that extends
+ * The expected usage of gui is that you register a gui instance for your
+ * plugin with <code>new gui(this);</code> in your class that extends
  * <code>JavaPlugin</code>. You can then use the instance you've created throughout
- * your project to create GUIs that use SpiGUI.
+ * your project to create GUIs that use gui.
  */
 public class SpiGUI {
 
@@ -33,7 +33,7 @@ public class SpiGUI {
      * <p>
      * This is typically set to true so events needn't be manually cancelled
      * every time an item is clicked in the inventory as that is the behavior
-     * most typically used with an inventory GUI.
+     * most typically used with an inventory gui.
      * <p>
      * With this set to true, you can of course use <code>event.setCancelled(false);</code> to
      * allow the default interaction.
@@ -64,7 +64,7 @@ public class SpiGUI {
     private SGToolbarBuilder defaultToolbarBuilder = (slot, page, type, menu) -> {
         switch (type) {
             case PREV_BUTTON:
-                if (menu.getCurrentPage() > 0) return new SGButton(new ItemBuilder(Material.ARROW)
+                if (menu.getCurrentPage() > 0) return new Button(new ItemBuilder(Material.ARROW)
                         .name("&a&l\u2190 Previous Page")
                         .lore(
                                 "&aClick to move back to",
@@ -77,7 +77,7 @@ public class SpiGUI {
                 else return null;
 
             case CURRENT_BUTTON:
-                return new SGButton(new ItemBuilder(Material.NAME_TAG)
+                return new Button(new ItemBuilder(Material.NAME_TAG)
                         .name("&7&lPage " + (menu.getCurrentPage() + 1) + " of " + menu.getMaxPage())
                         .lore(
                                 "&7You are currently viewing",
@@ -86,7 +86,7 @@ public class SpiGUI {
                 ).withListener(event -> event.setCancelled(true));
 
             case NEXT_BUTTON:
-                if (menu.getCurrentPage() < menu.getMaxPage() - 1) return new SGButton(new ItemBuilder(Material.ARROW)
+                if (menu.getCurrentPage() < menu.getMaxPage() - 1) return new Button(new ItemBuilder(Material.ARROW)
                         .name("&a&lNext Page \u2192")
                         .lore(
                                 "&aClick to move forward to",
@@ -105,7 +105,7 @@ public class SpiGUI {
     };
 
     /**
-     * Creates an instance of the SpiGUI library associated with a given plugin.
+     * Creates an instance of the gui library associated with a given plugin.
      * <br><br>
      * This is intended to be stored as a static field in your plugin with a public static
      * getter (or a public static field - dealer's choice) and you create inventories through
@@ -137,7 +137,7 @@ public class SpiGUI {
      * of the {@link SGMenuListener} registered with that plugin seemed like a good way to try
      * and minimize the inconvenience of the approach.
      *
-     * @param plugin The plugin using SpiGUI.
+     * @param plugin The plugin using gui.
      */
     public SpiGUI(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -192,16 +192,16 @@ public class SpiGUI {
      * <br><br>
      *
      * The tag is used when getting all open inventories ({@link #findOpenWithTag(String)}) with your chosen tag.
-     * An example of where this might be useful is with a permission GUI - when
-     * the permissions are updated by one user in the GUI, it would be desirable to
-     * refresh the state of the permissions GUI for all users observing the GUI.
+     * An example of where this might be useful is with a permission gui - when
+     * the permissions are updated by one user in the gui, it would be desirable to
+     * refresh the state of the permissions gui for all users observing the gui.
      *
      * <br><br>
      *
-     * You might give the permissions GUI a tag of 'myPermissionsGUI', then refreshing
-     * all the open instances of the GUI would be as simple as getting all open inventories
+     * You might give the permissions gui a tag of 'myPermissionsGUI', then refreshing
+     * all the open instances of the gui would be as simple as getting all open inventories
      * with the aforementioned tag using {@link #findOpenWithTag(String)} and calling refresh
-     * on each GUI in the list.
+     * on each gui in the list.
      *
      * <br><br>
      *

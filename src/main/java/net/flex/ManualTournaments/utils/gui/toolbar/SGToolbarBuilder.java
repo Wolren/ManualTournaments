@@ -1,13 +1,13 @@
-package net.flex.ManualTournaments.utils.SpiGUI.toolbar;
+package net.flex.ManualTournaments.utils.gui.toolbar;
 
-import net.flex.ManualTournaments.utils.SpiGUI.buttons.SGButton;
-import net.flex.ManualTournaments.utils.SpiGUI.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 
 public interface SGToolbarBuilder {
 
     /**
      * Specifies the toolbar button builder for an {@link SGMenu}.
-     * This can be customized to render different toolbar buttons for a GUI.
+     * This can be customized to render different toolbar buttons for a gui.
      *
      * @param slot The slot being rendered.
      * @param page The current page of the inventory being rendered.
@@ -16,6 +16,5 @@ public interface SGToolbarBuilder {
      * @return The button to be rendered for that slot, or null if no
      * button should be rendered.
      */
-    SGButton buildToolbarButton(int slot, int page, SGToolbarButtonType defaultType, SGMenu menu);
-
+    Button buildToolbarButton(int slot, int page, SGToolbarButtonType defaultType, SGMenu menu);
 }

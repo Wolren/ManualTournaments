@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.SpiGUI.item;
+package net.flex.ManualTournaments.utils.gui.item;
 
 /**
  * Items such as glass panes can have variable color. This color is

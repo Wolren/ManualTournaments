@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.SpiGUI.menu;
+package net.flex.ManualTournaments.utils.gui.menu;
 
 import org.bukkit.entity.Player;
 

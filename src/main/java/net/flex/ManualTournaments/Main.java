@@ -7,7 +7,7 @@ import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.listeners.SpectateListener;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
-import net.flex.ManualTournaments.utils.SpiGUI.SpiGUI;
+import net.flex.ManualTournaments.utils.gui.SpiGUI;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
