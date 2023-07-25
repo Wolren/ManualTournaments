@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.fightCommands.NullFight;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
@@ -17,7 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Fight implements CommandExecutor, TabCompleter {
@@ -29,9 +30,9 @@ public class Fight implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        getKitsConfig().load(getPlugin().KitsConfigfile);
-        getCustomConfig().load(getPlugin().customConfigFile);
-        getArenaConfig().load(getPlugin().ArenaConfigFile);
+        Main.getKitsConfig().load(getPlugin().KitsConfigfile);
+        Main.getCustomConfig().load(getPlugin().customConfigFile);
+        Main.getArenaConfig().load(getPlugin().ArenaConfigFile);
         distinctFighters.clear();
         fighters.clear();
         for (int i = 1; i < args.length; i++) {

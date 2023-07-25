@@ -7,8 +7,8 @@ import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.listeners.SpectateListener;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
-import net.flex.ManualTournaments.utils.gui.SpiGUI;
 import net.flex.ManualTournaments.utils.UpdateChecker;
+import net.flex.ManualTournaments.utils.gui.SpiGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -27,36 +27,35 @@ public final class Main extends JavaPlugin {
     }
 
     public static int version;
-    public List<String> kitNames, arenaNames;
+    public List<String> kitNames = new ArrayList<>(), arenaNames = new ArrayList<>();
     public File KitsConfigfile, ArenaConfigFile, customConfigFile;
     static FileConfiguration KitsConfig, ArenaConfig, customConfig;
-    private static final Map<String, Integer> versionMap = new HashMap<>();
-    public static SpiGUI gui;
+    private static final Map<String, Integer> versionMap = new HashMap<String, Integer>() {{
+        put("v1_8_R1", 11);
+        put("v1_8_R2", 12);
+        put("v1_8_R3", 13);
+        put("v1_9_R1", 14);
+        put("v1_9_R2", 15);
+        put("v1_10_R1", 16);
+        put("v1_11_R1", 17);
+        put("v1_12_R1", 18);
+        put("v1_13_R1", 19);
+        put("v1_13_R2", 20);
+        put("v1_14_R1", 21);
+        put("v1_15_R1", 22);
+        put("v1_16_R1", 23);
+        put("v1_16_R2", 24);
+        put("v1_16_R3", 25);
+        put("v1_17_R1", 26);
+        put("v1_18_R1", 27);
+        put("v1_18_R2", 28);
+        put("v1_19_R1", 29);
+        put("v1_19_R2", 30);
+        put("v1_19_R3", 31);
+        put("v1_20_R1", 32);
+    }};
 
-    static {
-        versionMap.put("v1_8_R1", 11);
-        versionMap.put("v1_8_R2", 12);
-        versionMap.put("v1_8_R3", 13);
-        versionMap.put("v1_9_R1", 14);
-        versionMap.put("v1_9_R2", 15);
-        versionMap.put("v1_10_R1", 16);
-        versionMap.put("v1_11_R1", 17);
-        versionMap.put("v1_12_R1", 18);
-        versionMap.put("v1_13_R1", 19);
-        versionMap.put("v1_13_R2", 20);
-        versionMap.put("v1_14_R1", 21);
-        versionMap.put("v1_15_R1", 22);
-        versionMap.put("v1_16_R1", 23);
-        versionMap.put("v1_16_R2", 24);
-        versionMap.put("v1_16_R3", 25);
-        versionMap.put("v1_17_R1", 26);
-        versionMap.put("v1_18_R1", 27);
-        versionMap.put("v1_18_R2", 28);
-        versionMap.put("v1_19_R1", 29);
-        versionMap.put("v1_19_R2", 30);
-        versionMap.put("v1_19_R3", 31);
-        versionMap.put("v1_20_R1", 32);
-    }
+    public static SpiGUI gui;
 
     public static FileConfiguration getKitsConfig() {
         return KitsConfig;

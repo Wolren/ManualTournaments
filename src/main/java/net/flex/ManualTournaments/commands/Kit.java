@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.KitFactory;
 import net.flex.ManualTournaments.factories.KitShortFactory;
 import org.bukkit.command.Command;
@@ -17,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static net.flex.ManualTournaments.Main.getKitsConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.optional;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
@@ -32,7 +32,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getPlugin().customConfigFile);
-        getKitsConfig().load(getPlugin().KitsConfigfile);
+        Main.getKitsConfig().load(getPlugin().KitsConfigfile);
         if (args.length == 1) {
             KitShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {

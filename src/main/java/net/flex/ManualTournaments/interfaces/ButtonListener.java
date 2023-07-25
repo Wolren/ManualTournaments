@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.gui.buttons;
+package net.flex.ManualTournaments.interfaces;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 

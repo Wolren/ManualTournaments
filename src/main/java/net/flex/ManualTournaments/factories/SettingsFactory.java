@@ -5,14 +5,14 @@ import net.flex.ManualTournaments.commands.settingsCommand.*;
 import net.flex.ManualTournaments.interfaces.SettingsCommand;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class SettingsFactory {
-    public static Map<String, SettingsCommand> settingsCommandMap = new ConcurrentHashMap<String, SettingsCommand>() {{
+    public static Map<String, SettingsCommand> settingsCommandMap = new HashMap<String, SettingsCommand>() {{
         put("BREAK_BLOCKS", new BreakBlocksSettings());
         put("CURRENT_ARENA", new CurrentArenaSettings());
         put("CURRENT_KIT", new CurrentKitSettings());

@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.utils.gui.buttons;
 
+import net.flex.ManualTournaments.interfaces.ButtonListener;
 import org.bukkit.inventory.ItemStack;
 
 public class Button {

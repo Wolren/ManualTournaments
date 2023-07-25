@@ -49,7 +49,6 @@ public final class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         public static Map<Player, Boolean> jumping = new HashMap<>();
         public static double jump_vel_border = 0.4;
 
-        @SuppressWarnings("deprecation")
         @EventHandler
         public void onJump(PlayerMoveEvent event) {
             Player player = event.getPlayer();

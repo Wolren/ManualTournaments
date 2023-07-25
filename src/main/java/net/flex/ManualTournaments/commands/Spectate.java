@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
@@ -37,7 +36,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getPlugin().customConfigFile);
-        getArenaConfig().load(getPlugin().ArenaConfigFile);
+        Main.getArenaConfig().load(getPlugin().ArenaConfigFile);
         if (args.length == 0) setSpectator(player);
         else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {
@@ -50,7 +49,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
     private void setSpectator(Player player) {
         if (getPlugin().arenaNames.contains(config.getString("current-arena"))) {
             String path = "Arenas." + config.getString("current-arena") + ".spectator.";
-            if (getArenaConfig().isSet(path)) {
+            if (Main.getArenaConfig().isSet(path)) {
                 if (Main.version >= 14) {
                     spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                     player.setCollidable(false);
@@ -65,7 +64,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 }
                 clear(player);
                 spectators.add(player.getUniqueId());
-                player.teleport(location(path, getArenaConfig()));
+                player.teleport(location(path, Main.getArenaConfig()));
                 ItemStack[] inventory = player.getInventory().getContents();
                 ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
                 ItemStack compass = new ItemStack(Material.COMPASS);

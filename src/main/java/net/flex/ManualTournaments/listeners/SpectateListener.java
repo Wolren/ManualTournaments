@@ -162,6 +162,7 @@ public class SpectateListener implements Listener {
         Player player = event.getPlayer();
         for (Player other : Bukkit.getServer().getOnlinePlayers()) {
             if (spectators.contains(other.getUniqueId())) {
+                SpectatorGUI.spectatorMenu.refreshInventory(other);
                 player.hidePlayer(other);
             }
         }

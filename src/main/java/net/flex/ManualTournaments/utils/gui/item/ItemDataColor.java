@@ -12,7 +12,6 @@ package net.flex.ManualTournaments.utils.gui.item;
  * @version 2.0.0
  */
 public enum ItemDataColor {
-
     WHITE((short) 0),
     ORANGE((short) 1),
     MAGENTA((short) 2),
