@@ -2,6 +2,7 @@ package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
+import net.flex.ManualTournaments.guis.SpectatorGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -64,16 +65,20 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                     other.hidePlayer(player);
                 }
                 clear(player);
-                ItemStack[] inventory = player.getInventory().getContents();
-                ItemStack itemStack = new ItemStack(Material.REDSTONE_BLOCK);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                if (itemMeta != null)
-                    itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
-                itemStack.setItemMeta(itemMeta);
-                inventory[8] = itemStack;
-                player.getInventory().setContents(inventory);
                 spectators.add(player.getUniqueId());
                 player.teleport(location(path, getArenaConfig()));
+                ItemStack[] inventory = player.getInventory().getContents();
+                ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
+                ItemMeta redstoneBlockMeta = redstoneBlock.getItemMeta();
+                if (redstoneBlockMeta != null)
+                    redstoneBlockMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
+                redstoneBlock.setItemMeta(redstoneBlockMeta);
+                inventory[8] = redstoneBlock;
+                player.getInventory().setContents(inventory);
+
+
+                SpectatorGUI spectatorGUI = new SpectatorGUI();
+                spectatorGUI.teleportationGUI(player);
                 send(player, "spectator-started-spectating");
             } else send(player, "arena-spectator-not-set");
         } else send(player, "current-arena-not-set");

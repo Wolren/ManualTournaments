@@ -7,6 +7,7 @@ import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.listeners.SpectateListener;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
+import net.flex.ManualTournaments.utils.SpiGUI.SpiGUI;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -30,6 +31,7 @@ public final class Main extends JavaPlugin {
     public File KitsConfigfile, ArenaConfigFile, customConfigFile;
     static FileConfiguration KitsConfig, ArenaConfig, customConfig;
     private static final Map<String, Integer> versionMap = new HashMap<>();
+    public static SpiGUI gui;
 
     static {
         versionMap.put("v1_8_R1", 11);
@@ -77,6 +79,7 @@ public final class Main extends JavaPlugin {
         super.onEnable();
         new UpdateChecker();
         initializeData();
+        gui = new SpiGUI(this);
         setCommands();
         registerEvents();
     }

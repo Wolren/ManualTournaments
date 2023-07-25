@@ -14,6 +14,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 
 import static net.flex.ManualTournaments.commands.Spectate.spectators;
+import static net.flex.ManualTournaments.commands.Spectate.stopSpectator;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class SpectateListener implements Listener {
@@ -44,7 +45,7 @@ public class SpectateListener implements Listener {
     }
 
     @EventHandler
-    public void onEntityInteract(EntityInteractEvent event) {
+    private void onEntityInteract(EntityInteractEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
         if (spectators.contains(player.getUniqueId())) event.setCancelled(true);
@@ -116,8 +117,8 @@ public class SpectateListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (spectators.contains(player.getUniqueId())) {
-            if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getMaterial() == Material.REDSTONE_BLOCK) {
-                player.performCommand("spectate stop");
+            if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getMaterial() == Material.REDSTONE_BLOCK && event.isBlockInHand()) {
+                stopSpectator(player);
             }
             event.setCancelled(true);
         }
