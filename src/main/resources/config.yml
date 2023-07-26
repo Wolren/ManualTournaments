@@ -79,7 +79,22 @@ fight-usage: "&7Usage: /fight &e&l(fight type) [fighters]"
 #%d is a placeholder for time in seconds
 fight-will-start: "&7Fight will start in &e&l%d &r&7seconds"
 fight-winners: "&7Congratulations to &e&l{team} &r&7for winning the fight!"
+
+gui-arena-menu-name: "Arena Menu"
+gui-arena-lore-color: "&6"
+gui-arena-lore-value-color: "&7"
+gui-arena-lore-left-click: "&eLeft click to open arena settings"
+gui-arena-lore-right-click: "&eRight click to set current arena"
+gui-arena-settings-menu-name: "Arena Settings"
+gui-kit-menu-name: "Kit Menu"
+gui-settings-menu-name: "Settings Menu"
+gui-settings-button-true-lore: "&aTrue"
+gui-settings-button-false-lore: "&cFalse"
+gui-settings-button-name-color: "&7"
 gui-spectator-color: "&e&l"
+
+
+
 kit-already-exists: "&6A kit with this name already exists"
 kit-given: "&aKit given successfully"
 kit-list: "&7Kits: &e&l"
