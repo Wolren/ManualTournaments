@@ -9,7 +9,8 @@ import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedComponents.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
+import static net.flex.ManualTournaments.utils.SharedComponents.sendNotExists;
 
 public final class CreateArena implements ArenaCommand {
     @SneakyThrows

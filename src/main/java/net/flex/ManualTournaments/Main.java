@@ -4,6 +4,7 @@ import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
+import net.flex.ManualTournaments.listeners.GUIListener;
 import net.flex.ManualTournaments.listeners.SpectateListener;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
@@ -129,6 +130,7 @@ public final class Main extends JavaPlugin {
     }
 
     private void registerEvents() {
+        getServer().getPluginManager().registerEvents(new GUIListener(), this);
         getServer().getPluginManager().registerEvents(new SpectateListener(), this);
         getServer().getPluginManager().registerEvents(new TeamFightListener(), this);
         getServer().getPluginManager().registerEvents(new TemporaryListener(), this);
