@@ -14,6 +14,10 @@ import static net.flex.ManualTournaments.utils.SharedComponents.send;
 public class CreateArenaButton extends ButtonBuilder {
     static FileConfiguration config = getPlugin().getConfig();
 
+    public CreateArenaButton(Player sender) {
+        super(sender);
+    }
+
     @Override
     protected Button configureButton(Player sender) {
         return new Button(new ItemBuilder(Material.EMERALD_BLOCK)
@@ -26,8 +30,6 @@ public class CreateArenaButton extends ButtonBuilder {
             }
         });
     }
-
-    public CreateArenaButton(Player sender) {
-        super(sender);
-    }
 }
+
+

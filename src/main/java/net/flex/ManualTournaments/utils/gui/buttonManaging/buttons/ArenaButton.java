@@ -11,6 +11,7 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 
 public class ArenaButton extends ButtonBuilder {
     static FileConfiguration config = getPlugin().getConfig();
+
     public ArenaButton(Player sender, String arenaName) {
         super(sender, arenaName);
     }

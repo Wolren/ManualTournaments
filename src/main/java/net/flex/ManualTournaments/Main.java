@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments;
 
+import lombok.Getter;
 import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 
+@Getter
 public final class Main extends JavaPlugin {
     public static Main getPlugin() {
         return getPlugin(Main.class);
@@ -30,6 +32,8 @@ public final class Main extends JavaPlugin {
     public static int version;
     public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>();
     public File KitsConfigfile, ArenaConfigFile, customConfigFile;
+
+    @Getter
     static FileConfiguration KitsConfig, ArenaConfig, customConfig;
     private static final Map<String, Integer> versionMap = new HashMap<String, Integer>() {{
         put("v1_8_R1", 11);
@@ -57,18 +61,6 @@ public final class Main extends JavaPlugin {
     }};
 
     public static SpiGUI gui;
-
-    public static FileConfiguration getKitsConfig() {
-        return KitsConfig;
-    }
-
-    public static FileConfiguration getArenaConfig() {
-        return ArenaConfig;
-    }
-
-    public static FileConfiguration getCustomConfig() {
-        return customConfig;
-    }
 
     @Override
     public void onLoad() {

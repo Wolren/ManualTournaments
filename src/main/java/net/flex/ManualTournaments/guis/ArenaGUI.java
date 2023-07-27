@@ -7,6 +7,7 @@ import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
 import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonDirector;
 import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.ArenaButton;
 import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.CreateArenaButton;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.RemoveArenaButton;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.Material;
@@ -50,8 +51,6 @@ public class ArenaGUI {
     private static Button createButton(String arenaName, Player sender) {
         Main.getCustomConfig().load(getPlugin().customConfigFile);
         Button arena = director.constructButton(new ArenaButton(sender, arenaName));
-
-
         ItemStack arenaIcon = arena.getIcon();
         if (Objects.equals(config.getString("current-arena"), arenaName)) {
             ItemMeta buttonItemMeta = arenaIcon.getItemMeta();
@@ -70,17 +69,6 @@ public class ArenaGUI {
         }
 
 
-        Button removeArena = new Button(new ItemBuilder(Material.REDSTONE_BLOCK)
-                .name(config.getString("gui-arena-settings-remove-name"))
-                .lore(config.getString("gui-arena-settings-remove-lore"))
-                .build())
-                .withListener(event -> {
-                    if (event.isLeftClick()) {
-                        sender.closeInventory();
-                        ArenaFactory.getCommand("REMOVE").execute(sender, arenaName, arenaNames.contains(arenaName));
-                        arenaGUI(sender);
-                    }
-                });
         Button validateArena = new Button(new ItemBuilder(Material.SHEARS)
                 .name(config.getString("gui-arena-settings-validate-name"))
                 .lore(config.getString("gui-arena-settings-validate-lore"))
@@ -120,7 +108,7 @@ public class ArenaGUI {
                         String name = String.format(Objects.requireNonNull(getPlugin().getConfig().getString("gui-arena-settings-menu-name")), arenaName);
                         SGMenu arenaSettingsMenu = gui.create(name, 2, name);
                         arenaSettingsMenu.setToolbarBuilder((slot, page, type, menu) -> {
-                            if (slot == 8) return removeArena;
+                            if (slot == 8) return director.constructButton(new RemoveArenaButton(sender, arenaName));;
                             if (slot == 7) return validateArena;
                             if (slot == 6) return teleportArena;
                             if (slot == 4) return backButton;
