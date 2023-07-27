@@ -4,9 +4,11 @@ import lombok.Getter;
 import net.flex.ManualTournaments.interfaces.ButtonListener;
 import org.bukkit.inventory.ItemStack;
 
-@Getter
 public class Button {
+    @Getter
     private ButtonListener listener;
+
+    @Getter
     private ItemStack icon;
 
     public Button(ItemStack icon) {

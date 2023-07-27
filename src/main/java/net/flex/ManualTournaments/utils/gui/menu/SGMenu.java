@@ -94,6 +94,7 @@ public class SGMenu implements InventoryHolder {
      * @return The current page of the inventory.
      */
     private int currentPage;
+    @Getter
     private Boolean blockDefaultInteractions;
     private Boolean enableAutomaticPagination;
 

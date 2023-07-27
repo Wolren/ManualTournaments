@@ -2,12 +2,9 @@ package net.flex.ManualTournaments.guis;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
-import net.flex.ManualTournaments.factories.ArenaFactory;
 import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
 import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonDirector;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.ArenaButton;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.CreateArenaButton;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.RemoveArenaButton;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.*;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.Material;
@@ -68,38 +65,7 @@ public class ArenaGUI {
             arenaMenu.refreshInventory(sender);
         }
 
-
-        Button validateArena = new Button(new ItemBuilder(Material.SHEARS)
-                .name(config.getString("gui-arena-settings-validate-name"))
-                .lore(config.getString("gui-arena-settings-validate-lore"))
-                .build())
-                .withListener(event -> {
-                    if (event.isLeftClick()) {
-                        ArenaFactory.getCommand("VALIDATE").execute(sender, arenaName, arenaNames.contains(arenaName));
-                    }
-                });
-        Button teleportArena = new Button(new ItemBuilder(Material.COMPASS)
-                .name(config.getString("gui-arena-settings-teleport-name"))
-                .lore(config.getString("gui-arena-settings-teleport-lore"))
-                .build())
-                .withListener(event -> {
-                    if (event.isLeftClick()) {
-                        sender.closeInventory();
-                        getPlugin();
-                        ArenaFactory.getCommand("TELEPORT").execute(sender, arenaName, arenaNames.contains(arenaName));
-                    }
-                });
-        Button backButton = new Button(new ItemBuilder(Material.ARROW)
-                .name(config.getString("gui-arena-back-name"))
-                .build())
-                .withListener(event -> {
-                    if (event.isLeftClick()) {
-                        sender.openInventory(arenaMenu.getInventory());
-                    }
-                });
-
-        return new Button(arenaIcon)
-                .withListener(event -> {
+        return arena.withListener(event -> {
                     if (event.isRightClick()) {
                         getPlugin().getConfig().set("current-arena", arenaName);
                         getPlugin().getConfig().save(getPlugin().customConfigFile);
@@ -108,52 +74,15 @@ public class ArenaGUI {
                         String name = String.format(Objects.requireNonNull(getPlugin().getConfig().getString("gui-arena-settings-menu-name")), arenaName);
                         SGMenu arenaSettingsMenu = gui.create(name, 2, name);
                         arenaSettingsMenu.setToolbarBuilder((slot, page, type, menu) -> {
-                            if (slot == 8) return director.constructButton(new RemoveArenaButton(sender, arenaName));;
-                            if (slot == 7) return validateArena;
-                            if (slot == 6) return teleportArena;
-                            if (slot == 4) return backButton;
+                            if (slot == 8) return director.constructButton(new RemoveArenaButton(sender, arenaName));
+                            if (slot == 7) return director.constructButton(new ValidateArenaButton(sender, arenaName));
+                            if (slot == 6) return director.constructButton(new TeleportArenaButton(sender, arenaName));
+                            if (slot == 4) return director.constructButton(new BackButton(sender));
                             else return new Button(new ItemBuilder(Material.AIR).build());
                         });
-                        String pathPos1 = "Arenas." + arenaName + ".pos1.";
-                        String pathPos2 = "Arenas." + arenaName + ".pos2.";
-                        String pathSpectator = "Arenas." + arenaName + ".spectator.";
-                        arenaSettingsMenu.setButton(0, new Button(new ItemBuilder(Material.MAP)
-                                .name(config.getString("gui-arena-settings-pos1-name"))
-                                .lore(config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos1 + "x"),
-                                        config.getString("gui-arena-settings-lore-color") + "y: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos1 + "y"),
-                                        config.getString("gui-arena-settings-lore-color") + "z: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos1 + "z"),
-                                        config.getString("gui-arena-settings-lore-color") + "yaw: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos1 + "yaw"),
-                                        config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos1 + "pitch"),
-                                        config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(pathPos1 + "world"))
-                                .build())
-                                .withListener(event1 -> {
-                                    ArenaFactory.getCommand("POS1").execute(sender, arenaName, arenaNames.contains(arenaName));
-                                    arenaSettingsMenu.refreshInventory(sender);
-                                }));
-                        arenaSettingsMenu.setButton(1, new Button(new ItemBuilder(Material.MAP)
-                                .name(config.getString("gui-arena-settings-pos2-name"))
-                                .lore(config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos2 + "x"),
-                                        config.getString("gui-arena-settings-lore-color") + "y: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos2 + "y"),
-                                        config.getString("gui-arena-settings-lore-color") + "z: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos2 + "z"),
-                                        config.getString("gui-arena-settings-lore-color") + "yaw: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos2 + "yaw"),
-                                        config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos2 + "pitch"),
-                                        config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(pathPos2 + "world"))
-                                .build()).withListener(event1 -> {
-                                    ArenaFactory.getCommand("POS2").execute(sender, arenaName, arenaNames.contains(arenaName));
-                                    arenaSettingsMenu.refreshInventory(sender);
-                        }));
-                        arenaSettingsMenu.setButton(2, new Button(new ItemBuilder(Material.MAP)
-                                .name(config.getString("gui-arena-settings-spectator-name"))
-                                .lore(config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathSpectator + "x"),
-                                        config.getString("gui-arena-settings-lore-color") + "y: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathSpectator + "y"),
-                                        config.getString("gui-arena-settings-lore-color") + "z: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathSpectator + "z"),
-                                        config.getString("gui-arena-settings-lore-color") + "yaw: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathSpectator + "yaw"),
-                                        config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathSpectator + "pitch"),
-                                        config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(pathSpectator + "world"))
-                                .build()).withListener(event1 -> {
-                            ArenaFactory.getCommand("SPECTATOR").execute(sender, arenaName, arenaNames.contains(arenaName));
-                            arenaSettingsMenu.refreshInventory(sender);
-                        }));
+                        arenaSettingsMenu.setButton(0, director.constructButton(new Pos1ArenaButton(sender, arenaName, arenaSettingsMenu)));
+                        arenaSettingsMenu.setButton(1, director.constructButton(new Pos2ArenaButton(sender, arenaName, arenaSettingsMenu)));
+                        arenaSettingsMenu.setButton(2, director.constructButton(new SpectatorArenaButton(sender, arenaName, arenaSettingsMenu)));
                         sender.openInventory(arenaSettingsMenu.getInventory());
                     }
                 });

@@ -53,7 +53,7 @@ public class SettingsGUI {
                 .build();
         Button setting = new Button(new ItemBuilder(Material.WHITE_WOOL).build());
         updateButtonIcon(setting, buttonName, trueIs, falseIs);
-        setting.setListener(event -> updateButtonOnEvent(setting, buttonName, trueIs, falseIs, menu, sender));
+        setting.withListener(event -> updateButtonOnEvent(setting, buttonName, trueIs, falseIs, menu, sender));
         return setting;
     }
 

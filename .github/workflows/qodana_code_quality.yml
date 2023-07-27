@@ -9,11 +9,15 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
+    environment: QODANA_TOKEN
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
+        with:
+          pr-mode: false
+          args: --print-problems
         env:
-          QODANA_TOKEN: ${{ secrets.eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmdhbml6YXRpb24iOiJBbFl5MCIsInByb2plY3QiOiJBdkRaTCIsInRva2VuIjoiQUxacWUifQ.NMITi8xdg8dlg-iDMrfKAmsiVU6dmPydVY88BW3HwuU }}
+          QODANA_TOKEN: ${{ secrets.TOKEN }}
