@@ -9,6 +9,7 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
+    environment: QODANA_TOKEN
     steps:
       - uses: actions/checkout@v3
         with:
