@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.commands.arenaCommands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.Arena;
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.interfaces.ArenaCommand;
 import org.bukkit.entity.Player;
 
@@ -23,7 +23,7 @@ public final class CreateArena implements ArenaCommand {
             }
             getArenaConfig().set("Arenas." + arenaName, "");
             getArenaConfig().save(getPlugin().ArenaConfigFile);
-            Arena.arenas.add(arenaName);
+            Main.arenaNames.add(arenaName);
             send(player, "arena-create");
         } else sendNotExists(player);
     }

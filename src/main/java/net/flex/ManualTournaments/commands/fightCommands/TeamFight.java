@@ -23,7 +23,7 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class TeamFight implements FightType {
-    public static List<UUID> team1 = new ArrayList<>(), team2 = new ArrayList<>(), temporary = new ArrayList<>();
+    public static Collection<UUID> team1 = new HashSet<>(), team2 = new HashSet<>(), temporary = new HashSet<>();
     public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team team1Board = board.registerNewTeam(message("team1")), team2Board = board.registerNewTeam(message("team2"));
     public static final Collection<String> team1String = new ArrayList<>(), team2String = new ArrayList<>();
@@ -94,8 +94,8 @@ public class TeamFight implements FightType {
 
     @Override
     public boolean canStartFight(String type) {
-        if (getPlugin().kitNames.contains(getPlugin().getConfig().getString("current-kit"))) {
-            if (getPlugin().arenaNames.contains(getPlugin().getConfig().getString("current-arena"))) {
+        if (Main.kitNames.contains(getPlugin().getConfig().getString("current-kit"))) {
+            if (Main.arenaNames.contains(getPlugin().getConfig().getString("current-arena"))) {
                 if (type.equalsIgnoreCase("team")) {
                     if (TeamFight.team1.isEmpty() && TeamFight.team2.isEmpty()) {
                         String path = "Arenas." + getPlugin().getConfig().getString("current-arena") + ".";

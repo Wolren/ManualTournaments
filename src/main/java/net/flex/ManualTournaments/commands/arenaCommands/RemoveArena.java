@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.commands.arenaCommands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.Arena;
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.interfaces.ArenaCommand;
 import org.bukkit.entity.Player;
 
@@ -9,7 +9,8 @@ import java.util.Objects;
 
 import static net.flex.ManualTournaments.Main.getArenaConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedComponents.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.send;
+import static net.flex.ManualTournaments.utils.SharedComponents.sendNotExists;
 
 public final class RemoveArena implements ArenaCommand {
     @SneakyThrows
@@ -22,7 +23,7 @@ public final class RemoveArena implements ArenaCommand {
             }
             getArenaConfig().set("Arenas." + arenaName, null);
             getArenaConfig().save(getPlugin().ArenaConfigFile);
-            Arena.arenas.remove(arenaName);
+            Main.arenaNames.remove(arenaName);
             send(player, "arena-removed");
         } else sendNotExists(player);
     }

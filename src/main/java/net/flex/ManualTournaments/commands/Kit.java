@@ -13,10 +13,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.optional;
@@ -24,7 +21,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class Kit implements TabCompleter, CommandExecutor {
     private static final FileConfiguration config = getPlugin().getConfig();
-    private final List<String> kits = getPlugin().kitNames;
+    private final Set<String> kits = Main.kitNames;
     Player player = null;
 
     @SneakyThrows
@@ -36,7 +33,7 @@ public class Kit implements TabCompleter, CommandExecutor {
         if (args.length == 1) {
             KitShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
-            KitFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], getPlugin().kitNames.contains(args[1]));
+            KitFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], Main.kitNames.contains(args[1]));
         } else send(player, "kit-usage");
         return true;
     }

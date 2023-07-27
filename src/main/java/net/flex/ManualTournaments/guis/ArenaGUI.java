@@ -3,7 +3,10 @@ package net.flex.ManualTournaments.guis;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.ArenaFactory;
-import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonDirector;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.ArenaButton;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.CreateArenaButton;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.Material;
@@ -15,7 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -23,62 +27,49 @@ import static net.flex.ManualTournaments.Main.*;
 
 public class ArenaGUI {
     public static SGMenu arenaMenu = gui.create(getPlugin().getConfig().getString("gui-arena-menu-name"), 5, "Arena");
-    public static List<Button> arenaMenuButtons = new ArrayList<>();
+    public static Collection<Button> arenaMenuButtons = new HashSet<>();
     public static boolean opener = false;
-    public static String newArenaName = "";
     static FileConfiguration config = getPlugin().getConfig();
+    static ButtonDirector director = new ButtonDirector();
 
     public static void arenaGUI(Player sender) {
-        newArenaName = "";
-
-        Button createArena = new Button(new ItemBuilder(Material.EMERALD_BLOCK)
-                .name(config.getString("gui-arena-create-name"))
-                .lore(config.getString("gui-arena-create-lore"))
-                .build())
-                .withListener(event -> {
-                    if (event.isLeftClick()) {
-                        sender.closeInventory();
-                        sender.sendMessage("Set the name writing: *(arena name) or cancel by writing *cancel");
-                        opener = true;
-                    }
-                });
-
         arenaMenu.setToolbarBuilder((slot, page, type, menu) -> {
-            if (slot == 8) return createArena;
+            if (slot == 8) return director.constructButton(new CreateArenaButton(sender));
             else return gui.getDefaultToolbarBuilder().buildToolbarButton(slot, page, type, menu);
         });
-
-        IntStream.range(0, getPlugin().arenaNames.size()).forEach(i -> {
-            Button button = createButton(getPlugin().arenaNames.get(i), sender);
+        arenaMenu.clearAllButStickiedSlots();
+        IntStream.range(0, arenaNames.size()).forEach(i -> {
+            Button button = createButton(new ArrayList<>(arenaNames).get(i), sender);
             arenaMenu.setButton(i, button);
             arenaMenuButtons.add(button);
         });
-
         sender.openInventory(arenaMenu.getInventory());
     }
 
     @SneakyThrows
     private static Button createButton(String arenaName, Player sender) {
         Main.getCustomConfig().load(getPlugin().customConfigFile);
-        ItemStack buttonItem = new ItemBuilder(Material.GRASS_BLOCK)
-                .name(config.getString("gui-arena-name-color") + arenaName)
-                .lore(
-                        config.getString("gui-arena-lore-right-click"),
-                        config.getString("gui-arena-lore-left-click"))
-                .build();
+        Button arena = director.constructButton(new ArenaButton(sender, arenaName));
+
+
+        ItemStack arenaIcon = arena.getIcon();
         if (Objects.equals(config.getString("current-arena"), arenaName)) {
-            ItemMeta buttonItemMeta = buttonItem.getItemMeta();
+            ItemMeta buttonItemMeta = arenaIcon.getItemMeta();
             if (buttonItemMeta != null) {
                 buttonItemMeta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
                 buttonItemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
-            buttonItem.setItemMeta(buttonItemMeta);
+            arenaIcon.setItemMeta(buttonItemMeta);
+            arena.setIcon(arenaIcon);
             arenaMenu.refreshInventory(sender);
         }
         if (!Objects.equals(config.getString("current-arena"), arenaName)) {
-            buttonItem.removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
+            arenaIcon.removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
+            arena.setIcon(arenaIcon);
             arenaMenu.refreshInventory(sender);
         }
+
+
         Button removeArena = new Button(new ItemBuilder(Material.REDSTONE_BLOCK)
                 .name(config.getString("gui-arena-settings-remove-name"))
                 .lore(config.getString("gui-arena-settings-remove-lore"))
@@ -86,7 +77,8 @@ public class ArenaGUI {
                 .withListener(event -> {
                     if (event.isLeftClick()) {
                         sender.closeInventory();
-                        ArenaFactory.getCommand("REMOVE").execute(sender, arenaName, getPlugin().arenaNames.contains(arenaName));
+                        ArenaFactory.getCommand("REMOVE").execute(sender, arenaName, arenaNames.contains(arenaName));
+                        arenaGUI(sender);
                     }
                 });
         Button validateArena = new Button(new ItemBuilder(Material.SHEARS)
@@ -95,7 +87,7 @@ public class ArenaGUI {
                 .build())
                 .withListener(event -> {
                     if (event.isLeftClick()) {
-                        ArenaFactory.getCommand("VALIDATE").execute(sender, arenaName, getPlugin().arenaNames.contains(arenaName));
+                        ArenaFactory.getCommand("VALIDATE").execute(sender, arenaName, arenaNames.contains(arenaName));
                     }
                 });
         Button teleportArena = new Button(new ItemBuilder(Material.COMPASS)
@@ -105,11 +97,12 @@ public class ArenaGUI {
                 .withListener(event -> {
                     if (event.isLeftClick()) {
                         sender.closeInventory();
-                        ArenaFactory.getCommand("TELEPORT").execute(sender, arenaName, getPlugin().arenaNames.contains(arenaName));
+                        getPlugin();
+                        ArenaFactory.getCommand("TELEPORT").execute(sender, arenaName, arenaNames.contains(arenaName));
                     }
                 });
         Button backButton = new Button(new ItemBuilder(Material.ARROW)
-                .name("&e&lGo back")
+                .name(config.getString("gui-arena-back-name"))
                 .build())
                 .withListener(event -> {
                     if (event.isLeftClick()) {
@@ -117,7 +110,7 @@ public class ArenaGUI {
                     }
                 });
 
-        return new Button(buttonItem)
+        return new Button(arenaIcon)
                 .withListener(event -> {
                     if (event.isRightClick()) {
                         getPlugin().getConfig().set("current-arena", arenaName);
@@ -146,7 +139,7 @@ public class ArenaGUI {
                                         config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(pathPos1 + "world"))
                                 .build())
                                 .withListener(event1 -> {
-                                    ArenaFactory.getCommand("POS1").execute(sender, arenaName, getPlugin().arenaNames.contains(arenaName));
+                                    ArenaFactory.getCommand("POS1").execute(sender, arenaName, arenaNames.contains(arenaName));
                                     arenaSettingsMenu.refreshInventory(sender);
                                 }));
                         arenaSettingsMenu.setButton(1, new Button(new ItemBuilder(Material.MAP)
@@ -158,7 +151,7 @@ public class ArenaGUI {
                                         config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathPos2 + "pitch"),
                                         config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(pathPos2 + "world"))
                                 .build()).withListener(event1 -> {
-                                    ArenaFactory.getCommand("POS2").execute(sender, arenaName, getPlugin().arenaNames.contains(arenaName));
+                                    ArenaFactory.getCommand("POS2").execute(sender, arenaName, arenaNames.contains(arenaName));
                                     arenaSettingsMenu.refreshInventory(sender);
                         }));
                         arenaSettingsMenu.setButton(2, new Button(new ItemBuilder(Material.MAP)
@@ -170,9 +163,9 @@ public class ArenaGUI {
                                         config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(pathSpectator + "pitch"),
                                         config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(pathSpectator + "world"))
                                 .build()).withListener(event1 -> {
-                                    ArenaFactory.getCommand("SPECTATOR").execute(sender, arenaName, getPlugin().arenaNames.contains(arenaName));
-                                    arenaSettingsMenu.refreshInventory(sender);
-                                }));
+                            ArenaFactory.getCommand("SPECTATOR").execute(sender, arenaName, arenaNames.contains(arenaName));
+                            arenaSettingsMenu.refreshInventory(sender);
+                        }));
                         sender.openInventory(arenaSettingsMenu.getInventory());
                     }
                 });

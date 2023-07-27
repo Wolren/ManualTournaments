@@ -1,7 +1,8 @@
 package net.flex.ManualTournaments.utils.gui.menu;
 
+import lombok.Getter;
 import net.flex.ManualTournaments.utils.gui.SpiGUI;
-import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarButtonType;
 import org.bukkit.Bukkit;
@@ -10,6 +11,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,24 +34,89 @@ import java.util.function.Consumer;
  * The reason for this is explained in the {@link SpiGUI#SpiGUI(JavaPlugin)}
  * class constructor implementation notes.
  */
+@Getter
 public class SGMenu implements InventoryHolder {
 
+    /**
+     * -- GETTER --
+     *  Returns the plugin that the inventory is associated with.
+     *  As this field is final, this would be the plugin that created
+     *  the inventory.
+     *
+     * @return The plugin the inventory is associated with.
+     */
     private final JavaPlugin owner;
     private final SpiGUI spiGUI;
 
+    /**
+     * -- GETTER --
+     *  This returns the inventory's display name.
+     *  <br><br>
+     *  Note that if you used
+     * , this will have been
+     *  color code translated already.
+     *
+     * @return The inventory's display name.
+     */
     private String name;
+    /**
+     * -- GETTER --
+     *  This returns the gui's tag.
+     *  <br><br>
+     *  The tag is used when getting all open inventories (
+     * ) with your chosen tag.
+     *  An example of where this might be useful is with a permission gui - when
+     *  the permissions are updated by one user in the gui, it would be desirable to
+     *  refresh the state of the permissions gui for all users observing the gui.
+     *
+     * @return The gui's tag.
+     */
     private String tag;
+    /**
+     * -- GETTER --
+     *  Returns the number of rows (of 9 columns) per page of the inventory.
+     *  If you want the total number of slots on a page, you should use
+     *  instead.
+     *
+     * @return The number of rows per page.
+     */
     private int rowsPerPage;
 
     private final Map<Integer, Button> items;
     private final HashSet<Integer> stickiedSlots;
 
+    /**
+     * -- GETTER --
+     *  Returns the current page of the inventory.
+     *  This is the page that will be displayed when the inventory is opened and
+     *  displayed to a player (i.e. rendered).
+     *
+     * @return The current page of the inventory.
+     */
     private int currentPage;
     private Boolean blockDefaultInteractions;
     private Boolean enableAutomaticPagination;
 
+    /**
+     * -- GETTER --
+     *  This is a per-inventory version of (
+     * ).
+     *
+     * @return The default toolbar builder used for GUIs.
+     */
+    @Getter
     private SGToolbarBuilder toolbarBuilder;
+    /**
+     * -- GETTER --
+     *
+     * @return The action to be performed on close.
+     */
     private Consumer<SGMenu> onClose;
+    /**
+     * -- GETTER --
+     *
+     * @return The action to be performed on page change.
+     */
     private Consumer<SGMenu> onPageChange;
 
     /**
@@ -107,7 +174,7 @@ public class SGMenu implements InventoryHolder {
      * If this value is set, it overrides the per-plugin option set in {@link SpiGUI}.
      *
      * @see SpiGUI#setEnableAutomaticPagination(boolean)
-     * @param enableAutomaticPagination Whether or not pagination buttons should be automatically added.
+     * @param enableAutomaticPagination Whether or not pagination buttonManaging should be automatically added.
      */
     public void setAutomaticPaginationEnabled(boolean enableAutomaticPagination) {
         this.enableAutomaticPagination = enableAutomaticPagination;
@@ -117,7 +184,7 @@ public class SGMenu implements InventoryHolder {
      * This is a per-inventory version of {@link SpiGUI#isAutomaticPaginationEnabled()}.
      *
      * @see SpiGUI#isAutomaticPaginationEnabled()
-     * @return Whether or not pagination buttons should be automatically added.
+     * @return Whether or not pagination buttonManaging should be automatically added.
      */
     public Boolean isAutomaticPaginationEnabled() {
         return enableAutomaticPagination;
@@ -131,42 +198,6 @@ public class SGMenu implements InventoryHolder {
      */
     public void setToolbarBuilder(SGToolbarBuilder toolbarBuilder) {
         this.toolbarBuilder = toolbarBuilder;
-    }
-
-    /**
-     * This is a per-inventory version of ({@link SpiGUI#getDefaultToolbarBuilder()}).
-     *
-     * @see SpiGUI#getDefaultToolbarBuilder()
-     * @return The default toolbar builder used for GUIs.
-     */
-    public SGToolbarBuilder getToolbarBuilder() {
-        return this.toolbarBuilder;
-    }
-
-    /// INVENTORY OWNER ///
-
-    /**
-     * Returns the plugin that the inventory is associated with.
-     * As this field is final, this would be the plugin that created
-     * the inventory.
-     *
-     * @return The plugin the inventory is associated with.
-     */
-    public JavaPlugin getOwner() {
-        return owner;
-    }
-
-    /// INVENTORY SIZE ///
-
-    /**
-     * Returns the number of rows (of 9 columns) per page of the inventory.
-     * If you want the total number of slots on a page, you should use {@link #getPageSize()}
-     * instead.
-     *
-     * @return The number of rows per page.
-     */
-    public int getRowsPerPage() {
-        return rowsPerPage;
     }
 
     /**
@@ -196,20 +227,6 @@ public class SGMenu implements InventoryHolder {
     }
 
     /// INVENTORY TAG ///
-
-    /**
-     * This returns the gui's tag.
-     * <br><br>
-     * The tag is used when getting all open inventories ({@link SpiGUI#findOpenWithTag(String)}) with your chosen tag.
-     * An example of where this might be useful is with a permission gui - when
-     * the permissions are updated by one user in the gui, it would be desirable to
-     * refresh the state of the permissions gui for all users observing the gui.
-     *
-     * @return The gui's tag.
-     */
-    public String getTag() {
-        return tag;
-    }
 
     /**
      * This sets the gui's tag.
@@ -247,18 +264,6 @@ public class SGMenu implements InventoryHolder {
         this.name = name;
     }
 
-    /**
-     * This returns the inventory's display name.
-     * <br><br>
-     * Note that if you used {@link #setName(String)}, this will have been
-     * color code translated already.
-     *
-     * @return The inventory's display name.
-     */
-    public String getName() {
-        return name;
-    }
-
     /// BUTTONS ///
 
     /**
@@ -281,7 +286,7 @@ public class SGMenu implements InventoryHolder {
     /**
      * Adds the specified {@link Button}s consecutively.
      *
-     * @param buttons The buttons to add.
+     * @param buttons The buttonManaging to add.
      */
     public void addButtons(Button... buttons) {
         for (Button button : buttons) addButton(button);
@@ -383,17 +388,6 @@ public class SGMenu implements InventoryHolder {
     }
 
     /// PAGINATION ///
-
-    /**
-     * Returns the current page of the inventory.
-     * This is the page that will be displayed when the inventory is opened and
-     * displayed to a player (i.e. rendered).
-     *
-     * @return The current page of the inventory.
-     */
-    public int getCurrentPage() {
-        return currentPage;
-    }
 
     /**
      * Sets the page of the inventory that will be displayed when the inventory is
@@ -546,14 +540,6 @@ public class SGMenu implements InventoryHolder {
     /// EVENTS ///
 
     /**
-     * @see #setOnClose(Consumer)
-     * @return The action to be performed on close.
-     */
-    public Consumer<SGMenu> getOnClose() {
-        return this.onClose;
-    }
-
-    /**
      * Used to set an action to be performed on inventory close without
      * registering an {@link org.bukkit.event.inventory.InventoryCloseEvent} specifically
      * for this inventory.
@@ -562,14 +548,6 @@ public class SGMenu implements InventoryHolder {
      */
     public void setOnClose(Consumer<SGMenu> onClose) {
         this.onClose = onClose;
-    }
-
-    /**
-     * @see #setOnPageChange(Consumer)
-     * @return The action to be performed on page change.
-     */
-    public Consumer<SGMenu> getOnPageChange() {
-        return this.onPageChange;
     }
 
     /**
@@ -615,7 +593,7 @@ public class SGMenu implements InventoryHolder {
      * @return The created inventory used to display the gui.
      */
     @Override
-    public Inventory getInventory() {
+    public @NotNull Inventory getInventory() {
         boolean isAutomaticPaginationEnabled = spiGUI.isAutomaticPaginationEnabled();
         if (isAutomaticPaginationEnabled() != null) {
             isAutomaticPaginationEnabled = isAutomaticPaginationEnabled();

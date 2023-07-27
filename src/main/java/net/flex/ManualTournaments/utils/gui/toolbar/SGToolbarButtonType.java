@@ -14,8 +14,8 @@ public enum SGToolbarButtonType {
 
     /**
      * The default mappings between slot number and {@link SGToolbarButtonType}.
-     * This intended for use in setting (or falling back to) defaults for toolbar buttons,
-     * or for minor tweaks to existing buttons in a toolbar, as opposed to entirely new
+     * This intended for use in setting (or falling back to) defaults for toolbar buttonManaging,
+     * or for minor tweaks to existing buttonManaging in a toolbar, as opposed to entirely new
      * custom toolbars.
      */
     private static final Map<Integer, SGToolbarButtonType> DEFAULT_MAPPINGS = Stream.of(
@@ -27,7 +27,7 @@ public enum SGToolbarButtonType {
     /**
      * Returns the default mapping between a given toolbar slot number (from 0 - 8),
      * and {@link SGToolbarButtonType}. This intended for use in setting (or falling
-     * back to) defaults for toolbar buttons, or for minor tweaks to existing buttons
+     * back to) defaults for toolbar buttonManaging, or for minor tweaks to existing buttonManaging
      * in a toolbar, as opposed to entirely new custom toolbars.
      * @param slot The slot number to get the default button type mapping for.
      * @return The default button type mapping for the specified slot. Or SGToolbarButtonType.UNASSIGNED,

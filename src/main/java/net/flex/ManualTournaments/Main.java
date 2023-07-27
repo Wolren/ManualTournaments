@@ -28,7 +28,7 @@ public final class Main extends JavaPlugin {
     }
 
     public static int version;
-    public List<String> kitNames = new ArrayList<>(), arenaNames = new ArrayList<>();
+    public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>();
     public File KitsConfigfile, ArenaConfigFile, customConfigFile;
     static FileConfiguration KitsConfig, ArenaConfig, customConfig;
     private static final Map<String, Integer> versionMap = new HashMap<String, Integer>() {{
@@ -98,8 +98,6 @@ public final class Main extends JavaPlugin {
     }
 
     private void initializeData() {
-        kitNames = new ArrayList<>();
-        arenaNames = new ArrayList<>();
         createKitsConfig();
         createArenaConfig();
         createCustomConfig();

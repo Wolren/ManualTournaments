@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.utils.gui.menu;
 
 import net.flex.ManualTournaments.utils.gui.SpiGUI;
-import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarButtonType;
 import org.bukkit.event.EventHandler;
@@ -14,6 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class SGMenuListener implements Listener {
 
@@ -65,7 +66,7 @@ public class SGMenuListener implements Listener {
      * @return True if it will, otherwise false.
      */
     public static boolean willHandleInventoryEvent(JavaPlugin plugin, Inventory inventory) {
-        return !shouldIgnoreInventoryEvent(inventory) && ((SGMenu) inventory.getHolder()).getOwner().equals(plugin);
+        return !shouldIgnoreInventoryEvent(inventory) && ((SGMenu) Objects.requireNonNull(inventory.getHolder())).getOwner().equals(plugin);
     }
 
     /**
@@ -95,24 +96,21 @@ public class SGMenuListener implements Listener {
         // Check if the gui is owner by the current plugin
         // (if not, it'll be deferred to the SGMenuListener registered
         // by that plugin that does own the gui.)
-        if (!clickedGui.getOwner().equals(owner)) return;
+        if (clickedGui != null && !clickedGui.getOwner().equals(owner)) return;
 
         // If the default action is to cancel the event (block default interactions)
         // we'll do that now.
         // The inventory's value is checked first, so it can be overridden on a
         // per-inventory basis. If the inventory's value is null, the plugin's
         // default value is checked.
-        if (clickedGui.areDefaultInteractionsBlocked() != null) {
+        // Note that this can be overridden by a call to #setCancelled(false) in
+        // the button's event handler.
+        if (clickedGui != null && clickedGui.areDefaultInteractionsBlocked() != null) {
             event.setCancelled(clickedGui.areDefaultInteractionsBlocked());
-        } else {
-            // Note that this can be overridden by a call to #setCancelled(false) in
-            // the button's event handler.
-            if (spiGUI.areDefaultInteractionsBlocked())
-                event.setCancelled(true);
         }
 
         // If the slot is on the pagination row, get the appropriate pagination handler.
-        if (event.getSlot() > clickedGui.getPageSize()) {
+        if (clickedGui != null && event.getSlot() > clickedGui.getPageSize()) {
             int offset = event.getSlot() - clickedGui.getPageSize();
             SGToolbarBuilder paginationButtonBuilder = spiGUI.getDefaultToolbarBuilder();
 
@@ -127,14 +125,17 @@ public class SGMenuListener implements Listener {
         }
 
         // If the slot is a stickied slot, get the button from page 0.
-        if (clickedGui.isStickiedSlot(event.getSlot())) {
+        if (clickedGui != null && clickedGui.isStickiedSlot(event.getSlot())) {
             Button button = clickedGui.getButton(0, event.getSlot());
             if (button != null && button.getListener() != null) button.getListener().onClick(event);
             return;
         }
 
         // Otherwise, get the button normally.
-        Button button = clickedGui.getButton(clickedGui.getCurrentPage(), event.getSlot());
+        Button button = null;
+        if (clickedGui != null) {
+            button = clickedGui.getButton(clickedGui.getCurrentPage(), event.getSlot());
+        }
         if (button != null && button.getListener() != null) {
             button.getListener().onClick(event);
         }
@@ -199,12 +200,11 @@ public class SGMenuListener implements Listener {
         // Check if the gui is owner by the current plugin
         // (if not, it'll be deferred to the SGMenuListener registered
         // by that plugin that does own the gui.)
-        if (!clickedGui.getOwner().equals(owner)) return;
+        if (clickedGui != null && !clickedGui.getOwner().equals(owner)) return;
 
         // If all the above is true and the inventory's onClose is not null,
         // call it.
-        if (clickedGui.getOnClose() != null)
-            clickedGui.getOnClose().accept(clickedGui);
+        if (clickedGui != null && clickedGui.getOnClose() != null) clickedGui.getOnClose().accept(clickedGui);
     }
 
 }

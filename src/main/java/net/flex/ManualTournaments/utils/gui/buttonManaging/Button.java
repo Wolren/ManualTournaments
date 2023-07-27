@@ -1,8 +1,10 @@
-package net.flex.ManualTournaments.utils.gui.buttons;
+package net.flex.ManualTournaments.utils.gui.buttonManaging;
 
+import lombok.Getter;
 import net.flex.ManualTournaments.interfaces.ButtonListener;
 import org.bukkit.inventory.ItemStack;
 
+@Getter
 public class Button {
     private ButtonListener listener;
     private ItemStack icon;
@@ -18,14 +20,6 @@ public class Button {
     public Button withListener(ButtonListener listener) {
         this.listener = listener;
         return this;
-    }
-
-    public ButtonListener getListener() {
-        return listener;
-    }
-
-    public ItemStack getIcon() {
-        return icon;
     }
 
     public void setIcon(ItemStack icon) {

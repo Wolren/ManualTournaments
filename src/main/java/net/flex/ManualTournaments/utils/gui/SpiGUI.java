@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.utils.gui;
 
-import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import lombok.Getter;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenuListener;
@@ -55,12 +56,17 @@ public class SpiGUI {
 
     /**
      * The defaultToolbarBuilder is the plugin-wide {@link SGToolbarBuilder}
-     * called when building pagination buttons for inventory GUIs.
+     * called when building pagination buttonManaging for inventory GUIs.
      * <p>
      * This can be overridden per-inventory, as well as per-plugin using the appropriate methods
      * on either the inventory class ({@link SGMenu}) or your plugin's instance of
      * {@link SpiGUI}.
+     * -- GETTER --
+     *
+     * @return The default toolbar builder used for GUIs.
+
      */
+    @Getter
     private SGToolbarBuilder defaultToolbarBuilder = (slot, page, type, menu) -> {
         switch (type) {
             case PREV_BUTTON:
@@ -260,15 +266,6 @@ public class SpiGUI {
     }
 
     /**
-     * @see SpiGUI#defaultToolbarBuilder
-     *
-     * @return The default toolbar builder used for GUIs.
-     */
-    public SGToolbarBuilder getDefaultToolbarBuilder() {
-        return defaultToolbarBuilder;
-    }
-
-    /**
      * Finds a list of all open inventories with a given tag along with the
      * player who has that inventory open.
      * <p>
@@ -287,18 +284,16 @@ public class SpiGUI {
         // Loop through every online player...
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             // ...if that player has an open inventory with a top inventory...
-            if (player.getOpenInventory().getTopInventory() != null) {
-                // ...get that top inventory.
-                Inventory topInventory = player.getOpenInventory().getTopInventory();
+            player.getOpenInventory().getTopInventory();// ...get that top inventory.
+            Inventory topInventory = player.getOpenInventory().getTopInventory();
 
-                // If the top inventory is an SGMenu,
-                if (topInventory.getHolder() != null && topInventory.getHolder() instanceof SGMenu) {
-                    // and the SGMenu has the tag matching the one we're checking for,
-                    SGMenu inventory = (SGMenu) topInventory.getHolder();
-                    if (inventory.getTag().equals(tag))
-                        // add the SGMenu to our list of found inventories.
-                        foundInventories.add(new SGOpenMenu(inventory, player));
-                }
+            // If the top inventory is an SGMenu,
+            if (topInventory.getHolder() != null && topInventory.getHolder() instanceof SGMenu) {
+                // and the SGMenu has the tag matching the one we're checking for,
+                SGMenu inventory = (SGMenu) topInventory.getHolder();
+                if (inventory.getTag().equals(tag))
+                    // add the SGMenu to our list of found inventories.
+                    foundInventories.add(new SGOpenMenu(inventory, player));
             }
         }
 

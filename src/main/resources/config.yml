@@ -80,6 +80,8 @@ fight-usage: "&7Usage: /fight &e&l(fight type) [fighters]"
 fight-will-start: "&7Fight will start in &e&l%d &r&7seconds"
 fight-winners: "&7Congratulations to &e&l{team} &r&7for winning the fight!"
 
+gui-arena-back-name: "&e&lGo back"
+gui-arena-create-message: "&7Set the name writing: &e&l*(arena name) &ror cancel by writing &e&l*cancel"
 gui-arena-create-name: "&e&lCreate arena"
 gui-arena-create-lore: "&7Left click to create arena"
 gui-arena-creation-cancelled: "&7Cancelled creating a new arena"

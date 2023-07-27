@@ -2,7 +2,7 @@ package net.flex.ManualTournaments.guis;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.factories.SettingsFactory;
-import net.flex.ManualTournaments.utils.gui.buttons.Button;
+import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.Material;

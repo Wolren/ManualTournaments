@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.listeners;
 
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.ArenaFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
 import org.bukkit.Bukkit;
@@ -23,8 +24,7 @@ public class GUIListener implements Listener {
                     send(player, "gui-arena-creation-cancelled");
                 } else {
                     String arenaName = message.replace("*", "");
-                    ArenaGUI.newArenaName = arenaName;
-                    ArenaFactory.getCommand("CREATE").execute(player, arenaName, getPlugin().arenaNames.contains(arenaName));
+                    ArenaFactory.getCommand("CREATE").execute(player, arenaName, Main.arenaNames.contains(arenaName));
                     Bukkit.getScheduler().runTask(getPlugin(), () -> ArenaGUI.arenaGUI(player));
                 }
                 event.setCancelled(true);

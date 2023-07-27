@@ -20,8 +20,6 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Arena implements CommandExecutor, TabCompleter {
-    public static final List<String> arenas = getPlugin().arenaNames;
-
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
@@ -33,7 +31,7 @@ public class Arena implements CommandExecutor, TabCompleter {
         } else if (args.length == 1) {
             ArenaShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
-            ArenaFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], getPlugin().arenaNames.contains(args[1]));
+            ArenaFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], Main.arenaNames.contains(args[1]));
         } else send(player, "arena-usage");
         return true;
     }
@@ -46,7 +44,7 @@ public class Arena implements CommandExecutor, TabCompleter {
             if (args[0].equals("create")) arrayList.add("(arena name)");
             else if (args[0].equals("remove") || args[0].equals("pos1") || args[0].equals("pos2") ||
                     args[0].equals("spectator") || args[0].equals("teleport") || args[0].equals("validate")) {
-                arrayList.addAll(getPlugin().arenaNames);
+                arrayList.addAll(Main.arenaNames);
             }
             return arrayList;
         } else return Collections.emptyList();
