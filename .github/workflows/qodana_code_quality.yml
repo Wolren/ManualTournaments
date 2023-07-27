@@ -18,4 +18,4 @@ jobs:
         with:
           args: --print-problems
         env:
-          QODANA_TOKEN: ${{ secrets.eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmdhbml6YXRpb24iOiJBbFl5MCIsInByb2plY3QiOiJBdkRaTCIsInRva2VuIjoicFZEYk0ifQ.V7rJbqVwookR3H0bV95HZpKIEajKltmO7pDw0qC4nDU }}
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
