@@ -34,7 +34,6 @@ public class SettingsGUI {
                     }
                 });
         settingsMenu.setAutomaticPaginationEnabled(false);
-        sender.closeInventory();
         sender.openInventory(settingsMenu.getInventory());
     }
 

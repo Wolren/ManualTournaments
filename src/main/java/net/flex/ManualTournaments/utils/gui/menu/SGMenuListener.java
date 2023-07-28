@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.utils.gui.menu;
 
+import lombok.SneakyThrows;
 import net.flex.ManualTournaments.utils.gui.SpiGUI;
 import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
@@ -81,6 +82,7 @@ public class SGMenuListener implements Listener {
      * @param event The event to handle.
      * @see SpiGUI#SpiGUI(JavaPlugin)
      */
+    @SneakyThrows
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) throws IOException {
 

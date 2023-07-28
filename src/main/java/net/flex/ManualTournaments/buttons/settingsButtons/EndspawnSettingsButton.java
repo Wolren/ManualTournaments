@@ -30,6 +30,7 @@ public class EndspawnSettingsButton extends ButtonBuilder {
                 .build())
                 .withListener(event1 -> {
                     SettingsShortFactory.getCommand("ENDSPAWN").execute(sender);
+                    sender.openInventory(sender.getInventory());
                     SettingsGUI.settingsGUI(sender);
                 });
     }

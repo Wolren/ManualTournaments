@@ -7,12 +7,15 @@ import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.Main.gui;
 
 public class ArenaSettingsGUI {
+    public static Set<Button> arenaSettingsMenuButtons = new HashSet<>();
     public static void arenaSettingsGUI(Player sender, String arenaName) {
         String name = String.format(Objects.requireNonNull(getPlugin().getConfig().getString("gui-arena-settings-menu-name")), arenaName);
         SGMenu arenaSettingsMenu = gui.create(name, 2, name);
@@ -24,9 +27,12 @@ public class ArenaSettingsGUI {
             if (slot == 4) return ArenaGUI.director.constructButton(new BackArenaButton(sender));
             else return new Button(new ItemBuilder(Material.AIR).build());
         });
-        arenaSettingsMenu.setButton(0, ArenaGUI.director.constructButton(new Pos1ArenaButton(sender, arenaName, arenaSettingsMenu)));
-        arenaSettingsMenu.setButton(1, ArenaGUI.director.constructButton(new Pos2ArenaButton(sender, arenaName, arenaSettingsMenu)));
-        arenaSettingsMenu.setButton(2, ArenaGUI.director.constructButton(new SpectatorArenaButton(sender, arenaName, arenaSettingsMenu)));
+        Button pos1Button = ArenaGUI.director.constructButton(new Pos1ArenaButton(sender, arenaName, arenaSettingsMenu));
+        arenaSettingsMenu.setButton(0, pos1Button);
+        Button pos2Button = ArenaGUI.director.constructButton(new Pos2ArenaButton(sender, arenaName, arenaSettingsMenu));
+        arenaSettingsMenu.setButton(1, pos2Button);
+        Button spectatorButton = ArenaGUI.director.constructButton(new SpectatorArenaButton(sender, arenaName, arenaSettingsMenu));
+        arenaSettingsMenu.setButton(2, spectatorButton);
         sender.openInventory(arenaSettingsMenu.getInventory());
     }
 }
