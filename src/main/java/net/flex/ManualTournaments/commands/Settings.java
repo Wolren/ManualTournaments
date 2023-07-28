@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
+import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.SettingsFactory;
 import net.flex.ManualTournaments.factories.SettingsShortFactory;
 import net.flex.ManualTournaments.guis.SettingsGUI;
@@ -33,7 +34,7 @@ public class Settings implements TabCompleter, CommandExecutor {
         if (args.length == 0) {
             SettingsGUI.settingsGUI(player);
         } else if (args.length == 1) {
-            SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
+            SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player);
         } else if (args.length == 2) {
             SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, args[0], args[1]);
         } else send(player, "settings-usage");
@@ -53,9 +54,9 @@ public class Settings implements TabCompleter, CommandExecutor {
                 case "kill_on_fight_end":
                     return Arrays.asList("true", "false");
                 case "current_arena":
-                    return new ArrayList<>(getPlugin().arenaNames);
+                    return new ArrayList<>(Main.arenaNames);
                 case "current_kit":
-                    return new ArrayList<>(getPlugin().kitNames);
+                    return new ArrayList<>(Main.kitNames);
             }
         }
         return Collections.emptyList();

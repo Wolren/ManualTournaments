@@ -10,7 +10,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public final class EndspawnSettings implements SettingsShortCommand {
     @SneakyThrows
     @Override
-    public void execute(Player player, String setting) {
+    public void execute(Player player) {
         getLocation("fight-end-spawn.", player, getPlugin().getConfig());
         send(player, "config-updated-successfully");
         getPlugin().getConfig().save(getPlugin().customConfigFile);

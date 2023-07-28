@@ -14,6 +14,6 @@ public class SettingsShortFactory {
     }};
 
     public static SettingsShortCommand getCommand(String command) {
-        return settingsShortCommandMap.getOrDefault(command, (player, setting) -> send(player, "settings-usage"));
+        return settingsShortCommandMap.getOrDefault(command, (player) -> send(player, "settings-usage"));
     }
 }
