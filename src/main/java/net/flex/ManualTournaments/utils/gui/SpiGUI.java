@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.utils.gui;
 
 import lombok.Getter;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
+import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenuListener;

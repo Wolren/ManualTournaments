@@ -1,8 +1,8 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging.buttons;
+package net.flex.ManualTournaments.buttons.arenaButtons;
 
 import net.flex.ManualTournaments.factories.ArenaFactory;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonBuilder;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.buttons.ButtonBuilder;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.Material;
@@ -19,8 +19,8 @@ public class SpectatorArenaButton extends ButtonBuilder {
     }
 
     @Override
-    protected Button configureButton(Player sender, String arenaName, SGMenu menu) {
-        String path = "Arenas." + arenaName + ".spectator.";
+    protected Button configureButton(Player sender, String name, SGMenu menu) {
+        String path = "Arenas." + name + ".spectator.";
         return new Button(new ItemBuilder(Material.MAP)
                 .name(config.getString("gui-arena-settings-spectator-name"))
                 .lore(config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "x"),
@@ -30,7 +30,7 @@ public class SpectatorArenaButton extends ButtonBuilder {
                         config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "pitch"),
                         config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(path + "world"))
                 .build()).withListener(event1 -> {
-            ArenaFactory.getCommand("SPECTATOR").execute(sender, arenaName, arenaNames.contains(arenaName));
+            ArenaFactory.getCommand("SPECTATOR").execute(sender, name, arenaNames.contains(name));
             menu.refreshInventory(sender);
         });
     }

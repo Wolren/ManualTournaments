@@ -1,8 +1,8 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging.buttons;
+package net.flex.ManualTournaments.buttons.arenaButtons;
 
 import net.flex.ManualTournaments.guis.ArenaGUI;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonBuilder;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.buttons.ButtonBuilder;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,10 +10,10 @@ import org.bukkit.entity.Player;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 
-public class BackButton extends ButtonBuilder {
+public class BackArenaButton extends ButtonBuilder {
     static FileConfiguration config = getPlugin().getConfig();
 
-    public BackButton(Player sender) {
+    public BackArenaButton(Player sender) {
         super(sender);
     }
 

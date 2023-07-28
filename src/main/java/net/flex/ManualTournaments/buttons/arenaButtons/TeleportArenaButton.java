@@ -1,8 +1,8 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging.buttons;
+package net.flex.ManualTournaments.buttons.arenaButtons;
 
 import net.flex.ManualTournaments.factories.ArenaFactory;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonBuilder;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.buttons.ButtonBuilder;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,7 +17,7 @@ public class TeleportArenaButton extends ButtonBuilder {
         super(sender, arenaName);
     }
     @Override
-    protected Button configureButton(Player sender, String arenaName) {
+    protected Button configureButton(Player sender, String name) {
         return new Button(new ItemBuilder(Material.COMPASS)
                 .name(config.getString("gui-arena-settings-teleport-name"))
                 .lore(config.getString("gui-arena-settings-teleport-lore"))
@@ -26,7 +26,7 @@ public class TeleportArenaButton extends ButtonBuilder {
                     if (event.isLeftClick()) {
                         sender.closeInventory();
                         getPlugin();
-                        ArenaFactory.getCommand("TELEPORT").execute(sender, arenaName, arenaNames.contains(arenaName));
+                        ArenaFactory.getCommand("TELEPORT").execute(sender, name, arenaNames.contains(name));
                     }
                 });
     }

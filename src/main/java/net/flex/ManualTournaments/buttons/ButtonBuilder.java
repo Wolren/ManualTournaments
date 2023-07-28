@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging;
+package net.flex.ManualTournaments.buttons;
 
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.entity.Player;
@@ -10,11 +10,11 @@ public abstract class ButtonBuilder {
        return null;
     }
 
-    protected Button configureButton(Player sender, String arenaName) {
+    protected Button configureButton(Player sender, String name) {
         return null;
     }
 
-    protected Button configureButton(Player sender, String arenaName, SGMenu menu) {
+    protected Button configureButton(Player sender, String name, SGMenu menu) {
         return null;
     }
 
@@ -22,12 +22,12 @@ public abstract class ButtonBuilder {
         button = configureButton(sender);
     }
 
-    public ButtonBuilder(Player sender, String arenaName) {
-        button = configureButton(sender, arenaName);
+    public ButtonBuilder(Player sender, String name) {
+        button = configureButton(sender, name);
     }
 
-    public ButtonBuilder(Player sender, String arenaName, SGMenu menu) {
-        button = configureButton(sender, arenaName, menu);
+    public ButtonBuilder(Player sender, String name, SGMenu menu) {
+        button = configureButton(sender, name, menu);
     }
 
     public Button buildButton() {

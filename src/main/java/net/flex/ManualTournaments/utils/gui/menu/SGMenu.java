@@ -1,7 +1,7 @@
 package net.flex.ManualTournaments.utils.gui.menu;
 
 import net.flex.ManualTournaments.utils.gui.SpiGUI;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
+import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarButtonType;
 import org.bukkit.Bukkit;

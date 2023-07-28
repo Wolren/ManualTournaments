@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging;
+package net.flex.ManualTournaments.buttons;
 
 public class ButtonDirector {
     public Button constructButton(ButtonBuilder buttonBuilder){

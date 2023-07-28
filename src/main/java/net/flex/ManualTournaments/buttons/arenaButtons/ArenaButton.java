@@ -1,9 +1,9 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging.buttons;
+package net.flex.ManualTournaments.buttons.arenaButtons;
 
 import net.flex.ManualTournaments.guis.ArenaGUI;
 import net.flex.ManualTournaments.guis.ArenaSettingsGUI;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonBuilder;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.buttons.ButtonBuilder;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,20 +24,20 @@ public class ArenaButton extends ButtonBuilder {
         super(sender, arenaName);
     }
 
-    protected Button configureButton(Player sender, String arenaName) {
+    protected Button configureButton(Player sender, String name) {
         return new Button(new ItemBuilder(Material.GRASS_BLOCK)
-                .name(config.getString("gui-arena-name-color") + arenaName)
+                .name(config.getString("gui-arena-name-color") + name)
                 .lore(
                         config.getString("gui-arena-lore-right-click"),
                         config.getString("gui-arena-lore-left-click"))
                 .build())
                 .withListener(event -> {
                     if (event.isRightClick()) {
-                        getPlugin().getConfig().set("current-arena", arenaName);
+                        getPlugin().getConfig().set("current-arena", name);
                         getPlugin().getConfig().save(getPlugin().customConfigFile);
-                        refresh(sender, arenaName);
+                        refresh(sender, name);
                     } else if (event.isLeftClick()) {
-                        ArenaSettingsGUI.arenaSettingsGUI(sender, arenaName);
+                        ArenaSettingsGUI.arenaSettingsGUI(sender, name);
                     }
                 });
     }

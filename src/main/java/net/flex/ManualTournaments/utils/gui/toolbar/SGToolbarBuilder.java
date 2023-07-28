@@ -1,6 +1,6 @@
 package net.flex.ManualTournaments.utils.gui.toolbar;
 
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
+import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 
 public interface SGToolbarBuilder {

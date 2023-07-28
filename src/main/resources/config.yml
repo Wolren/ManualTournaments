@@ -80,17 +80,16 @@ fight-usage: "&7Usage: /fight &e&l(fight type) [fighters]"
 fight-will-start: "&7Fight will start in &e&l%d &r&7seconds"
 fight-winners: "&7Congratulations to &e&l{team} &r&7for winning the fight!"
 
+
 gui-arena-back-name: "&e&lGo back"
+gui-arena-create-lore: "&7Left click to create arena"
 gui-arena-create-message: "&7Set the name writing: &e&l*(arena name) &ror cancel by writing &e&l*cancel"
 gui-arena-create-name: "&e&lCreate arena"
-gui-arena-create-lore: "&7Left click to create arena"
 gui-arena-creation-cancelled: "&7Cancelled creating a new arena"
 gui-arena-lore-left-click: "&7Left click to open arena settings"
 gui-arena-lore-right-click: "&7Right click to set current arena"
 gui-arena-menu-name: "Arena Menu"
 gui-arena-name-color: "&e&l"
-
-
 gui-arena-settings-lore-color: "&6"
 gui-arena-settings-lore-value-color: "&7"
 #%s is a placeholder for arena name
@@ -106,8 +105,24 @@ gui-arena-settings-validate-lore: "&7Left click to validate arena"
 gui-arena-settings-validate-name: "&e&lValidate arena"
 
 
-gui-arena-spectator-name: "&r&7spectator"
+gui-kit-back-name: "&e&lGo back"
+gui-kit-create-lore: "&7Left click to create kit"
+gui-kit-create-message: "&7Set the name writing: &e&l*(kit name) &ror cancel by writing &e&l*cancel"
+gui-kit-create-name: "&e&lCreate kit"
+gui-kit-creation-cancelled: "&7Cancelled creating a new kit"
+gui-kit-lore-left-click: "&7Left click to open kit settings"
+gui-kit-lore-right-click: "&7Right click to set current kit"
 gui-kit-menu-name: "Kit Menu"
+gui-kit-name-color: "&e&l"
+#%s is a placeholder for arena name
+gui-kit-settings-menu-name: "Kit %s settings"
+gui-kit-settings-give-name: "&e&lGive kit"
+gui-kit-settings-give-lore: "&7Left click to give yourself the kit"
+gui-kit-settings-remove-name: "&e&lRemove kit"
+gui-kit-settings-remove-lore: "&7Left click to remove kit"
+
+
+gui-arena-spectator-name: "&r&7spectator"
 gui-settings-menu-name: "Settings Menu"
 gui-settings-button-true-lore: "&aTrue"
 gui-settings-button-false-lore: "&cFalse"

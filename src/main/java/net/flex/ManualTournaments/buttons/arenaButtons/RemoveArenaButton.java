@@ -1,8 +1,8 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging.buttons;
+package net.flex.ManualTournaments.buttons.arenaButtons;
 
 import net.flex.ManualTournaments.factories.ArenaFactory;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonBuilder;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.buttons.ButtonBuilder;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,7 +20,7 @@ public class RemoveArenaButton extends ButtonBuilder {
     }
 
     @Override
-    protected Button configureButton(Player sender, String arenaName) {
+    protected Button configureButton(Player sender, String name) {
         return new Button(new ItemBuilder(Material.REDSTONE_BLOCK)
                 .name(config.getString("gui-arena-settings-remove-name"))
                 .lore(config.getString("gui-arena-settings-remove-lore"))
@@ -28,7 +28,7 @@ public class RemoveArenaButton extends ButtonBuilder {
                 .withListener(event -> {
                     if (event.isLeftClick()) {
                         sender.closeInventory();
-                        ArenaFactory.getCommand("REMOVE").execute(sender, arenaName, arenaNames.contains(arenaName));
+                        ArenaFactory.getCommand("REMOVE").execute(sender, name, arenaNames.contains(name));
                         arenaGUI(sender);
                     }
                 });

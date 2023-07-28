@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.KitFactory;
 import net.flex.ManualTournaments.factories.KitShortFactory;
+import net.flex.ManualTournaments.guis.KitGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +31,9 @@ public class Kit implements TabCompleter, CommandExecutor {
         else player = optional(sender);
         config.load(getPlugin().customConfigFile);
         Main.getKitsConfig().load(getPlugin().KitsConfigfile);
-        if (args.length == 1) {
+        if (args.length == 0) {
+            KitGUI.kitGUI(player);
+        } else if (args.length == 1) {
             KitShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
             KitFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], Main.kitNames.contains(args[1]));

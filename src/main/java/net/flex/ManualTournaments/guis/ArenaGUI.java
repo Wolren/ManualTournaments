@@ -1,9 +1,9 @@
 package net.flex.ManualTournaments.guis;
 
-import net.flex.ManualTournaments.utils.gui.buttonManaging.Button;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.ButtonDirector;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.ArenaButton;
-import net.flex.ManualTournaments.utils.gui.buttonManaging.buttons.CreateArenaButton;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.buttons.ButtonDirector;
+import net.flex.ManualTournaments.buttons.arenaButtons.ArenaButton;
+import net.flex.ManualTournaments.buttons.arenaButtons.CreateArenaButton;
 import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -32,7 +32,7 @@ public class ArenaGUI {
         arenaMenu.clearAllButStickiedSlots();
         IntStream.range(0, arenaNames.size()).forEach(i -> {
             String arenaName = new ArrayList<>(arenaNames).get(i);
-            Button button = createButton(arenaName, sender);
+            Button button = new ArenaButton(sender, arenaName).buildButton();
             arenaMenu.setButton(i, button);
             arenaMenuButtons.put(arenaName, button);
             if (Objects.equals(getPlugin().getConfig().getString("current-arena"), arenaName)) {
@@ -40,10 +40,6 @@ public class ArenaGUI {
             } else removeEnchantment(button);
         });
         sender.openInventory(arenaMenu.getInventory());
-    }
-
-    private static Button createButton(String arenaName, Player sender) {
-        return new ArenaButton(sender, arenaName).buildButton();
     }
 
     public static void addEnchantment(Button button) {

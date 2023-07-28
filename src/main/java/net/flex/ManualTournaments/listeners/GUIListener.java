@@ -2,7 +2,9 @@ package net.flex.ManualTournaments.listeners;
 
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.ArenaFactory;
+import net.flex.ManualTournaments.factories.KitFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
+import net.flex.ManualTournaments.guis.KitGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,9 +18,9 @@ public class GUIListener implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        if (ArenaGUI.opener && player.hasPermission("mt.arena")) {
-            String message = event.getMessage();
-            if (message.startsWith("*")) {
+        String message = event.getMessage();
+        if (message.startsWith("*")) {
+            if (ArenaGUI.opener && player.hasPermission("mt.arena")) {
                 if (message.endsWith("cancel")) {
                     ArenaGUI.opener = false;
                     send(player, "gui-arena-creation-cancelled");
@@ -26,6 +28,16 @@ public class GUIListener implements Listener {
                     String arenaName = message.replace("*", "");
                     ArenaFactory.getCommand("CREATE").execute(player, arenaName, Main.arenaNames.contains(arenaName));
                     Bukkit.getScheduler().runTask(getPlugin(), () -> ArenaGUI.arenaGUI(player));
+                }
+                event.setCancelled(true);
+            } else if (KitGUI.opener && player.hasPermission("mt.kit")) {
+                if (message.endsWith("cancel")) {
+                    KitGUI.opener = false;
+                    send(player, "gui-kit-creation-cancelled");
+                } else {
+                    String kitName = message.replace("*", "");
+                    KitFactory.getCommand("CREATE").execute(player, kitName, Main.kitNames.contains(kitName));
+                    Bukkit.getScheduler().runTask(getPlugin(), () -> KitGUI.kitGUI(player));
                 }
                 event.setCancelled(true);
             }

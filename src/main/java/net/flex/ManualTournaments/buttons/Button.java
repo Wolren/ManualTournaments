@@ -1,4 +1,4 @@
-package net.flex.ManualTournaments.utils.gui.buttonManaging;
+package net.flex.ManualTournaments.buttons;
 
 import net.flex.ManualTournaments.interfaces.ButtonListener;
 import org.bukkit.inventory.ItemStack;
