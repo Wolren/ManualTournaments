@@ -8,7 +8,6 @@ import net.flex.ManualTournaments.utils.gui.menu.SGMenuListener;
 import net.flex.ManualTournaments.utils.gui.menu.SGOpenMenu;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -282,12 +281,11 @@ public class SpiGUI {
         List<SGOpenMenu> foundInventories = new ArrayList<>();
 
         // Loop through every online player...
-        for (Player player : plugin.getServer().getOnlinePlayers()) {
-            // ...if that player has an open inventory with a top inventory...
+        // ...if that player has an open inventory with a top inventory...
+        // If the top inventory is an SGMenu,
+        plugin.getServer().getOnlinePlayers().forEach(player -> {
             player.getOpenInventory().getTopInventory();// ...get that top inventory.
             Inventory topInventory = player.getOpenInventory().getTopInventory();
-
-            // If the top inventory is an SGMenu,
             if (topInventory.getHolder() != null && topInventory.getHolder() instanceof SGMenu) {
                 // and the SGMenu has the tag matching the one we're checking for,
                 SGMenu inventory = (SGMenu) topInventory.getHolder();
@@ -295,7 +293,7 @@ public class SpiGUI {
                     // add the SGMenu to our list of found inventories.
                     foundInventories.add(new SGOpenMenu(inventory, player));
             }
-        }
+        });
 
         return foundInventories;
 

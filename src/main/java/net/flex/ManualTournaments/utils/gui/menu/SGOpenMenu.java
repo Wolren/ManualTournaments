@@ -1,13 +1,11 @@
 package net.flex.ManualTournaments.utils.gui.menu;
 
-import lombok.Getter;
 import org.bukkit.entity.Player;
 
 public class SGOpenMenu {
 
     private final SGMenu gui;
 
-    @Getter
     private final Player player;
 
     public SGOpenMenu(SGMenu gui, Player player) {
@@ -17,5 +15,9 @@ public class SGOpenMenu {
 
     public SGMenu getMenu() {
         return this.gui;
+    }
+
+    public Player getPlayer() {
+        return this.player;
     }
 }

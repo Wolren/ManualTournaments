@@ -7,15 +7,15 @@ public abstract class ButtonBuilder {
     protected Button button;
 
     protected Button configureButton(Player sender) {
-        throw new UnsupportedOperationException("You used the wrong overload");
+       return null;
     }
 
     protected Button configureButton(Player sender, String arenaName) {
-        throw new UnsupportedOperationException("You used the wrong overload");
+        return null;
     }
 
     protected Button configureButton(Player sender, String arenaName, SGMenu menu) {
-        throw new UnsupportedOperationException("You used the wrong overload");
+        return null;
     }
 
     public ButtonBuilder(Player sender) {

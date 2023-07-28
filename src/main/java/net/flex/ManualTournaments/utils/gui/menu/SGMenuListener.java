@@ -14,7 +14,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public class SGMenuListener implements Listener {
 
@@ -45,20 +44,20 @@ public class SGMenuListener implements Listener {
         // negate that to return false if it is (because a valid SGMenu
         // should be handled by the library).
         return !(inventory != null &&
-                 inventory.getHolder() != null &&
-                 inventory.getHolder() instanceof SGMenu);
+                inventory.getHolder() != null &&
+                inventory.getHolder() instanceof SGMenu);
     }
 
     /**
      * Allows a plugin to determine whether an inventory event will be
-     * handled by gui.
+     * handled by SpiGUI.
      * <p>
-     * You can use this to override gui's event handlers (in
+     * You can use this to override SpiGUI's event handlers (in
      * {@link SGMenuListener}) with custom functionality, should you need
      * to.
      * <p>
-     * The plugin parameter refers to your plugin, the one using gui.
-     * It needs to be passed in here so that gui can check whether
+     * The plugin parameter refers to your plugin, the one using SpiGUI.
+     * It needs to be passed in here so that SpiGUI can check whether
      * the {@link SGMenu} inventory belongs to your plugin.
      *
      * @param plugin The {@link JavaPlugin} plugin instance.
@@ -66,16 +65,16 @@ public class SGMenuListener implements Listener {
      * @return True if it will, otherwise false.
      */
     public static boolean willHandleInventoryEvent(JavaPlugin plugin, Inventory inventory) {
-        return !shouldIgnoreInventoryEvent(inventory) && ((SGMenu) Objects.requireNonNull(inventory.getHolder())).getOwner().equals(plugin);
+        return !shouldIgnoreInventoryEvent(inventory) && ((SGMenu) inventory.getHolder()).getOwner().equals(plugin);
     }
 
     /**
      * Overrides the click event for an SGMenu. This is automatically
-     * registered into a plugin using gui when gui is initialized
+     * registered into a plugin using SpiGUI when SpiGUI is initialized
      * in that plugin.
      * <p>
      * The respective inventory is first checked to ensure that it is a
-     * gui {@link SGMenu} and, if it is, whether a pagination button
+     * SpiGUI {@link SGMenu} and, if it is, whether a pagination button
      * was clicked, finally (if not a pagination button) the event is
      * delegated to the inventory the click occurred in.
      *
@@ -85,32 +84,35 @@ public class SGMenuListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) throws IOException {
 
-        // This should only run for gui menus, so if the clicked
-        // inventory was not a gui menu (i.e., an SGMenu), don't
+        // This should only run for SpiGUI menus, so if the clicked
+        // inventory was not a SpiGUI menu (i.e., an SGMenu), don't
         // continue.
         if (shouldIgnoreInventoryEvent(event.getClickedInventory())) return;
 
-        // Get the instance of the gui that was clicked.
+        // Get the instance of the SpiGUI that was clicked.
         SGMenu clickedGui = (SGMenu) event.getClickedInventory().getHolder();
 
-        // Check if the gui is owner by the current plugin
+        // Check if the GUI is owner by the current plugin
         // (if not, it'll be deferred to the SGMenuListener registered
-        // by that plugin that does own the gui.)
-        if (clickedGui != null && !clickedGui.getOwner().equals(owner)) return;
+        // by that plugin that does own the GUI.)
+        if (!clickedGui.getOwner().equals(owner)) return;
 
         // If the default action is to cancel the event (block default interactions)
         // we'll do that now.
         // The inventory's value is checked first, so it can be overridden on a
         // per-inventory basis. If the inventory's value is null, the plugin's
         // default value is checked.
-        // Note that this can be overridden by a call to #setCancelled(false) in
-        // the button's event handler.
-        if (clickedGui != null && clickedGui.areDefaultInteractionsBlocked() != null) {
+        if (clickedGui.areDefaultInteractionsBlocked() != null) {
             event.setCancelled(clickedGui.areDefaultInteractionsBlocked());
+        } else {
+            // Note that this can be overridden by a call to #setCancelled(false) in
+            // the button's event handler.
+            if (spiGUI.areDefaultInteractionsBlocked())
+                event.setCancelled(true);
         }
 
         // If the slot is on the pagination row, get the appropriate pagination handler.
-        if (clickedGui != null && event.getSlot() > clickedGui.getPageSize()) {
+        if (event.getSlot() > clickedGui.getPageSize()) {
             int offset = event.getSlot() - clickedGui.getPageSize();
             SGToolbarBuilder paginationButtonBuilder = spiGUI.getDefaultToolbarBuilder();
 
@@ -125,17 +127,14 @@ public class SGMenuListener implements Listener {
         }
 
         // If the slot is a stickied slot, get the button from page 0.
-        if (clickedGui != null && clickedGui.isStickiedSlot(event.getSlot())) {
+        if (clickedGui.isStickiedSlot(event.getSlot())) {
             Button button = clickedGui.getButton(0, event.getSlot());
             if (button != null && button.getListener() != null) button.getListener().onClick(event);
             return;
         }
 
         // Otherwise, get the button normally.
-        Button button = null;
-        if (clickedGui != null) {
-            button = clickedGui.getButton(clickedGui.getCurrentPage(), event.getSlot());
-        }
+        Button button = clickedGui.getButton(clickedGui.getCurrentPage(), event.getSlot());
         if (button != null && button.getListener() != null) {
             button.getListener().onClick(event);
         }
@@ -144,11 +143,11 @@ public class SGMenuListener implements Listener {
 
     /**
      * Overrides the drag event for an SGMenu. This is automatically
-     * registered into a plugin using gui when gui is initialized
+     * registered into a plugin using SpiGUI when SpiGUI is initialized
      * in that plugin.
      * <p>
      * The respective inventory is first checked to ensure that it is a
-     * gui {@link SGMenu} and, if it is, the drag event is captured
+     * SpiGUI {@link SGMenu} and, if it is, the drag event is captured
      * and cancelled.
      * <p>
      * If this behavior is undesirable, it can be overridden by creating
@@ -164,8 +163,8 @@ public class SGMenuListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInventoryDrag(InventoryDragEvent event) {
 
-        // This should only run for gui menus, so if the clicked
-        // inventory was not a gui menu (i.e., an SGMenu), don't
+        // This should only run for SpiGUI menus, so if the clicked
+        // inventory was not a SpiGUI menu (i.e., an SGMenu), don't
         // continue.
         if (shouldIgnoreInventoryEvent(event.getInventory())) return;
 
@@ -176,11 +175,11 @@ public class SGMenuListener implements Listener {
 
     /**
      * Overrides the close event for an SGMenu. This is automatically
-     * registered into a plugin using gui when gui is initialized
+     * registered into a plugin using SpiGUI when SpiGUI is initialized
      * in that plugin.
      * <p>
      * The respective inventory is first checked to ensure that it is a
-     * gui {@link SGMenu} and, if it is, the close event is delegated
+     * SpiGUI {@link SGMenu} and, if it is, the close event is delegated
      * to a handler for that inventory, if one exists.
      *
      * @param event The event to handle.
@@ -189,22 +188,23 @@ public class SGMenuListener implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
 
-        // This should only run for gui menus, so if the clicked
-        // inventory was not a gui menu (i.e., an SGMenu), don't
+        // This should only run for SpiGUI menus, so if the clicked
+        // inventory was not a SpiGUI menu (i.e., an SGMenu), don't
         // continue.
         if (shouldIgnoreInventoryEvent(event.getInventory())) return;
 
-        // Get the instance of the gui that was clicked.
+        // Get the instance of the SpiGUI that was clicked.
         SGMenu clickedGui = (SGMenu) event.getInventory().getHolder();
 
-        // Check if the gui is owner by the current plugin
+        // Check if the GUI is owner by the current plugin
         // (if not, it'll be deferred to the SGMenuListener registered
-        // by that plugin that does own the gui.)
-        if (clickedGui != null && !clickedGui.getOwner().equals(owner)) return;
+        // by that plugin that does own the GUI.)
+        if (!clickedGui.getOwner().equals(owner)) return;
 
         // If all the above is true and the inventory's onClose is not null,
         // call it.
-        if (clickedGui != null && clickedGui.getOnClose() != null) clickedGui.getOnClose().accept(clickedGui);
+        if (clickedGui.getOnClose() != null)
+            clickedGui.getOnClose().accept(clickedGui);
     }
 
 }
