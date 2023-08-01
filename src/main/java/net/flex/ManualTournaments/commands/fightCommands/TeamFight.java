@@ -2,75 +2,75 @@ package net.flex.ManualTournaments.commands.fightCommands;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
-import net.flex.ManualTournaments.listeners.TeamFightListener;
-import net.flex.ManualTournaments.interfaces.FightType;
+import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
+import net.flex.ManualTournaments.interfaces.FightType;
+import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.utils.SqlMethods;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 
-import static net.flex.ManualTournaments.Main.getArenaConfig;
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class TeamFight implements FightType {
-    public static Collection<UUID> team1 = new HashSet<>(), team2 = new HashSet<>(), temporary = new HashSet<>();
-    public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    public static Team team1Board = board.registerNewTeam(message("team1")), team2Board = board.registerNewTeam(message("team2"));
+    private static final Set<Player> distinctFighters = new HashSet<>();
+    public static Set<UUID> team1 = new HashSet<>(), team2 = new HashSet<>();
+    public static Team team1Board = Fight.board.registerNewTeam(message("team1")), team2Board = Fight.board.registerNewTeam(message("team2"));
     public static final Collection<String> team1String = new ArrayList<>(), team2String = new ArrayList<>();
     public static File FightsConfigFile;
     public static FileConfiguration FightsConfig;
-    public static int duration, fightCount = getPlugin().getConfig().getInt("fight-count");
-    public static boolean cancelled = false;
+    public static int duration;
 
     @SneakyThrows
     public void startFight(Player player, List<Player> fighters) {
         clearBeforeFight();
         setBoard();
-        for (int i = 0; i < fighters.toArray().length; i++) {
-            Player fighter = fighters.get(i);
-            if (fighter == null) send(player, "fighter-error");
-            else {
-                UUID fighterId = fighter.getUniqueId();
-                fighter.setTotalExperience(0);
-                fighter.setGameMode(GameMode.SURVIVAL);
-                if (Main.version <= 13) collidableReflection(fighter, false);
-                getPlugin().getConfig().load(getPlugin().customConfigFile);
-                if (i < (fighters.toArray().length / 2)) {
-                    team1Board.addEntry(fighter.getDisplayName());
-                    team1.add(fighterId);
-                    fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos1.", getArenaConfig()));
-                } else if (i >= (fighters.toArray().length / 2)) {
-                    team2Board.addEntry(fighter.getDisplayName());
-                    team2.add(fighterId);
-                    fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos2.", getArenaConfig()));
+        distinctFighters.addAll(fighters);
+        if (distinctFighters.size() == fighters.size()) {
+            for (int i = 0; i < fighters.size(); i++) {
+                Player fighter = fighters.get(i);
+                if (fighter == null) send(player, "fighter-error");
+                else {
+                    UUID fighterId = fighter.getUniqueId();
+                    fighter.setGameMode(GameMode.SURVIVAL);
+                    if (Main.version <= 13) collidableReflection(fighter, false);
+                    getPlugin().getConfig().load(getCustomConfigFile());
+                    if (i < (fighters.size() / 2)) {
+                        team1Board.addEntry(fighter.getDisplayName());
+                        team1.add(fighterId);
+                        fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos1.", getArenaConfig()));
+                    } else if (i >= (fighters.size() / 2)) {
+                        team2Board.addEntry(fighter.getDisplayName());
+                        team2.add(fighterId);
+                        fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos2.", getArenaConfig()));
+                    }
+                    GiveKit.setKit(fighter, getPlugin().getConfig().getString("current-kit"));
+                    if (getPlugin().getConfig().getBoolean("freeze-on-start")) DefaultFight.freezeOnStart(fighter, fighterId);
                 }
-                GiveKit.setKit(fighter, getPlugin().getConfig().getString("current-kit"));
-                if (getPlugin().getConfig().getBoolean("freeze-on-start")) freezeOnStart(fighter, fighterId);
             }
+            if (getPlugin().getConfig().getBoolean("count-fights")) DefaultFight.countFights();
+            if (getPlugin().getConfig().getBoolean("create-fights-folder")) setFightsFolder();
+            if (getPlugin().getConfig().getBoolean("mysql-enabled")) SqlMethods.sqlFights();
+            if (getPlugin().getConfig().getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
+            else if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
+                Bukkit.broadcastMessage(message("fight-good-luck"));
         }
-        if (getPlugin().getConfig().getBoolean("count-fights")) countFights();
-        if (getPlugin().getConfig().getBoolean("create-fights-folder")) setFightsFolder();
-        if (getPlugin().getConfig().getBoolean("mysql-enabled")) SqlMethods.sqlFights();
-        if (getPlugin().getConfig().getBoolean("freeze-on-start")) countdownBeforeFight();
-        else if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
-            Bukkit.broadcastMessage(message("fight-good-luck"));
     }
 
     @SneakyThrows
     public void stopFight() {
         player.setWalkSpeed(0.2F);
         removeEntries();
-        cancelled = true;
+        cancelled.set(true);
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {
             if (team1.contains(online.getUniqueId()) || team2.contains(online.getUniqueId())) {
                 if (Main.version <= 13) collidableReflection(player, true);
@@ -118,7 +118,8 @@ public class TeamFight implements FightType {
     private static void clearBeforeFight() {
         team1String.clear();
         team2String.clear();
-        cancelled = false;
+        cancelled.set(false);
+        distinctFighters.clear();
     }
 
     private void setBoard() {
@@ -135,49 +136,16 @@ public class TeamFight implements FightType {
             team1Board.setAllowFriendlyFire(true);
             team2Board.setAllowFriendlyFire(true);
         }
-        for (Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(board);
-    }
-
-    private void freezeOnStart(Player fighter, UUID fighterId) {
-        (new BukkitRunnable() {
-            int i = getPlugin().getConfig().getInt("countdown-time");
-
-            public void run() {
-                temporary.add(fighterId);
-                player.setWalkSpeed(0.0F);
-                if (i == 0) {
-                    temporary.clear();
-                    player.setWalkSpeed(0.2F);
-                    playSound(fighter);
-                    cancel();
-                } else {
-                    if (cancelled) {
-                        temporary.clear();
-                        player.setWalkSpeed(0.2F);
-                        cancel();
-                    } else {
-                        playNote(fighter);
-                    }
-                }
-
-                --i;
-            }
-        }).runTaskTimer(getPlugin(), 0L, 20L);
-    }
-
-    @SneakyThrows
-    private void countFights() {
-        getPlugin().getConfig().set("fight-count", ++fightCount);
-        getPlugin().getConfig().save(getPlugin().customConfigFile);
+        for (Player online : Bukkit.getOnlinePlayers()) online.setScoreboard(Fight.board);
     }
 
     @SneakyThrows
     private void setFightsFolder() {
         duration = 0;
-        TeamFightListener.stopper = 0;
+        TeamFightListener.stopper = true;
         new BukkitRunnable() {
             public void run() {
-                if (TeamFightListener.stopper == 1 || cancelled) cancel();
+                if (!TeamFightListener.stopper || cancelled.get()) cancel();
                 else duration++;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
@@ -195,36 +163,6 @@ public class TeamFight implements FightType {
         FightsConfig.save(FightsConfigFile);
     }
 
-    private void playSound(Player fighter) {
-        if (Main.version >= 18)
-            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-        else
-            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
-    }
-
-    private void playNote(Player fighter) {
-        if (Main.version >= 18)
-            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
-        else
-            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
-    }
-
-    private void countdownBeforeFight() {
-        (new BukkitRunnable() {
-            int i = getPlugin().getConfig().getInt("countdown-time");
-
-            public void run() {
-                if (i == 0) {
-                    if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
-                        Bukkit.broadcastMessage(message("fight-good-luck"));
-                    cancel();
-                } else if (cancelled) cancel();
-                else
-                    Bukkit.broadcastMessage(String.format(message("fight-will-start"), i));
-                --i;
-            }
-        }).runTaskTimer(getPlugin(), 0L, 20L);
-    }
 
     private static void createFightsFolder() {
         File fightsConfigFolder = new File(getPlugin().getDataFolder(), "fights");

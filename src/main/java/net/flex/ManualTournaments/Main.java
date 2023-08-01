@@ -21,15 +21,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
+
 public final class Main extends JavaPlugin {
     public static Main getPlugin() {
         return getPlugin(Main.class);
     }
 
+    public static SpiGUI gui;
     public static int version;
     public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>();
-    public File KitsConfigfile, ArenaConfigFile, customConfigFile;
-    static FileConfiguration KitsConfig, ArenaConfig, customConfig;
+    private static File KitsConfigfile, ArenaConfigFile, CustomConfigFile;
+    private static FileConfiguration KitsConfig, ArenaConfig, CustomConfig;
     private static final Map<String, Integer> versionMap = new HashMap<String, Integer>() {{
         put("v1_8_R1", 11);
         put("v1_8_R2", 12);
@@ -55,9 +57,19 @@ public final class Main extends JavaPlugin {
         put("v1_20_R1", 32);
     }};
 
-    public static SpiGUI gui;
+    public static File getKitConfigFile() {
+        return KitsConfigfile;
+    }
 
-    public static FileConfiguration getKitsConfig() {
+    public static File getArenaConfigFile() {
+        return ArenaConfigFile;
+    }
+
+    public static File getCustomConfigFile() {
+        return CustomConfigFile;
+    }
+
+    public static FileConfiguration getKitConfig() {
         return KitsConfig;
     }
 
@@ -66,7 +78,7 @@ public final class Main extends JavaPlugin {
     }
 
     public static FileConfiguration getCustomConfig() {
-        return customConfig;
+        return CustomConfig;
     }
 
     @Override
@@ -146,11 +158,11 @@ public final class Main extends JavaPlugin {
     }
 
     private void createCustomConfig() {
-        customConfigFile = new File(getDataFolder(), "config.yml");
-        customConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(customConfigFile);
-        if (!customConfigFile.exists()) {
-            created(customConfigFile.getParentFile().mkdirs());
+        CustomConfigFile = new File(getDataFolder(), "config.yml");
+        CustomConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(CustomConfigFile);
+        if (!CustomConfigFile.exists()) {
+            created(CustomConfigFile.getParentFile().mkdirs());
             saveResource("config.yml", false);
         }
     }

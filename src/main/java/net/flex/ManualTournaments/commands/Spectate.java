@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public final class Spectate implements TabCompleter, CommandExecutor {
@@ -35,8 +35,8 @@ public final class Spectate implements TabCompleter, CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        config.load(getPlugin().customConfigFile);
-        Main.getArenaConfig().load(getPlugin().ArenaConfigFile);
+        config.load(getCustomConfigFile());
+        Main.getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) setSpectator(player);
         else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Arena implements CommandExecutor, TabCompleter {
@@ -24,8 +24,8 @@ public class Arena implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        getPlugin().getConfig().load(getPlugin().customConfigFile);
-        Main.getArenaConfig().load(getPlugin().ArenaConfigFile);
+        getPlugin().getConfig().load(getCustomConfigFile());
+        Main.getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) {
             ArenaGUI.arenaGUI(player);
         } else if (args.length == 1) {

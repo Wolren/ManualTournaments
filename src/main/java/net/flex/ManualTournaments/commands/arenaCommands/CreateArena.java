@@ -7,8 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Objects;
 
-import static net.flex.ManualTournaments.Main.getArenaConfig;
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 import static net.flex.ManualTournaments.utils.SharedComponents.sendNotExists;
 
@@ -19,10 +18,10 @@ public final class CreateArena implements ArenaCommand {
         if (!arenaExists) {
             if (Objects.equals(getPlugin().getConfig().getString("current-arena"), ""))  {
                 getPlugin().getConfig().set("current-arena", arenaName);
-                getPlugin().getConfig().save(getPlugin().customConfigFile);
+                getPlugin().getConfig().save(getCustomConfigFile());
             }
             getArenaConfig().set("Arenas." + arenaName, "");
-            getArenaConfig().save(getPlugin().ArenaConfigFile);
+            getArenaConfig().save(getArenaConfigFile());
             Main.arenaNames.add(arenaName);
             send(player, "arena-create");
         } else sendNotExists(player);

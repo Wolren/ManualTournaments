@@ -1,6 +1,7 @@
 package net.flex.ManualTournaments.factories;
 
-import net.flex.ManualTournaments.commands.fightCommands.NullFight;
+import net.flex.ManualTournaments.commands.fightCommands.FfaFight;
+import net.flex.ManualTournaments.commands.fightCommands.DefaultFight;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import net.flex.ManualTournaments.interfaces.FightType;
 
@@ -11,9 +12,10 @@ public class FightFactory {
 
     public static final Map<String, FightType> fightTypesMap =  new HashMap<String, FightType>() {{
         put("TEAM", new TeamFight());
+        put("FFA", new FfaFight());
     }};
 
-    public static FightType fight = new NullFight();
+    public static FightType fight = new DefaultFight();
     public FightType createFight(String type) {
         if (fightTypesMap.containsKey(type.toUpperCase())) {
             fight = fightTypesMap.get(type.toUpperCase());
@@ -21,7 +23,7 @@ public class FightFactory {
             fight.stopFight();
         }
         if (fight.canStartFight(type)) return fight;
-        else return new NullFight();
+        else return new DefaultFight();
     }
 }
 

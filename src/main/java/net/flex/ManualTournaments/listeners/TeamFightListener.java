@@ -37,7 +37,7 @@ public class TeamFightListener implements Listener {
     public static double regeneratedTeam2 = 0;
     public static double damageTeam1 = 0;
     public static double damageTeam2 = 0;
-    public static int stopper;
+    public static boolean stopper;
 
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
@@ -48,7 +48,7 @@ public class TeamFightListener implements Listener {
             event.setDroppedExp(0);
             event.setDeathMessage(null);
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
-            if (killer != null && !TeamFight.cancelled) {
+            if (killer != null && !TeamFight.cancelled.get()) {
                 if (TeamFight.team1.contains(killer.getUniqueId()) || TeamFight.team2.contains(killer.getUniqueId())) {
                     String replacePlayer = Objects.requireNonNull(config.getString("fight-death")).replace("{player}", player.getDisplayName());
                     String replaceKiller = replacePlayer.replace("{killer}", killer.getDisplayName());
@@ -56,7 +56,7 @@ public class TeamFightListener implements Listener {
                 }
             }
         }
-        if (!TeamFight.cancelled) {
+        if (!TeamFight.cancelled.get()) {
             teamRemover(player, TeamFight.team1, TeamFight.team2);
             teamRemover(player, TeamFight.team2, TeamFight.team1);
         }
@@ -68,7 +68,7 @@ public class TeamFightListener implements Listener {
             FightsConfig.load(TeamFight.FightsConfigFile);
             FightsConfig.set("duration", TeamFight.duration - 3);
             durationUpdate(TeamFight.duration - 3);
-            stopper = 1;
+            stopper = false;
             FightsConfig.save(TeamFight.FightsConfigFile);
         }
     }

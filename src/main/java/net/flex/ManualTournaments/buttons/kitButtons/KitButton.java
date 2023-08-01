@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Objects;
 
+import static net.flex.ManualTournaments.Main.getCustomConfigFile;
 import static net.flex.ManualTournaments.Main.getPlugin;
 
 public class KitButton extends ButtonBuilder {
@@ -34,7 +35,7 @@ public class KitButton extends ButtonBuilder {
                 .withListener(event -> {
                     if (event.isRightClick()) {
                         getPlugin().getConfig().set("current-kit", name);
-                        getPlugin().getConfig().save(getPlugin().customConfigFile);
+                        getPlugin().getConfig().save(getCustomConfigFile());
                         refresh(sender, name);
                     } else if (event.isLeftClick()) {
                         KitSettingsGUI.kitSettingsGUI(sender, name);

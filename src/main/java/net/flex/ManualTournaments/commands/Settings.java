@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static net.flex.ManualTournaments.Main.getCustomConfigFile;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.optional;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
@@ -30,7 +31,7 @@ public class Settings implements TabCompleter, CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        config.load(getPlugin().customConfigFile);
+        config.load(getCustomConfigFile());
         if (args.length == 0) {
             SettingsGUI.settingsGUI(player);
         } else if (args.length == 1) {

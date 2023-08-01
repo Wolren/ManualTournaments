@@ -15,8 +15,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.Main.gui;
+import static net.flex.ManualTournaments.Main.*;
 
 public class SettingsGUI {
     private static final Collection<String> buttonConfigSet = new HashSet<>(Arrays.asList("break-blocks", "drop-items", "drop-on-death", "freeze-on-start", "friendly-fire", "kill-on-fight-end", "place-blocks"));
@@ -64,6 +63,6 @@ public class SettingsGUI {
         getPlugin().getConfig().set(buttonConfig, configValue);
         updateButtonIcon(setting, buttonConfig, trueIs, falseIs);
         menu.refreshInventory(sender);
-        getPlugin().getConfig().save(getPlugin().customConfigFile);
+        getPlugin().getConfig().save(getCustomConfigFile());
     }
 }

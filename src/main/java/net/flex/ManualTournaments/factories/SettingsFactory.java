@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.flex.ManualTournaments.Main.getCustomConfigFile;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
@@ -33,7 +34,7 @@ public class SettingsFactory {
         if (value.equals("true") || value.equals("false")) {
             getPlugin().getConfig().set(configKey, true);
             send(player, "config-updated-successfully");
-            getPlugin().getConfig().save(getPlugin().customConfigFile);
+            getPlugin().getConfig().save(getCustomConfigFile());
         } else send(player, "config-options");
     }
 }

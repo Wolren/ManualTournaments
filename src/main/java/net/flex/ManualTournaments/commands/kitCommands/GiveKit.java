@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static net.flex.ManualTournaments.Main.getKitsConfig;
+import static net.flex.ManualTournaments.Main.getKitConfig;
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
@@ -40,10 +40,10 @@ public final class GiveKit implements KitCommand {
         if (Main.version >= 22) player.setAbsorptionAmount(0);
         player.setFireTicks(0);
         for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
-        ConfigurationSection itemsSection = getKitsConfig().getConfigurationSection(path + "items");
-        ConfigurationSection armorSection = getKitsConfig().getConfigurationSection(path + "armor");
-        ConfigurationSection offhandSection = getKitsConfig().getConfigurationSection(path + "offhand");
-        ConfigurationSection effectsSection = getKitsConfig().getConfigurationSection(path + "effects");
+        ConfigurationSection itemsSection = getKitConfig().getConfigurationSection(path + "items");
+        ConfigurationSection armorSection = getKitConfig().getConfigurationSection(path + "armor");
+        ConfigurationSection offhandSection = getKitConfig().getConfigurationSection(path + "offhand");
+        ConfigurationSection effectsSection = getKitConfig().getConfigurationSection(path + "effects");
         setItems(player, path, itemsSection);
         setArmor(player, path, armorSection);
         if (Main.version >= 15) setOffhand(player, path, offhandSection);
@@ -55,10 +55,10 @@ public final class GiveKit implements KitCommand {
         for (String string : Objects.requireNonNull(itemSection).getKeys(false)) {
             int slot = Integer.parseInt(string);
             String slotPath = path + "items." + slot + ".";
-            String name = getKitsConfig().getString(slotPath + "name");
-            List<String> enchants = getKitsConfig().getStringList(slotPath + "enchants");
-            ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(getKitsConfig().getString(slotPath + "type")))), getKitsConfig().getInt(slotPath + "amount"));
-            if (getKitsConfig().getString(slotPath + "potion") != null) {
+            String name = getKitConfig().getString(slotPath + "name");
+            List<String> enchants = getKitConfig().getStringList(slotPath + "enchants");
+            ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(getKitConfig().getString(slotPath + "type")))), getKitConfig().getInt(slotPath + "amount"));
+            if (getKitConfig().getString(slotPath + "potion") != null) {
                 effect(slotPath, is);
                 player.getInventory().setItem(slot, is);
             } else if (is.getType().equals(Material.ENCHANTED_BOOK)) {
@@ -67,11 +67,11 @@ public final class GiveKit implements KitCommand {
                     player.getInventory().setItem(slot, is);
                 }
             } else {
-                if (Main.version <= 18) is.setDurability((short) getKitsConfig().getInt(slotPath + "durability"));
+                if (Main.version <= 18) is.setDurability((short) getKitConfig().getInt(slotPath + "durability"));
                 ItemMeta im = is.getItemMeta();
                 if (im != null) {
                     enchant(name, enchants, im, slotPath);
-                    im.setLore(getKitsConfig().getStringList(slotPath + "lore"));
+                    im.setLore(getKitConfig().getStringList(slotPath + "lore"));
                     is.setItemMeta(im);
                     player.getInventory().setItem(slot, is);
                 }
@@ -85,9 +85,9 @@ public final class GiveKit implements KitCommand {
             String slotPath = path + "armor." + string + ".";
             ItemStack is = itemStack(slotPath);
             ItemMeta im = is.getItemMeta();
-            if (Main.version <= 18) is.setDurability((short) getKitsConfig().getInt(slotPath + "durability"));
+            if (Main.version <= 18) is.setDurability((short) getKitConfig().getInt(slotPath + "durability"));
             if (im == null) continue;
-            enchant(getKitsConfig().getString(slotPath + "name"), getKitsConfig().getStringList(slotPath + "enchants"), im, slotPath);
+            enchant(getKitConfig().getString(slotPath + "name"), getKitConfig().getStringList(slotPath + "enchants"), im, slotPath);
             is.setItemMeta(im);
             if (slotPath.contains("HELMET")) player.getInventory().setHelmet(is);
             else if (slotPath.contains("CHESTPLATE")) player.getInventory().setChestplate(is);
@@ -100,14 +100,14 @@ public final class GiveKit implements KitCommand {
         if (offhandSection == null) return;
         List<String> strings = new ArrayList<>(Objects.requireNonNull(offhandSection).getKeys(false));
         String slotPath = path + "offhand." + strings.get(0) + ".";
-        String type = getKitsConfig().getString(slotPath + "type");
-        String name = getKitsConfig().getString(slotPath + "name");
+        String type = getKitConfig().getString(slotPath + "type");
+        String name = getKitConfig().getString(slotPath + "name");
         short durability = 0;
-        if (Main.version <= 18) durability = (short) getKitsConfig().getInt(slotPath + "durability");
-        List<String> enchants = getKitsConfig().getStringList(slotPath + "enchants");
-        int amount = getKitsConfig().getInt(slotPath + "amount");
+        if (Main.version <= 18) durability = (short) getKitConfig().getInt(slotPath + "durability");
+        List<String> enchants = getKitConfig().getStringList(slotPath + "enchants");
+        int amount = getKitConfig().getInt(slotPath + "amount");
         ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(type))), amount);
-        if (getKitsConfig().getString(slotPath + "potion") != null) {
+        if (getKitConfig().getString(slotPath + "potion") != null) {
             effect(slotPath, is);
             if (Main.version >= 14) player.getInventory().setItemInOffHand(is);
         } else if (is.getType().equals(Material.ENCHANTED_BOOK)) {
@@ -129,30 +129,30 @@ public final class GiveKit implements KitCommand {
         Iterable<String> effects = new ArrayList<>(Objects.requireNonNull(effectSection).getKeys(false));
         for (String s : effects) {
             PotionEffectType type = PotionEffectType.getByName(s);
-            int amplifier = getKitsConfig().getInt(path + "effects." + s.toUpperCase() + ".amplifier");
-            int duration = getKitsConfig().getInt(path + "effects." + s.toUpperCase() + ".duration");
+            int amplifier = getKitConfig().getInt(path + "effects." + s.toUpperCase() + ".amplifier");
+            int duration = getKitConfig().getInt(path + "effects." + s.toUpperCase() + ".duration");
             PotionEffect effect = new PotionEffect(Objects.requireNonNull(type), duration, amplifier);
             p.addPotionEffect(effect);
         }
     }
 
     private static ItemStack itemStack(String pathing) {
-        return new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(getKitsConfig().getString(pathing + "type")))), getKitsConfig().getInt(pathing + "amount"));
+        return new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(getKitConfig().getString(pathing + "type")))), getKitConfig().getInt(pathing + "amount"));
     }
 
     private static void effect(String pathing, ItemStack is) {
-        PotionType potionMetaType = PotionType.valueOf(getKitsConfig().getString(pathing + "potion.type"));
-        boolean metaExtended = getKitsConfig().getBoolean(pathing + "potion.extended");
-        boolean metaUpgraded = getKitsConfig().getBoolean(pathing + "potion.upgraded");
+        PotionType potionMetaType = PotionType.valueOf(getKitConfig().getString(pathing + "potion.type"));
+        boolean metaExtended = getKitConfig().getBoolean(pathing + "potion.extended");
+        boolean metaUpgraded = getKitConfig().getBoolean(pathing + "potion.upgraded");
         PotionMeta potionMeta = (PotionMeta) is.getItemMeta();
         if (Main.version >= 14 && potionMeta != null) {
             potionMeta.setBasePotionData(new PotionData(potionMetaType, metaExtended, metaUpgraded));
             is.setItemMeta(potionMeta);
         } else if (Main.version >= 13) {
-            PotionType potionType = PotionType.valueOf(getKitsConfig().getString(pathing + "potion.type"));
-            int level = getKitsConfig().getInt(pathing + "potion.level");
-            boolean splash = getKitsConfig().getBoolean(pathing + "potion.splash");
-            boolean extended = getKitsConfig().getBoolean(pathing + "potion.extended");
+            PotionType potionType = PotionType.valueOf(getKitConfig().getString(pathing + "potion.type"));
+            int level = getKitConfig().getInt(pathing + "potion.level");
+            boolean splash = getKitConfig().getBoolean(pathing + "potion.splash");
+            boolean extended = getKitConfig().getBoolean(pathing + "potion.extended");
             Potion potion = new Potion(potionType, level, splash, extended);
             is.setItemMeta(potion.toItemStack(is.getAmount()).getItemMeta());
         }
@@ -171,8 +171,8 @@ public final class GiveKit implements KitCommand {
 
     private static void enchant(String name, Iterable<String> enchants, ItemMeta im, String slotPath) {
         if (name != null) im.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        im.setLore(getKitsConfig().getStringList(slotPath + "lore"));
-        if (getKitsConfig().getBoolean(slotPath + "unbreakable") && Main.version >= 14) im.setUnbreakable(true);
+        im.setLore(getKitConfig().getStringList(slotPath + "lore"));
+        if (getKitConfig().getBoolean(slotPath + "unbreakable") && Main.version >= 14) im.setUnbreakable(true);
         for (String enchant : enchants) {
             String[] stringEnchants = enchant.split(" = ");
             NamespacedKey enchantmentKey = NamespacedKey.fromString(stringEnchants[0], getPlugin());

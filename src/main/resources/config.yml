@@ -48,6 +48,7 @@ current-arena: ""
 #Scoreboard team names, functionality to be implemented in future versions
 team1: "Red"
 team2: "Blue"
+team-ffa:
 #Scoreboard prefix visible on tab and nickname
 team1-prefix: "&cRed&r "
 team2-prefix: "&9Blue&r "

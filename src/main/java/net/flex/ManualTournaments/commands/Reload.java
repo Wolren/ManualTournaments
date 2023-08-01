@@ -13,16 +13,16 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 
 public final class Reload implements CommandExecutor, TabCompleter {
     @SneakyThrows
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
         if ((args.length == 1 && args[0].equals("reload")) || args.length == 0) {
             getPlugin().getLogger().info("Reloading...");
-            Main.getKitsConfig().load(getPlugin().KitsConfigfile);
-            getPlugin().getConfig().load(getPlugin().customConfigFile);
-            Main.getArenaConfig().load(getPlugin().ArenaConfigFile);
+            Main.getKitConfig().load(getKitConfigFile());
+            Main.getArenaConfig().load(getArenaConfigFile());
+            Main.getCustomConfig().load(getCustomConfigFile());
             getPlugin().getLogger().info("Reloading complete");
             return true;
         } else return false;

@@ -17,8 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static net.flex.ManualTournaments.Main.getArenaConfig;
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 
 public class SharedComponents {
 
@@ -58,7 +57,7 @@ public class SharedComponents {
         cfg.set(pathing + "yaw", yaw);
         cfg.set(pathing + "pitch", pitch);
         cfg.set(pathing + "world", world);
-        getArenaConfig().save(getPlugin().ArenaConfigFile);
+        getArenaConfig().save(getArenaConfigFile());
     }
 
     public static void collidableReflection(Player fighter, boolean value) {

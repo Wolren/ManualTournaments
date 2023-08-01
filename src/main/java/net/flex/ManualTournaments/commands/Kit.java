@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.optional;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
@@ -29,8 +29,8 @@ public class Kit implements TabCompleter, CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        config.load(getPlugin().customConfigFile);
-        Main.getKitsConfig().load(getPlugin().KitsConfigfile);
+        config.load(getCustomConfigFile());
+        Main.getKitConfig().load(getKitConfigFile());
         if (args.length == 0) {
             KitGUI.kitGUI(player);
         } else if (args.length == 1) {
