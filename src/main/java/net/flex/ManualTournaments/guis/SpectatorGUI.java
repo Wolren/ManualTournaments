@@ -2,7 +2,7 @@ package net.flex.ManualTournaments.guis;
 
 import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,7 +11,7 @@ import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.Main.gui;
 
 public class SpectatorGUI {
-    public static SGMenu spectatorMenu = gui.create("Teleportation Menu", 5, "Spectator");
+    public static Menu spectatorMenu = gui.create("Teleportation Menu", 5, "Spectator");
 
     public static void teleportationGUI(Player sender) {
         Bukkit.getOnlinePlayers().forEach(player -> {

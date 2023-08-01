@@ -6,7 +6,7 @@ import net.flex.ManualTournaments.factories.ArenaFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
 import net.flex.ManualTournaments.guis.ArenaSettingsGUI;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -16,12 +16,12 @@ import static net.flex.ManualTournaments.Main.*;
 public class SpectatorArenaButton extends ButtonBuilder {
     static FileConfiguration config = getPlugin().getConfig();
 
-    public SpectatorArenaButton(Player sender, String arenaName, SGMenu menu) {
+    public SpectatorArenaButton(Player sender, String arenaName, Menu menu) {
         super(sender, arenaName, menu);
     }
 
     @Override
-    protected Button configureButton(Player sender, String name, SGMenu menu) {
+    protected Button configureButton(Player sender, String name, Menu menu) {
         String path = "Arenas." + name + ".spectator.";
         return new Button(new ItemBuilder(Material.MAP)
                 .name(config.getString("gui-arena-settings-spectator-name"))

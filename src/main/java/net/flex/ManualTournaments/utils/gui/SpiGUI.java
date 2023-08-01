@@ -3,8 +3,8 @@ package net.flex.ManualTournaments.utils.gui;
 import lombok.Getter;
 import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenuListener;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
+import net.flex.ManualTournaments.utils.gui.menu.MenuListener;
 import net.flex.ManualTournaments.utils.gui.menu.SGOpenMenu;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import org.bukkit.Material;
@@ -58,7 +58,7 @@ public class SpiGUI {
      * called when building pagination buttonManaging for inventory GUIs.
      * <p>
      * This can be overridden per-inventory, as well as per-plugin using the appropriate methods
-     * on either the inventory class ({@link SGMenu}) or your plugin's instance of
+     * on either the inventory class ({@link Menu}) or your plugin's instance of
      * {@link SpiGUI}.
      * -- GETTER --
      *
@@ -138,8 +138,8 @@ public class SpiGUI {
      * also be registered with the plugin too.
      * <br><br>
      * Thus, the design whereby this class is registered as a static field on a {@link JavaPlugin}
-     * instance and serves as a proxy for creating ({@link SGMenu}) inventories and an instance
-     * of the {@link SGMenuListener} registered with that plugin seemed like a good way to try
+     * instance and serves as a proxy for creating ({@link Menu}) inventories and an instance
+     * of the {@link MenuListener} registered with that plugin seemed like a good way to try
      * and minimize the inconvenience of the approach.
      *
      * @param plugin The plugin using gui.
@@ -148,7 +148,7 @@ public class SpiGUI {
         this.plugin = plugin;
 
         plugin.getServer().getPluginManager().registerEvents(
-            new SGMenuListener(plugin, this), plugin
+            new MenuListener(plugin, this), plugin
         );
     }
 
@@ -172,7 +172,7 @@ public class SpiGUI {
      * @param rows The number of rows the inventory should have per page.
      * @return The created inventory.
      */
-    public SGMenu create(String name, int rows) {
+    public Menu create(String name, int rows) {
         return create(name, rows, null);
     }
 
@@ -215,8 +215,8 @@ public class SpiGUI {
      * @param tag The inventory's tag.
      * @return The created inventory.
      */
-    public SGMenu create(String name, int rows, String tag) {
-        return new SGMenu(plugin, this, name, rows, tag);
+    public Menu create(String name, int rows, String tag) {
+        return new Menu(plugin, this, name, rows, tag);
     }
 
     /**
@@ -282,15 +282,15 @@ public class SpiGUI {
 
         // Loop through every online player...
         // ...if that player has an open inventory with a top inventory...
-        // If the top inventory is an SGMenu,
+        // If the top inventory is an Menu,
         plugin.getServer().getOnlinePlayers().forEach(player -> {
             player.getOpenInventory().getTopInventory();// ...get that top inventory.
             Inventory topInventory = player.getOpenInventory().getTopInventory();
-            if (topInventory.getHolder() != null && topInventory.getHolder() instanceof SGMenu) {
-                // and the SGMenu has the tag matching the one we're checking for,
-                SGMenu inventory = (SGMenu) topInventory.getHolder();
+            if (topInventory.getHolder() != null && topInventory.getHolder() instanceof Menu) {
+                // and the Menu has the tag matching the one we're checking for,
+                Menu inventory = (Menu) topInventory.getHolder();
                 if (inventory.getTag().equals(tag))
-                    // add the SGMenu to our list of found inventories.
+                    // add the Menu to our list of found inventories.
                     foundInventories.add(new SGOpenMenu(inventory, player));
             }
         });

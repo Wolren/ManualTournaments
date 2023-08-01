@@ -25,7 +25,7 @@ public class TeamFight implements FightType {
     private static final Set<Player> distinctFighters = new HashSet<>();
     public static Set<UUID> team1 = new HashSet<>(), team2 = new HashSet<>();
     public static Team team1Board = Fight.board.registerNewTeam(message("team1")), team2Board = Fight.board.registerNewTeam(message("team2"));
-    public static final Collection<String> team1String = new ArrayList<>(), team2String = new ArrayList<>();
+    public static final Set<String> team1String = new HashSet<>(), team2String = new HashSet<>();
     public static File FightsConfigFile;
     public static FileConfiguration FightsConfig;
     public static int duration;

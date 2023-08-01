@@ -3,7 +3,7 @@ package net.flex.ManualTournaments.guis;
 import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.buttons.arenaButtons.*;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -18,7 +18,7 @@ public class ArenaSettingsGUI {
     public static Set<Button> arenaSettingsMenuButtons = new HashSet<>();
     public static void arenaSettingsGUI(Player sender, String arenaName) {
         String name = String.format(Objects.requireNonNull(getPlugin().getConfig().getString("gui-arena-settings-menu-name")), arenaName);
-        SGMenu arenaSettingsMenu = gui.create(name, 2, name);
+        Menu arenaSettingsMenu = gui.create(name, 2, name);
         arenaSettingsMenu.setBlockDefaultInteractions(true);
         arenaSettingsMenu.setToolbarBuilder((slot, page, type, menu) -> {
             if (slot == 8) return ArenaGUI.director.constructButton(new RemoveArenaButton(sender, arenaName));

@@ -4,16 +4,16 @@ import org.bukkit.entity.Player;
 
 public class SGOpenMenu {
 
-    private final SGMenu gui;
+    private final Menu gui;
 
     private final Player player;
 
-    public SGOpenMenu(SGMenu gui, Player player) {
+    public SGOpenMenu(Menu gui, Player player) {
         this.gui = gui;
         this.player = player;
     }
 
-    public SGMenu getMenu() {
+    public Menu getMenu() {
         return this.gui;
     }
 

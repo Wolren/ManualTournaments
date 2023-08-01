@@ -25,7 +25,7 @@ public class DefaultFight implements FightType {
     public static int fightCount = getPlugin().getConfig().getInt("fight-count");
 
     public static void countdownBeforeFight() {
-        (new BukkitRunnable() {
+        new BukkitRunnable() {
             int i = getPlugin().getConfig().getInt("countdown-time");
 
             public void run() {
@@ -38,11 +38,11 @@ public class DefaultFight implements FightType {
                     Bukkit.broadcastMessage(String.format(message("fight-will-start"), i));
                 --i;
             }
-        }).runTaskTimer(getPlugin(), 0L, 20L);
+        }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
     public static void freezeOnStart(Player fighter, UUID fighterId) {
-        (new BukkitRunnable() {
+        new BukkitRunnable() {
             int i = getPlugin().getConfig().getInt("countdown-time");
 
             public void run() {
@@ -65,7 +65,7 @@ public class DefaultFight implements FightType {
 
                 --i;
             }
-        }).runTaskTimer(getPlugin(), 0L, 20L);
+        }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
     private static void playSound(Player fighter) {

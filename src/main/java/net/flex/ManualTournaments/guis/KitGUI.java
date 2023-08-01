@@ -4,7 +4,7 @@ import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.buttons.ButtonDirector;
 import net.flex.ManualTournaments.buttons.kitButtons.CreateKitButton;
 import net.flex.ManualTournaments.buttons.kitButtons.KitButton;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 import static net.flex.ManualTournaments.Main.*;
 
 public class KitGUI {
-    public static SGMenu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5, "Kit");
+    public static Menu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5, "Kit");
     public static Map<String, Button> kitMenuButtons = new HashMap<>();
     public static boolean opener = false;
     public static ButtonDirector director = new ButtonDirector();

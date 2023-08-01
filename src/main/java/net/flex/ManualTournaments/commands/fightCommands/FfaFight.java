@@ -40,6 +40,8 @@ public class FfaFight implements FightType {
             }
             if (getPlugin().getConfig().getBoolean("count-fights")) DefaultFight.countFights();
             if (getPlugin().getConfig().getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
+            else if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
+                Bukkit.broadcastMessage(message("fight-good-luck"));
         }
     }
 

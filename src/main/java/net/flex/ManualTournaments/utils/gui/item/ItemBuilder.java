@@ -106,10 +106,6 @@ public class ItemBuilder {
     }
 
     public ItemStack build() {
-        return get();
-    }
-
-    public ItemStack get() {
         return stack;
     }
 }

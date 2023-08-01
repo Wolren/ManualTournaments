@@ -1,12 +1,12 @@
 package net.flex.ManualTournaments.utils.gui.toolbar;
 
 import net.flex.ManualTournaments.buttons.Button;
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
 
 public interface SGToolbarBuilder {
 
     /**
-     * Specifies the toolbar button builder for an {@link SGMenu}.
+     * Specifies the toolbar button builder for an {@link Menu}.
      * This can be customized to render different toolbar buttonManaging for a gui.
      *
      * @param slot The slot being rendered.
@@ -16,5 +16,5 @@ public interface SGToolbarBuilder {
      * @return The button to be rendered for that slot, or null if no
      * button should be rendered.
      */
-    Button buildToolbarButton(int slot, int page, SGToolbarButtonType defaultType, SGMenu menu);
+    Button buildToolbarButton(int slot, int page, SGToolbarButtonType defaultType, Menu menu);
 }

@@ -1,6 +1,6 @@
 package net.flex.ManualTournaments.buttons;
 
-import net.flex.ManualTournaments.utils.gui.menu.SGMenu;
+import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.entity.Player;
 
 public abstract class ButtonBuilder {
@@ -14,7 +14,7 @@ public abstract class ButtonBuilder {
         return null;
     }
 
-    protected Button configureButton(Player sender, String name, SGMenu menu) {
+    protected Button configureButton(Player sender, String name, Menu menu) {
         return null;
     }
 
@@ -26,7 +26,7 @@ public abstract class ButtonBuilder {
         button = configureButton(sender, name);
     }
 
-    public ButtonBuilder(Player sender, String name, SGMenu menu) {
+    public ButtonBuilder(Player sender, String name, Menu menu) {
         button = configureButton(sender, name, menu);
     }
 

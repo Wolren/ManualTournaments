@@ -15,24 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
-
-/**
- * SGMenu is used to implement the library's GUIs.
- * <br><br>
- * This is a Minecraft 'inventory' that contains items which can have
- * programmable actions performed when they are clicked. Additionally,
- * it automatically adds 'pagination' items if the menu overflows.
- * <br><br>
- * You do not instantiate this class when you need it - as you would
- * have done with the older version of the library - rather you make a
- * call to {@link SpiGUI#create(String, int)} (or {@link SpiGUI#create(String, int, String)})
- * from your plugin's {@link SpiGUI} instance.
- * <br><br>
- * This creates an inventory that is already associated with your plugin.
- * The reason for this is explained in the {@link SpiGUI#SpiGUI(JavaPlugin)}
- * class constructor implementation notes.
- */
-public class SGMenu implements InventoryHolder {
+public class Menu implements InventoryHolder {
 
     private final JavaPlugin owner;
     private final SpiGUI spiGUI;
@@ -45,25 +28,10 @@ public class SGMenu implements InventoryHolder {
     private Boolean blockDefaultInteractions;
     private Boolean enableAutomaticPagination;
     private SGToolbarBuilder toolbarBuilder;
-    private Consumer<SGMenu> onClose;
-    private Consumer<SGMenu> onPageChange;
+    private Consumer<Menu> onClose;
+    private Consumer<Menu> onPageChange;
 
-    /**
-     * <b>Intended for internal use only. Use {@link SpiGUI#create(String, int)} or {@link SpiGUI#create(String, int, String)}!</b><br>
-     * Used by the library internally to construct an SGMenu.
-     * <p>
-     * The name parameter is color code translated.
-     *
-     * @param owner The plugin the inventory should be associated with.
-     * @param spiGUI The SpiGUI that created this inventory.
-     * @param name The display name of the inventory.
-     * @param rowsPerPage The number of rows per page.
-     * @param tag The inventory's tag.
-     *
-     * @see SpiGUI#create(String, int)
-     * @see SpiGUI#create(String, int, String)
-     */
-    public SGMenu(JavaPlugin owner, SpiGUI spiGUI, String name, int rowsPerPage, String tag) {
+    public Menu(JavaPlugin owner, SpiGUI spiGUI, String name, int rowsPerPage, String tag) {
         this.owner = owner;
         this.spiGUI = spiGUI;
         this.name = ChatColor.translateAlternateColorCodes('&', name);
@@ -76,159 +44,55 @@ public class SGMenu implements InventoryHolder {
         this.currentPage = 0;
     }
 
-    /// INVENTORY SETTINGS ///
-
-    /**
-     * This is a per-inventory version of {@link SpiGUI#setBlockDefaultInteractions(boolean)}.
-     *
-     * @see SpiGUI#setBlockDefaultInteractions(boolean)
-     * @param blockDefaultInteractions Whether or not the default behavior of click events should be cancelled.
-     */
     public void setBlockDefaultInteractions(boolean blockDefaultInteractions) {
         this.blockDefaultInteractions = blockDefaultInteractions;
     }
 
-    /**
-     * This is a per-inventory version of {@link SpiGUI#areDefaultInteractionsBlocked()}.
-     *
-     * @see SpiGUI#areDefaultInteractionsBlocked()
-     * @return Whether or not the default behavior of click events should be cancelled.
-     */
     public Boolean areDefaultInteractionsBlocked() {
         return blockDefaultInteractions;
     }
 
-    /**
-     * This is a per-inventory version of {@link SpiGUI#setEnableAutomaticPagination(boolean)}.
-     * If this value is set, it overrides the per-plugin option set in {@link SpiGUI}.
-     *
-     * @see SpiGUI#setEnableAutomaticPagination(boolean)
-     * @param enableAutomaticPagination Whether or not pagination buttons should be automatically added.
-     */
+
     public void setAutomaticPaginationEnabled(boolean enableAutomaticPagination) {
         this.enableAutomaticPagination = enableAutomaticPagination;
     }
 
-    /**
-     * This is a per-inventory version of {@link SpiGUI#isAutomaticPaginationEnabled()}.
-     *
-     * @see SpiGUI#isAutomaticPaginationEnabled()
-     * @return Whether or not pagination buttons should be automatically added.
-     */
     public Boolean isAutomaticPaginationEnabled() {
         return enableAutomaticPagination;
     }
 
-    /**
-     * This is a per-inventory version of ({@link SpiGUI#setDefaultToolbarBuilder(SGToolbarBuilder)}).
-     *
-     * @see SpiGUI#setDefaultToolbarBuilder(SGToolbarBuilder)
-     * @param toolbarBuilder The default toolbar builder used for GUIs.
-     */
     public void setToolbarBuilder(SGToolbarBuilder toolbarBuilder) {
         this.toolbarBuilder = toolbarBuilder;
     }
 
-    /**
-     * This is a per-inventory version of ({@link SpiGUI#getDefaultToolbarBuilder()}).
-     *
-     * @see SpiGUI#getDefaultToolbarBuilder()
-     * @return The default toolbar builder used for GUIs.
-     */
     public SGToolbarBuilder getToolbarBuilder() {
         return this.toolbarBuilder;
     }
 
-    /// INVENTORY OWNER ///
-
-    /**
-     * Returns the plugin that the inventory is associated with.
-     * As this field is final, this would be the plugin that created
-     * the inventory.
-     *
-     * @return The plugin the inventory is associated with.
-     */
     public JavaPlugin getOwner() {
         return owner;
     }
 
-    /// INVENTORY SIZE ///
-
-    /**
-     * Returns the number of rows (of 9 columns) per page of the inventory.
-     * If you want the total number of slots on a page, you should use {@link #getPageSize()}
-     * instead.
-     *
-     * @return The number of rows per page.
-     */
     public int getRowsPerPage() {
         return rowsPerPage;
     }
 
-    /**
-     * Returns the number of slots per page of the inventory. This would be
-     * associated with the Bukkit/Spigot API's inventory 'size' parameter.
-     * <p>
-     * So for example if {@link #getRowsPerPage()} was 3, this would be 27,
-     * as Minecraft Chest inventories have rows of 9 columns.
-     *
-     * @return The number of inventory slots per page.
-     */
     public int getPageSize() {
         return rowsPerPage * 9;
     }
 
-    /**
-     * Sets the number of rows per page of the inventory.
-     * <p>
-     * There is no way to set the number of slots per page directly, so if
-     * you need to do that, you'll need to divide the number of slots by 9
-     * and supply the result to this parameter to achieve that.
-     *
-     * @param rowsPerPage The number of rows per page.
-     */
     public void setRowsPerPage(int rowsPerPage) {
         this.rowsPerPage = rowsPerPage;
     }
 
-    /// INVENTORY TAG ///
-
-    /**
-     * This returns the GUI's tag.
-     * <br><br>
-     * The tag is used when getting all open inventories ({@link SpiGUI#findOpenWithTag(String)}) with your chosen tag.
-     * An example of where this might be useful is with a permission GUI - when
-     * the permissions are updated by one user in the GUI, it would be desirable to
-     * refresh the state of the permissions GUI for all users observing the GUI.
-     *
-     * @return The GUI's tag.
-     */
     public String getTag() {
         return tag;
     }
 
-    /**
-     * This sets the GUI's tag.
-     *
-     * @see #getTag()
-     * @see SpiGUI#findOpenWithTag(String)
-     * @param tag The GUI's tag.
-     */
     public void setTag(String tag) {
         this.tag = tag;
     }
 
-    /// INVENTORY NAME ///
-
-    /**
-     * This sets the inventory's display name.
-     * <br><br>
-     * The name parameter is color code translated before the value is set.
-     * If you want to avoid this behavior, you should use {@link #setRawName(String)}
-     * which sets the inventory's name directly.
-     *
-     * @param name The display name to set. (and to be color code translated)
-     */
     public void setName(String name) {
         this.name = ChatColor.translateAlternateColorCodes('&', name);
     }
@@ -545,7 +409,7 @@ public class SGMenu implements InventoryHolder {
      * @see #setOnClose(Consumer)
      * @return The action to be performed on close.
      */
-    public Consumer<SGMenu> getOnClose() {
+    public Consumer<Menu> getOnClose() {
         return this.onClose;
     }
 
@@ -556,7 +420,7 @@ public class SGMenu implements InventoryHolder {
      *
      * @param onClose The action to be performed on close.
      */
-    public void setOnClose(Consumer<SGMenu> onClose) {
+    public void setOnClose(Consumer<Menu> onClose) {
         this.onClose = onClose;
     }
 
@@ -564,7 +428,7 @@ public class SGMenu implements InventoryHolder {
      * @see #setOnPageChange(Consumer)
      * @return The action to be performed on page change.
      */
-    public Consumer<SGMenu> getOnPageChange() {
+    public Consumer<Menu> getOnPageChange() {
         return this.onPageChange;
     }
 
@@ -573,16 +437,16 @@ public class SGMenu implements InventoryHolder {
      *
      * @param onPageChange The action to be performed on page change.
      */
-    public void setOnPageChange(Consumer<SGMenu> onPageChange) {
+    public void setOnPageChange(Consumer<Menu> onPageChange) {
         this.onPageChange = onPageChange;
     }
 
     /// INVENTORY API ///
 
     public void refreshInventory(HumanEntity viewer) {
-        // If the open inventory isn't an SGMenu - or if it isn't this inventory, do nothing.
+        // If the open inventory isn't an Menu - or if it isn't this inventory, do nothing.
         if (
-                !(viewer.getOpenInventory().getTopInventory().getHolder() instanceof SGMenu)
+                !(viewer.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
                         || viewer.getOpenInventory().getTopInventory().getHolder() != this
         ) return;
 
