@@ -2,13 +2,13 @@ package net.flex.ManualTournaments.utils.gui.menu;
 
 import org.bukkit.entity.Player;
 
-public class SGOpenMenu {
+public class OpenMenu {
 
     private final Menu gui;
 
     private final Player player;
 
-    public SGOpenMenu(Menu gui, Player player) {
+    public OpenMenu(Menu gui, Player player) {
         this.gui = gui;
         this.player = player;
     }

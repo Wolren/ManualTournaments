@@ -9,15 +9,14 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scoreboard.Team;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.commands.Fight.teams;
 
 public class SharedComponents {
 
@@ -81,8 +80,13 @@ public class SharedComponents {
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    public static String teamList(final Iterable<UUID> team, final Collection<String> teamString) {
-        for (final UUID uuid : team) teamString.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+    public static String teamList() {
+        Set<String> teamString = new HashSet<>();
+        for (Set<UUID> uuidList : teams.values()) {
+            for (UUID uuid : uuidList) {
+                teamString.add(Objects.requireNonNull(Bukkit.getOfflinePlayer(uuid)).getName());
+            }
+        }
         return String.join(", ", teamString);
     }
 
@@ -98,10 +102,18 @@ public class SharedComponents {
 
     public static void removeEntries() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (TeamFight.team1.contains(player.getUniqueId()))
-                TeamFight.team1Board.removeEntry(player.getDisplayName());
-            else if (TeamFight.team2.contains(player.getUniqueId()))
-                TeamFight.team2Board.removeEntry(player.getDisplayName());
+            for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
+                Team team = entry.getKey();
+                Set<UUID> playerUUIDs = entry.getValue();
+                if (playerUUIDs.contains(player.getUniqueId())) {
+                    if (team.getName().equals("1")) {
+                        TeamFight.team1.removeEntry(player.getName());
+                    } else if (team.getName().equals("2")) {
+                        TeamFight.team2.removeEntry(player.getName());
+                    }
+                    break;
+                }
+            }
         }
     }
 }

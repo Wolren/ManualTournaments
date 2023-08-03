@@ -1,7 +1,6 @@
 package net.flex.ManualTournaments;
 
 import net.flex.ManualTournaments.commands.*;
-import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.listeners.GUIListener;
@@ -97,9 +96,7 @@ public final class Main extends JavaPlugin {
 
     public void onDisable() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (TeamFight.team1.contains(player.getUniqueId()) || TeamFight.team2.contains(player.getUniqueId())) {
-                player.getInventory().clear();
-            }
+            if (Fight.playerIsInTeam(player.getUniqueId())) player.getInventory().clear();
         }
         FightFactory.fight.stopFight();
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {

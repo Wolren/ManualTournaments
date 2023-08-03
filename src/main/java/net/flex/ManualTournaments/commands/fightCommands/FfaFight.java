@@ -13,12 +13,11 @@ import org.bukkit.scoreboard.Team;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.commands.Fight.teams;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class FfaFight implements FightType {
     private static final Set<Player> distinctFighters = new HashSet<>();
-    public static Map<Team, List<UUID>> teams = new HashMap<>();
-    public static boolean cancelled = false;
 
     @SneakyThrows
     @Override
@@ -29,7 +28,7 @@ public class FfaFight implements FightType {
             for (Player fighter : fighters) {
                 Team team = Fight.board.registerNewTeam("Team " + fighter.getName());
                 setBoard(team, fighter);
-                teams.put(team, Collections.singletonList(fighter.getUniqueId()));
+                teams.put(team, Collections.singleton(fighter.getUniqueId()));
                 fighter.setGameMode(GameMode.SURVIVAL);
                 if (Main.version <= 13) collidableReflection(fighter, false);
                 getPlugin().getConfig().load(getCustomConfigFile());
@@ -46,13 +45,14 @@ public class FfaFight implements FightType {
     }
 
     private void setBoard(Team team, Player fighter) {
-        team.addEntry(fighter.getDisplayName());
         if (Main.version >= 14) team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         Bukkit.getOnlinePlayers().forEach(online -> online.setScoreboard(Fight.board));
+        team.addEntry(fighter.getDisplayName());
     }
 
     @Override
     public void stopFight() {
+
     }
 
     @Override
@@ -79,7 +79,7 @@ public class FfaFight implements FightType {
     private static void clearBeforeFight() {
         Fight.board.getTeams().forEach(Team::unregister);
         teams.clear();
-        cancelled = false;
+        cancelled.set(false);
         distinctFighters.clear();
     }
 }

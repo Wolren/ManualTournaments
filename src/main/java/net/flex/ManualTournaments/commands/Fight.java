@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -21,7 +22,8 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Fight implements CommandExecutor, TabCompleter {
-    private final ArrayList<Player> fighters = new ArrayList<>();
+    public static Map<Team, Set<UUID>> teams = new HashMap<>();
+    private final List<Player> fighters = new ArrayList<>();
     public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
 
     @SneakyThrows
@@ -51,5 +53,20 @@ public class Fight implements CommandExecutor, TabCompleter {
             list.add("team");
         } else for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
         return list;
+    }
+
+    public static boolean playerIsInTeam(UUID player) {
+        return teams.values().stream().anyMatch(list -> list.contains(player));
+    }
+
+    public static List<UUID> getTeamPlayers(String teamName) {
+        List<UUID> UUIDs = new ArrayList<>();
+        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
+            Team team = entry.getKey();
+            if (team.getName().equals(teamName)) {
+                UUIDs.addAll(entry.getValue());
+            }
+        }
+        return UUIDs;
     }
 }

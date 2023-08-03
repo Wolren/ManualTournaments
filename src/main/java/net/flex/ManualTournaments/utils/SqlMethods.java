@@ -34,9 +34,9 @@ public class SqlMethods {
                     " duration," +
                     " winners)" +
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            preparedStatement.setString(1, teamList(TeamFight.team1, TeamFight.team1String));
+            preparedStatement.setString(1, teamList());
             TeamFight.team1String.clear();
-            preparedStatement.setString(2, teamList(TeamFight.team2, TeamFight.team2String));
+            preparedStatement.setString(2, teamList());
             TeamFight.team2String.clear();
             preparedStatement.setDouble(3, 0);
             preparedStatement.setDouble(4, 0);

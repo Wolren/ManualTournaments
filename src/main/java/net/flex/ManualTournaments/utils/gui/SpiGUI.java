@@ -5,7 +5,7 @@ import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import net.flex.ManualTournaments.utils.gui.menu.MenuListener;
-import net.flex.ManualTournaments.utils.gui.menu.SGOpenMenu;
+import net.flex.ManualTournaments.utils.gui.menu.OpenMenu;
 import net.flex.ManualTournaments.utils.gui.toolbar.SGToolbarBuilder;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -268,17 +268,17 @@ public class SpiGUI {
      * Finds a list of all open inventories with a given tag along with the
      * player who has that inventory open.
      * <p>
-     * This returns a list of {@link SGOpenMenu} which simply stores the
+     * This returns a list of {@link OpenMenu} which simply stores the
      * opened inventory along with the player viewing the open inventory.
      * <p>
      * Supplying null as the tag value will get all untagged inventories.
      *
      * @param tag The tag to search for.
-     * @return A list of {@link SGOpenMenu} whose inventories have the specified tag.
+     * @return A list of {@link OpenMenu} whose inventories have the specified tag.
      */
-    public List<SGOpenMenu> findOpenWithTag(String tag) {
+    public List<OpenMenu> findOpenWithTag(String tag) {
 
-        List<SGOpenMenu> foundInventories = new ArrayList<>();
+        List<OpenMenu> foundInventories = new ArrayList<>();
 
         // Loop through every online player...
         // ...if that player has an open inventory with a top inventory...
@@ -291,7 +291,7 @@ public class SpiGUI {
                 Menu inventory = (Menu) topInventory.getHolder();
                 if (inventory.getTag().equals(tag))
                     // add the Menu to our list of found inventories.
-                    foundInventories.add(new SGOpenMenu(inventory, player));
+                    foundInventories.add(new OpenMenu(inventory, player));
             }
         });
 
