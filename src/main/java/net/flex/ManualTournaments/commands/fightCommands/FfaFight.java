@@ -10,7 +10,10 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.commands.Fight.teams;
@@ -25,61 +28,81 @@ public class FfaFight implements FightType {
         clearBeforeFight();
         distinctFighters.addAll(fighters);
         if (distinctFighters.size() == fighters.size()) {
-            for (Player fighter : fighters) {
-                Team team = Fight.board.registerNewTeam("Team " + fighter.getName());
-                setBoard(team, fighter);
-                teams.put(team, Collections.singleton(fighter.getUniqueId()));
-                fighter.setGameMode(GameMode.SURVIVAL);
-                if (Main.version <= 13) collidableReflection(fighter, false);
-                getPlugin().getConfig().load(getCustomConfigFile());
-                fighter.teleport(location("Arenas." + getPlugin().getConfig().getString("current-arena") + ".pos1.", getArenaConfig()));
-                GiveKit.setKit(fighter, getPlugin().getConfig().getString("current-kit"));
-                if (getPlugin().getConfig().getBoolean("freeze-on-start"))
-                    DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
-            }
-            if (getPlugin().getConfig().getBoolean("count-fights")) DefaultFight.countFights();
-            if (getPlugin().getConfig().getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
-            else if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
+            fighters.forEach(this::setupFighter);
+            if (config.getBoolean("count-fights")) DefaultFight.countFights();
+            if (config.getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
+            else if (config.getBoolean("fight-good-luck-enabled")) {
                 Bukkit.broadcastMessage(message("fight-good-luck"));
+            }
         }
     }
 
+    private void clearBeforeFight() {
+        Fight.board.getTeams().forEach(Team::unregister);
+        teams.clear();
+        cancelled.set(false);
+        distinctFighters.clear();
+    }
+
+    @SneakyThrows
+    private void setupFighter(Player fighter) {
+        Team team = Fight.board.registerNewTeam("Team " + fighter.getName());
+        setBoard(team, fighter);
+        teams.put(team, new HashSet<>(Collections.singleton(fighter.getUniqueId())));
+        fighter.setGameMode(GameMode.SURVIVAL);
+        if (version <= 13) collidableReflection(fighter, false);
+        config.load(getCustomConfigFile());
+        fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig()));
+        GiveKit.setKit(fighter, config.getString("current-kit"));
+        if (config.getBoolean("freeze-on-start")) {
+            DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
+        }
+    }
+
+
     private void setBoard(Team team, Player fighter) {
-        if (Main.version >= 14) team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        if (Main.version >= 14) {
+            team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        }
         Bukkit.getOnlinePlayers().forEach(online -> online.setScoreboard(Fight.board));
         team.addEntry(fighter.getDisplayName());
     }
 
     @Override
     public void stopFight() {
-
+        player.setWalkSpeed(0.2F);
+        removeEntries();
+        cancelled.set(true);
+        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
+            if (version <= 13) collidableReflection(player, true);
+            if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
+            else if (!config.getBoolean("kill-on-fight-end")) {
+                String path = "fight-end-spawn.";
+                clear(online);
+                online.teleport(location(path, config));
+            }
+        });
+        teams.clear();
     }
 
     @Override
     public boolean canStartFight(String type) {
-        if (Main.kitNames.contains(getPlugin().getConfig().getString("current-kit"))) {
-            if (Main.arenaNames.contains(getPlugin().getConfig().getString("current-arena"))) {
+        if (Main.kitNames.contains(config.getString("current-kit"))) {
+            if (Main.arenaNames.contains(config.getString("current-arena"))) {
                 if (type.equalsIgnoreCase("ffa")) {
-                    String path = "Arenas." + getPlugin().getConfig().getString("current-arena") + ".";
-                    boolean pos1 = getArenaConfig().isSet(path + "pos1");
-                    boolean pos2 = getArenaConfig().isSet(path + "pos2");
-                    boolean spectator = getArenaConfig().isSet(path + "spectator");
-                    if (pos1 && pos2 && spectator) return true;
-                    else {
-                        if (!pos1) send(player, "arena-lacks-pos1");
-                        if (!pos2) send(player, "arena-lacks-pos2");
-                        if (!spectator) send(player, "arena-lacks-spectator");
-                    }
+                    if (teams.values().stream().allMatch(Set::isEmpty)) {
+                        String path = "Arenas." + config.getString("current-arena") + ".";
+                        boolean pos1 = getArenaConfig().isSet(path + "pos1");
+                        boolean spectator = getArenaConfig().isSet(path + "spectator");
+                        if (pos1 && spectator) return true;
+                        else {
+                            if (!pos1) send(player, "arena-lacks-pos1");
+                            if (!spectator) send(player, "arena-lacks-spectator");
+                        }
+                    } else send(player, "fight-concurrent");
                 }
             } else send(player, "current-arena-not-set");
         } else send(player, "current-kit-not-set");
         return false;
-    }
-
-    private static void clearBeforeFight() {
-        Fight.board.getTeams().forEach(Team::unregister);
-        teams.clear();
-        cancelled.set(false);
-        distinctFighters.clear();
     }
 }

@@ -15,8 +15,9 @@ public final class ValidateArena implements ArenaCommand {
             boolean pos1 = getArenaConfig().isSet(path + "pos1");
             boolean pos2 = getArenaConfig().isSet(path + "pos2");
             boolean spectator = getArenaConfig().isSet(path + "spectator");
-            if (pos1 && pos2 && spectator) send(player, "arena-set-correctly");
-            else {
+            if (pos1 && pos2 && spectator) {
+                send(player, "arena-set-correctly");
+            } else {
                 if (!pos1) send(player, "arena-lacks-pos1");
                 if (!pos2) send(player, "arena-lacks-pos2");
                 if (!spectator) send(player, "arena-lacks-spectator");

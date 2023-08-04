@@ -2,12 +2,17 @@ package net.flex.ManualTournaments.utils;
 
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
+import net.flex.ManualTournaments.buttons.Button;
+import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Team;
 
@@ -19,7 +24,7 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.commands.Fight.teams;
 
 public class SharedComponents {
-
+    public static FileConfiguration config = getPlugin().getConfig();
     public static Player player = null;
 
     public static String message(String s) {
@@ -80,11 +85,13 @@ public class SharedComponents {
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    public static String teamList() {
+    public static String teamList(String teamName) {
         Set<String> teamString = new HashSet<>();
-        for (Set<UUID> uuidList : teams.values()) {
-            for (UUID uuid : uuidList) {
-                teamString.add(Objects.requireNonNull(Bukkit.getOfflinePlayer(uuid)).getName());
+        for (Map.Entry<Team, Set<UUID>> entry : Fight.teams.entrySet()) {
+            if (entry.getKey().getName().equals(teamName)) {
+                for (UUID uuid : entry.getValue()) {
+                    teamString.add(Objects.requireNonNull(Bukkit.getOfflinePlayer(uuid)).getName());
+                }
             }
         }
         return String.join(", ", teamString);
@@ -115,5 +122,22 @@ public class SharedComponents {
                 }
             }
         }
+    }
+
+    public static boolean playerIsInTeam(UUID player) {
+        return teams.values().stream().anyMatch(list -> list.contains(player));
+    }
+
+    public static void addEnchantment(Button button) {
+        ItemMeta meta = button.getIcon().getItemMeta();
+        if (meta != null) {
+            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            button.getIcon().setItemMeta(meta);
+        }
+    }
+
+    public static void removeEnchantment(Button button) {
+        button.getIcon().removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
     }
 }

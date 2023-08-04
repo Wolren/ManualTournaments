@@ -51,22 +51,8 @@ public class Fight implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             list.add("stop");
             list.add("team");
+            list.add("ffa");
         } else for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
         return list;
-    }
-
-    public static boolean playerIsInTeam(UUID player) {
-        return teams.values().stream().anyMatch(list -> list.contains(player));
-    }
-
-    public static List<UUID> getTeamPlayers(String teamName) {
-        List<UUID> UUIDs = new ArrayList<>();
-        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
-            Team team = entry.getKey();
-            if (team.getName().equals(teamName)) {
-                UUIDs.addAll(entry.getValue());
-            }
-        }
-        return UUIDs;
     }
 }

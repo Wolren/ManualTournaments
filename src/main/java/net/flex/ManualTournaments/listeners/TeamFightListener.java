@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.commands.fightCommands.TeamFight.FightsConfig;
@@ -41,17 +42,17 @@ public class TeamFightListener implements Listener {
         Player player = event.getEntity();
         Player killer = player.getKiller();
         removeEntries();
-        if (Fight.playerIsInTeam(player.getUniqueId())) {
+        if (playerIsInTeam(player.getUniqueId())) {
             event.setDroppedExp(0);
             event.setDeathMessage(null);
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
             if (!TeamFight.cancelled.get()) {
-                teamRemover(player);
-                if (killer != null && Fight.playerIsInTeam(killer.getUniqueId())) {
+                if (killer != null && playerIsInTeam(killer.getUniqueId())) {
                     String replacePlayer = Objects.requireNonNull(config.getString("fight-death")).replace("{player}", player.getDisplayName());
                     String replaceKiller = replacePlayer.replace("{killer}", killer.getDisplayName());
                     event.setDeathMessage(ChatColor.translateAlternateColorCodes('&', replaceKiller));
                 }
+                teamRemover(player);
             }
         }
     }
@@ -69,9 +70,9 @@ public class TeamFightListener implements Listener {
 
     @SneakyThrows
     private void teamRemover(Player player) {
-        Set<UUID> team1 = Collections.emptySet();
-        Set<UUID> team2 = Collections.emptySet();
-        Set<UUID> ffaTeam = Collections.emptySet();
+        Set<UUID> team1 = new HashSet<>();
+        Set<UUID> team2 = new HashSet<>();
+        Map<Team, Set<UUID>> ffaTeams = new HashMap<>();
         for (Map.Entry<Team, Set<UUID>> entry : Fight.teams.entrySet()) {
             if (entry.getValue().contains(player.getUniqueId())) {
                 entry.getValue().remove(player.getUniqueId());
@@ -81,18 +82,29 @@ public class TeamFightListener implements Listener {
             } else if (entry.getKey().getName().equals("2")) {
                 team2 = entry.getValue();
             } else {
-                ffaTeam = entry.getValue();
+                ffaTeams.put(entry.getKey(), entry.getValue());
             }
         }
         if (team1.isEmpty() && !team2.isEmpty()) {
-            teamRemoverHandler(team2);
+            teamHandler(team2, "2");
         } else if (!team1.isEmpty() && team2.isEmpty()) {
-            teamRemoverHandler(team1);
+            teamHandler(team1, "1");
+        }
+        int filledTeams = 0;
+        Map.Entry<Team, Set<UUID>> nonEmptyTeam = null;
+        for (Map.Entry<Team, Set<UUID>> entry : ffaTeams.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                filledTeams++;
+                nonEmptyTeam = entry;
+            }
+        }
+        if (filledTeams == 1) {
+            teamFfaHandler(nonEmptyTeam.getValue());
         }
     }
 
     @SneakyThrows
-    private static void teamRemoverHandler(Set<UUID> team) {
+    private static void teamHandler(Set<UUID> team, String winner) {
         if (config.getBoolean("mysql-enabled")) {
             regeneratedUpdate(regeneratedTeam1, regeneratedTeam2);
             damageUpdate(damageTeam1, damageTeam2);
@@ -109,16 +121,47 @@ public class TeamFightListener implements Listener {
         damageTeam1 = 0;
         damageTeam2 = 0;
         if (config.getBoolean("mysql-enabled")) {
-            winnersUpdate(teamList());
+            winnersUpdate(teamList(winner));
         }
         if (config.getBoolean("create-fights-folder")) {
             FightsConfig.load(TeamFight.FightsConfigFile);
-            FightsConfig.set("winners", teamList());
+            FightsConfig.set("winners", teamList(winner));
             FightsConfig.set("cancelled", false);
             FightsConfig.save(TeamFight.FightsConfigFile);
         }
-        Collection<String> array = new ArrayList<>();
-        for (UUID uuid : team) array.add(Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName());
+        Collection<String> array = team.stream().map(uuid -> Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName()).collect(Collectors.toList());
+        String listString = String.join(", ", array);
+        new BukkitRunnable() {
+            int i = config.getInt("teleport-countdown-time");
+
+            @SneakyThrows
+            public void run() {
+                if (i == 0) {
+                    String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
+                    Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
+                    if (config.getBoolean("create-fights-folder")) endCounter();
+                    if (config.getBoolean("kill-on-fight-end")) {
+                        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                            if (team.contains(p.getUniqueId())) p.setHealth(0);
+                        }
+                    } else if (!config.getBoolean("kill-on-fight-end")) {
+                        String path = "fight-end-spawn.";
+                        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                            if (team.contains(p.getUniqueId()) && config.isSet(path)) {
+                                clear(player);
+                                p.teleport(location(path, config));
+                            }
+                        }
+                    }
+                    cancel();
+                }
+                --i;
+            }
+        }.runTaskTimer(getPlugin(), 0L, 20L);
+    }
+
+    private static void teamFfaHandler(Set<UUID> team) {
+        Collection<String> array = team.stream().map(uuid -> Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName()).collect(Collectors.toList());
         String listString = String.join(", ", array);
         new BukkitRunnable() {
             int i = config.getInt("teleport-countdown-time");
@@ -152,7 +195,7 @@ public class TeamFightListener implements Listener {
     @EventHandler
     private void onDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        if (Fight.playerIsInTeam(player.getUniqueId())) {
+        if (playerIsInTeam(player.getUniqueId())) {
             if (!config.getBoolean("drop-items")) event.setCancelled(true);
         }
     }
@@ -160,7 +203,7 @@ public class TeamFightListener implements Listener {
     @EventHandler
     private void onBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        if (Fight.playerIsInTeam(player.getUniqueId())) {
+        if (playerIsInTeam(player.getUniqueId())) {
             if (!config.getBoolean("break-blocks")) event.setCancelled(true);
         }
     }
@@ -168,7 +211,7 @@ public class TeamFightListener implements Listener {
     @EventHandler
     private void onPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
-        if (Fight.playerIsInTeam(player.getUniqueId())) {
+        if (playerIsInTeam(player.getUniqueId())) {
             if (!config.getBoolean("place-blocks")) event.setCancelled(true);
         }
     }
@@ -176,7 +219,7 @@ public class TeamFightListener implements Listener {
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (Fight.playerIsInTeam(player.getUniqueId())) {
+        if (playerIsInTeam(player.getUniqueId())) {
             if (config.getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());
                 player.setHealth(0);
@@ -195,7 +238,7 @@ public class TeamFightListener implements Listener {
     @EventHandler
     private void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        if (Fight.playerIsInTeam(player.getUniqueId())) {
+        if (playerIsInTeam(player.getUniqueId())) {
             if (config.getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
                 event.setCancelled(false);
             } else {

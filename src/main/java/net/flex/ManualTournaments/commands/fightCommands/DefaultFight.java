@@ -17,75 +17,76 @@ import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getCustomConfigFile;
 import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedComponents.message;
-import static net.flex.ManualTournaments.utils.SharedComponents.player;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class DefaultFight implements FightType {
     public static Set<UUID> temporary = new HashSet<>();
-    public static int fightCount = getPlugin().getConfig().getInt("fight-count");
 
-    public static void countdownBeforeFight() {
+    static void countdownBeforeFight() {
         new BukkitRunnable() {
-            int i = getPlugin().getConfig().getInt("countdown-time");
+            int countdownTime = config.getInt("countdown-time");
 
             public void run() {
-                if (i == 0) {
-                    if (getPlugin().getConfig().getBoolean("fight-good-luck-enabled"))
+                if (countdownTime == 0) {
+                    if (config.getBoolean("fight-good-luck-enabled")) {
                         Bukkit.broadcastMessage(message("fight-good-luck"));
+                    }
                     cancel();
-                } else if (cancelled.get()) cancel();
-                else
-                    Bukkit.broadcastMessage(String.format(message("fight-will-start"), i));
-                --i;
+                } else if (cancelled.get()) {
+                    cancel();
+                } else {
+                    Bukkit.broadcastMessage(String.format(message("fight-will-start"), countdownTime));
+                }
+
+                countdownTime--;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
-    public static void freezeOnStart(Player fighter, UUID fighterId) {
+    @SneakyThrows
+    static void countFights() {
+        int fightCount = config.getInt("fight-count");
+        config.set("fight-count", ++fightCount);
+        config.save(getCustomConfigFile());
+    }
+
+    static void freezeOnStart(Player fighter, UUID fighterId) {
         new BukkitRunnable() {
-            int i = getPlugin().getConfig().getInt("countdown-time");
+            int countdownTime = config.getInt("countdown-time");
 
             public void run() {
                 DefaultFight.temporary.add(fighterId);
                 player.setWalkSpeed(0.0F);
-                if (i == 0) {
+                if (countdownTime == 0) {
                     DefaultFight.temporary.clear();
                     player.setWalkSpeed(0.2F);
                     playSound(fighter);
                     cancel();
-                } else {
-                    if (cancelled.get()) {
-                        DefaultFight.temporary.clear();
-                        player.setWalkSpeed(0.2F);
-                        cancel();
-                    } else {
-                        playNote(fighter);
-                    }
-                }
+                } else if (cancelled.get()) {
+                    DefaultFight.temporary.clear();
+                    player.setWalkSpeed(0.2F);
+                    cancel();
+                } else playNote(fighter);
 
-                --i;
+                countdownTime--;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
     private static void playSound(Player fighter) {
-        if (Main.version >= 18)
+        if (Main.version >= 18) {
             fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-        else
+        } else {
             fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
+        }
     }
 
     private static void playNote(Player fighter) {
-        if (Main.version >= 18)
+        if (Main.version >= 18) {
             fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
-        else
+        } else {
             fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
-    }
-
-    @SneakyThrows
-    static void countFights() {
-        getPlugin().getConfig().set("fight-count", ++fightCount);
-        getPlugin().getConfig().save(getCustomConfigFile());
+        }
     }
 
     @Override

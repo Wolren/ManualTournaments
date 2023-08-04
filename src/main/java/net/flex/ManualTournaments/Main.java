@@ -3,6 +3,8 @@ package net.flex.ManualTournaments;
 import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
+import net.flex.ManualTournaments.guis.ArenaGUI;
+import net.flex.ManualTournaments.guis.KitGUI;
 import net.flex.ManualTournaments.listeners.GUIListener;
 import net.flex.ManualTournaments.listeners.SpectateListener;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
@@ -20,6 +22,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
+
+import static net.flex.ManualTournaments.utils.SharedComponents.playerIsInTeam;
 
 public final class Main extends JavaPlugin {
     public static Main getPlugin() {
@@ -96,12 +100,14 @@ public final class Main extends JavaPlugin {
 
     public void onDisable() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (Fight.playerIsInTeam(player.getUniqueId())) player.getInventory().clear();
+            if (playerIsInTeam(player.getUniqueId())) player.getInventory().clear();
         }
         FightFactory.fight.stopFight();
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
             if (Spectate.spectators.contains(player.getUniqueId())) Spectate.stopSpectator(player);
         }
+        ArenaGUI.opener = false;
+        KitGUI.opener = false;
         super.onDisable();
     }
 

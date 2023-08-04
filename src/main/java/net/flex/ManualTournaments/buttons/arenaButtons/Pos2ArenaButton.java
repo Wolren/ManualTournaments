@@ -8,34 +8,25 @@ import net.flex.ManualTournaments.guis.ArenaSettingsGUI;
 import net.flex.ManualTournaments.utils.gui.item.ItemBuilder;
 import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.arenaNames;
+import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public class Pos2ArenaButton extends ButtonBuilder {
-    static FileConfiguration config = getPlugin().getConfig();
-
     public Pos2ArenaButton(Player sender, String arenaName, Menu menu) {
         super(sender, arenaName, menu);
     }
 
     @Override
     protected Button configureButton(Player sender, String name, Menu menu) {
-        String path = "Arenas." + name + ".pos2.";
         return new Button(new ItemBuilder(Material.MAP)
                 .name(config.getString("gui-arena-settings-pos2-name"))
-                .lore(config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "x"),
-                        config.getString("gui-arena-settings-lore-color") + "y: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "y"),
-                        config.getString("gui-arena-settings-lore-color") + "z: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "z"),
-                        config.getString("gui-arena-settings-lore-color") + "yaw: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "yaw"),
-                        config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "pitch"),
-                        config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(path + "world"))
-                .build())
-                .withListener(event1 -> {
-                    ArenaFactory.getCommand("POS2").execute(sender, name, arenaNames.contains(name));
-                    sender.openInventory(ArenaGUI.arenaMenu.getInventory());
-                    ArenaSettingsGUI.arenaSettingsGUI(sender, name);
-                });
+                .lore(ArenaGUI.getLore("Arenas." + name + ".pos2."))
+                .build()).withListener(event1 -> {
+            ArenaFactory.getCommand("POS2").execute(sender, name, arenaNames.contains(name));
+            sender.openInventory(ArenaGUI.arenaMenu.getInventory());
+            ArenaSettingsGUI.arenaSettingsGUI(sender, name);
+        });
     }
 }

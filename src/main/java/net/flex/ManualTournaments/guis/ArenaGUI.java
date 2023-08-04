@@ -5,18 +5,13 @@ import net.flex.ManualTournaments.buttons.ButtonDirector;
 import net.flex.ManualTournaments.buttons.arenaButtons.ArenaButton;
 import net.flex.ManualTournaments.buttons.arenaButtons.CreateArenaButton;
 import net.flex.ManualTournaments.utils.gui.menu.Menu;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class ArenaGUI {
     public static Menu arenaMenu = gui.create(getPlugin().getConfig().getString("gui-arena-menu-name"), 5, "Arena");
@@ -42,16 +37,14 @@ public class ArenaGUI {
         sender.openInventory(arenaMenu.getInventory());
     }
 
-    public static void addEnchantment(Button button) {
-        ItemMeta meta = button.getIcon().getItemMeta();
-        if (meta != null) {
-            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            button.getIcon().setItemMeta(meta);
-        }
-    }
-
-    public static void removeEnchantment(Button button) {
-        button.getIcon().removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
+    public static List<String> getLore(String path) {
+        return Arrays.asList(
+                config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "x"),
+                config.getString("gui-arena-settings-lore-color") + "y: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "y"),
+                config.getString("gui-arena-settings-lore-color") + "z: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "z"),
+                config.getString("gui-arena-settings-lore-color") + "yaw: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "yaw"),
+                config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "pitch"),
+                config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(path + "world")
+        );
     }
 }

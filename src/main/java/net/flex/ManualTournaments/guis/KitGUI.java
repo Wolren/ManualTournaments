@@ -5,10 +5,7 @@ import net.flex.ManualTournaments.buttons.ButtonDirector;
 import net.flex.ManualTournaments.buttons.kitButtons.CreateKitButton;
 import net.flex.ManualTournaments.buttons.kitButtons.KitButton;
 import net.flex.ManualTournaments.utils.gui.menu.Menu;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +14,8 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.addEnchantment;
+import static net.flex.ManualTournaments.utils.SharedComponents.removeEnchantment;
 
 public class KitGUI {
     public static Menu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5, "Kit");
@@ -40,18 +39,5 @@ public class KitGUI {
             } else removeEnchantment(button);
         });
         sender.openInventory(kitMenu.getInventory());
-    }
-
-    public static void addEnchantment(Button button) {
-        ItemMeta meta = button.getIcon().getItemMeta();
-        if (meta != null) {
-            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            button.getIcon().setItemMeta(meta);
-        }
-    }
-
-    public static void removeEnchantment(Button button) {
-        button.getIcon().removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
     }
 }

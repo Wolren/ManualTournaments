@@ -4,7 +4,6 @@ import net.flex.ManualTournaments.interfaces.ButtonListener;
 import org.bukkit.inventory.ItemStack;
 
 public class Button {
-
     private ButtonListener listener;
     private ItemStack icon;
 
