@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments;
 
+import com.mojang.authlib.GameProfileRepository;
 import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
@@ -29,6 +30,7 @@ public final class Main extends JavaPlugin {
     public static Main getPlugin() {
         return getPlugin(Main.class);
     }
+    public static GameProfileRepository profileRepository;
 
     public static SpiGUI gui;
     public static int version;

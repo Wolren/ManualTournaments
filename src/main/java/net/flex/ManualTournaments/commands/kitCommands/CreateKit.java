@@ -66,18 +66,18 @@ public final class CreateKit implements KitCommand {
 
         for (ItemStack armor : inventory.getArmorContents()) {
             if (armor != null) {
-                String armorPath = path + "armor." + armor.getType().name() + ".";
+                String armorPath = path + "armor." + armor.getType().name();
                 getKitConfig().set(armorPath, inventory.getArmorContents());
-                getType(armorPath, armor);
+                getType(armorPath + ".", armor);
             }
         }
 
         if (Main.version >= 15) {
             ItemStack offhand = inventory.getItemInOffHand();
             if (!offhand.getType().equals(Material.AIR)) {
-                String offhandPath = path + "offhand." + offhand.getType().name() + ".";
+                String offhandPath = path + "offhand." + offhand.getType().name();
                 getKitConfig().set(offhandPath, offhand);
-                getType(offhandPath, offhand);
+                getType(offhandPath + ".", offhand);
             }
         }
 
@@ -241,18 +241,19 @@ public final class CreateKit implements KitCommand {
                 for (int i = 0; i < fireworkMeta.getEffectsSize(); i++) {
                     FireworkEffect fireworkEffect = fireworkMeta.getEffects().get(i);
                     getKitConfig().set(path + "firework." + i + ".type", fireworkEffect.getType().name());
+                    getKitConfig().set(path + "firework." + i + ".duration", fireworkMeta.getPower());
                     getKitConfig().set(path + "firework." + i + ".flicker", fireworkEffect.hasFlicker());
                     getKitConfig().set(path + "firework." + i + ".trail", fireworkEffect.hasTrail());
-                    List<String> colorList = new ArrayList<>();
+                    List<Integer> colorList = new ArrayList<>();
                     List<Color> colors = fireworkEffect.getColors();
                     for (Color color : colors) {
-                        colorList.add(color.getRed() + ", " + color.getGreen() + ", " + color.getBlue());
+                        colorList.add(color.asRGB());
                     }
                     getKitConfig().set(path + "firework." + i + ".colors", colorList);
-                    List<String> fadeColorList = new ArrayList<>();
+                    List<Integer> fadeColorList = new ArrayList<>();
                     List<Color> fadeColors = fireworkEffect.getFadeColors();
                     for (Color fadeColor : fadeColors) {
-                        fadeColorList.add(fadeColor.getRed() + ", " + fadeColor.getGreen() + ", " + fadeColor.getBlue());
+                        fadeColorList.add(fadeColor.asRGB());
                     }
                     getKitConfig().set(path + "firework." + i + ".fadeColors", fadeColorList);
                 }
@@ -273,8 +274,8 @@ public final class CreateKit implements KitCommand {
 
         if (im instanceof LeatherArmorMeta) {
             LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) im;
-            Color color = leatherArmorMeta.getColor();
-            getKitConfig().set(path + "color", color.getRed() + ", " + color.getGreen() + ", " + color.getBlue());
+            int color = leatherArmorMeta.getColor().asRGB();
+            getKitConfig().set(path + "color", color);
         }
 
         if (im instanceof MapMeta) {
@@ -282,7 +283,7 @@ public final class CreateKit implements KitCommand {
             if (mapMeta.hasColor()) {
                 Color color = mapMeta.getColor();
                 if (color != null) {
-                    getKitConfig().set(path + "map.color", color.getRed() + ", " + color.getGreen() + ", " + color.getBlue());
+                    getKitConfig().set(path + "map.color", color.asRGB());
                 }
             }
             if (mapMeta.isScaling()) {
@@ -298,7 +299,6 @@ public final class CreateKit implements KitCommand {
                 getKitConfig().set(path + "map.view.locked", mapView.isLocked());
                 getKitConfig().set(path + "map.view.tracking", mapView.isTrackingPosition());
                 getKitConfig().set(path + "map.view.unlimitedTracking", mapView.isUnlimitedTracking());
-                getKitConfig().set(path + "map.view.virtual", mapView.isVirtual());
             }
         }
 
@@ -334,10 +334,10 @@ public final class CreateKit implements KitCommand {
         if (im instanceof SkullMeta) {
             SkullMeta skullMeta = (SkullMeta) im;
             if (skullMeta.hasOwner()) {
-                getKitConfig().set(path + ".skull.owner", Objects.requireNonNull(skullMeta.getOwningPlayer()).getUniqueId().toString());
+                getKitConfig().set(path + "skull.owner", Objects.requireNonNull(Objects.requireNonNull(skullMeta.getOwnerProfile()).getUniqueId()).toString());
             }
             if (version >= 32) {
-                getKitConfig().set(path + ".skull.sound", skullMeta.getNoteBlockSound());
+                getKitConfig().set(path + "skull.sound", skullMeta.getNoteBlockSound());
             }
         }
 
@@ -345,18 +345,20 @@ public final class CreateKit implements KitCommand {
             SuspiciousStewMeta stewMeta = (SuspiciousStewMeta) im;
             if (stewMeta.hasCustomEffects()) {
                 List<PotionEffect> potionEffects = stewMeta.getCustomEffects();
-                for (PotionEffect potionEffect : potionEffects) {
-                    getKitConfig().set(path + ".stew.type", potionEffect.getType().getName());
-                    getKitConfig().set(path + ".stew.duration", potionEffect.getDuration());
-                    getKitConfig().set(path + ".stew.amplifier", potionEffect.getAmplifier());
+                for (int i = 0; i < potionEffects.size(); i++) {
+                    PotionEffect potionEffect = potionEffects.get(i);
+                    String stewPath = path + "stew." + i + ".";
+                    getKitConfig().set(stewPath + "type", potionEffect.getType().getName());
+                    getKitConfig().set(stewPath + "duration", potionEffect.getDuration());
+                    getKitConfig().set(stewPath + "amplifier", potionEffect.getAmplifier());
                     if (potionEffect.isAmbient()) {
-                        getKitConfig().set(path + ".stew.ambient", potionEffect.isAmbient());
+                        getKitConfig().set(stewPath + "ambient", potionEffect.isAmbient());
                     }
                     if (potionEffect.hasParticles()) {
-                        getKitConfig().set(path + ".stew.particles", potionEffect.hasParticles());
+                        getKitConfig().set(stewPath + "particles", potionEffect.hasParticles());
                     }
                     if (potionEffect.hasIcon()) {
-                        getKitConfig().set(path + ".stew.icon", potionEffect.hasIcon());
+                        getKitConfig().set(stewPath + "icon", potionEffect.hasIcon());
                     }
                 }
             }
@@ -365,9 +367,9 @@ public final class CreateKit implements KitCommand {
         if (im instanceof TropicalFishBucketMeta) {
             TropicalFishBucketMeta tropicalFishMeta = (TropicalFishBucketMeta) im;
             if (tropicalFishMeta.hasVariant()) {
-                getKitConfig().set(path + ".fish.bodyColor", tropicalFishMeta.getBodyColor().name());
-                getKitConfig().set(path + ".fish.pattern", tropicalFishMeta.getPattern().name());
-                getKitConfig().set(path + ".fish.patternColor", tropicalFishMeta.getPatternColor().name());
+                getKitConfig().set(path + "fish.bodyColor", tropicalFishMeta.getBodyColor().name());
+                getKitConfig().set(path + "fish.pattern", tropicalFishMeta.getPattern().name());
+                getKitConfig().set(path + "fish.patternColor", tropicalFishMeta.getPatternColor().name());
             }
         }
     }
