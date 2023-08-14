@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.commands.kitCommands;
 
+import com.google.common.base.Preconditions;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.interfaces.KitCommand;
@@ -18,7 +19,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.map.MapView;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +30,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getKitConfig;
+import static net.flex.ManualTournaments.Main.version;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public final class GiveKit implements KitCommand {
@@ -94,7 +99,12 @@ public final class GiveKit implements KitCommand {
             boolean particles = getKitConfig().getBoolean(effectPath + "particles");
             boolean icon = getKitConfig().getBoolean(effectPath + "icon");
             if (type != null) {
-                PotionEffect effect = new PotionEffect(type, duration, amplifier, ambient, particles, icon);
+                PotionEffect effect;
+                if (Main.version < 18) {
+                    effect = new PotionEffect(type, duration, amplifier, ambient, particles);
+                } else {
+                    effect = new PotionEffect(type, duration, amplifier, ambient, particles, icon);
+                }
                 p.addPotionEffect(effect);
             }
         }
@@ -106,7 +116,6 @@ public final class GiveKit implements KitCommand {
         int durability = getKitConfig().getInt(slotPath + "durability");
         ItemStack is = new ItemStack(Objects.requireNonNull(Material.matchMaterial(Objects.requireNonNull(type))), amount);
         ItemMeta im = is.getItemMeta();
-
 
 
         if (version <= 18 && durability != 0) {
@@ -121,6 +130,7 @@ public final class GiveKit implements KitCommand {
         int modelData = getKitConfig().getInt(slotPath + "modelData");
         boolean unbreakable = getKitConfig().getBoolean(slotPath + "unbreakable");
         List<String> enchants = getKitConfig().getStringList(slotPath + "enchants");
+        List<String> storedEnchants = getKitConfig().getStringList(slotPath + "storedEnchants");
         String trimMaterial = getKitConfig().getString(slotPath + "trim.material");
         String trimPattern = getKitConfig().getString(slotPath + "trim.pattern");
         String axolotl = getKitConfig().getString(slotPath + "variant");
@@ -149,7 +159,7 @@ public final class GiveKit implements KitCommand {
             }
         }
 
-        if (modelData != 0) {
+        if (Main.version >= 21 && modelData != 0) {
             im.setCustomModelData(modelData);
         }
 
@@ -160,15 +170,18 @@ public final class GiveKit implements KitCommand {
         if (!enchants.isEmpty()) {
             for (String enchant : enchants) {
                 String[] stringEnchants = enchant.split(" = ");
-                NamespacedKey enchantmentKey = NamespacedKey.fromString(stringEnchants[0], getPlugin());
-                Enchantment enchantment = Enchantment.getByKey(enchantmentKey);
-                if (enchantment != null) {
-                    im.addEnchant(enchantment, Integer.parseInt(stringEnchants[1]), true);
+                Enchantment enchantment;
+                if (Main.version >= 18) {
+                    NamespacedKey enchantmentKey = fromString(stringEnchants[0]);
+                    enchantment = Enchantment.getByKey(enchantmentKey);
+                } else {
+                    enchantment = Enchantment.getByName(stringEnchants[0]);
                 }
+                im.addEnchant(enchantment, Integer.parseInt(stringEnchants[1]), true);
             }
         }
 
-        if (im instanceof AxolotlBucketMeta && axolotl != null) {
+        if (Main.version >= 26 && im instanceof AxolotlBucketMeta && axolotl != null) {
             AxolotlBucketMeta axolotlMeta = (AxolotlBucketMeta) im;
             Axolotl.Variant variant = Axolotl.Variant.valueOf(axolotl);
             axolotlMeta.setVariant(variant);
@@ -185,7 +198,7 @@ public final class GiveKit implements KitCommand {
             }
         }
 
-        if (im instanceof BlockStateMeta) {
+        if (Main.version >= 17 && im instanceof BlockStateMeta) {
             BlockStateMeta blockStateMeta = (BlockStateMeta) im;
             if (blockStateMeta.getBlockState() instanceof ShulkerBox) {
                 ShulkerBox shulkerBox = (ShulkerBox) blockStateMeta.getBlockState();
@@ -200,16 +213,18 @@ public final class GiveKit implements KitCommand {
             if (author != null) {
                 bookMeta.setAuthor(author);
             }
-            if (generation != null) {
-                bookMeta.setGeneration(BookMeta.Generation.valueOf(generation));
+            if (Main.version >= 16) {
+                if (generation != null) {
+                    bookMeta.setGeneration(BookMeta.Generation.valueOf(generation));
+                }
             }
-            if (title != null)  {
+            if (title != null) {
                 bookMeta.setTitle(title);
             }
             bookMeta.setPages(pages);
         }
 
-        if (im instanceof CompassMeta) {
+        if (Main.version >= 23 && im instanceof CompassMeta) {
             CompassMeta compassMeta = (CompassMeta) im;
             String lodestonePath = slotPath + "lodestone.location.";
             Location lodestoneLocation = CreateKit.lodestoneLocation(lodestonePath);
@@ -217,7 +232,7 @@ public final class GiveKit implements KitCommand {
             compassMeta.setLodestoneTracked(tracking);
         }
 
-        if (im instanceof CrossbowMeta) {
+        if (Main.version >= 19 && im instanceof CrossbowMeta) {
             CrossbowMeta crossbowMeta = (CrossbowMeta) im;
             ConfigurationSection crossbowSection = getKitConfig().getConfigurationSection(slotPath + "projectiles");
             Inventory projecticlesInventory = Bukkit.createInventory(null, InventoryType.PLAYER, "");
@@ -231,20 +246,23 @@ public final class GiveKit implements KitCommand {
             }
         }
 
-        if (im instanceof Damageable) {
+        if (Main.version >= 19 && im instanceof Damageable) {
             Damageable damageable = (Damageable) im;
             damageable.setDamage(damage);
         }
 
         if (im instanceof EnchantmentStorageMeta) {
-            for (String enchant : enchants) {
+            EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) im;
+            for (String enchant : storedEnchants) {
                 String[] stringEnchants = enchant.split(" = ");
-                NamespacedKey enchantmentKey = NamespacedKey.fromString(stringEnchants[0]);
-                Enchantment enchantment = Enchantment.getByKey(enchantmentKey);
-                EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) is.getItemMeta();
-                if (storageMeta != null && enchantment != null) {
-                    storageMeta.addStoredEnchant(enchantment, Integer.parseInt(stringEnchants[1]), true);
+                Enchantment enchantment;
+                if (Main.version >= 18) {
+                    NamespacedKey enchantmentKey = fromString(stringEnchants[0]);
+                    enchantment = Enchantment.getByKey(enchantmentKey);
+                } else {
+                    enchantment = Enchantment.getByName(stringEnchants[0]);
                 }
+                storageMeta.addStoredEnchant(Objects.requireNonNull(enchantment), Integer.parseInt(stringEnchants[1]), true);
             }
         }
 
@@ -274,11 +292,11 @@ public final class GiveKit implements KitCommand {
             }
         }
 
-        if (im instanceof KnowledgeBookMeta) {
+        if (Main.version >= 18 && im instanceof KnowledgeBookMeta) {
             KnowledgeBookMeta knowledgeBookMeta = (KnowledgeBookMeta) im;
             List<NamespacedKey> recipeKeyList = new ArrayList<>();
             for (String recipeString : recipes) {
-                recipeKeyList.add(NamespacedKey.fromString(recipeString));
+                recipeKeyList.add(fromString(recipeString));
             }
             knowledgeBookMeta.setRecipes(recipeKeyList);
         }
@@ -291,28 +309,34 @@ public final class GiveKit implements KitCommand {
 
         if (im instanceof MapMeta) {
             MapMeta mapMeta = (MapMeta) im;
-            Color mapColor = Color.fromRGB(getKitConfig().getInt(slotPath + "map.color"));
-            mapMeta.setColor(mapColor);
+            if (Main.version >= 17) {
+                Color mapColor = Color.fromRGB(getKitConfig().getInt(slotPath + "map.color"));
+                mapMeta.setColor(mapColor);
+            }
             boolean scaling = getKitConfig().getBoolean(slotPath + "map.scaling");
             mapMeta.setScaling(scaling);
-            World world = Bukkit.getWorld(Objects.requireNonNull(getKitConfig().getString(slotPath + "map.view.world")));
-            MapView mapView = Bukkit.createMap(Objects.requireNonNull(world));
-            int id = getKitConfig().getInt(slotPath + "map.view.id");
-            mapMeta.setMapId(id);
-            MapView.Scale scale = MapView.Scale.valueOf(getKitConfig().getString(slotPath + "map.view.scale"));
-            mapView.setScale(scale);
-            mapView.setWorld(world);
-            int centerX = getKitConfig().getInt(slotPath + "map.view.centerX");
-            mapView.setCenterX(centerX);
-            int centerZ = getKitConfig().getInt(slotPath + "map.view.centerZ");
-            mapView.setCenterZ(centerZ);
-            boolean locked = getKitConfig().getBoolean(slotPath + "map.view.locked");
-            mapView.setLocked(locked);
-            boolean tracked = getKitConfig().getBoolean(slotPath + "map.view.tracking");
-            mapView.setTrackingPosition(tracked);
-            boolean unlimitedTracking = getKitConfig().getBoolean(slotPath + "map.view.unlimitedTracking");
-            mapView.setUnlimitedTracking(unlimitedTracking);
-            mapMeta.setMapView(mapView);
+            if (Main.version >= 21) {
+                World world = Bukkit.getWorld(Objects.requireNonNull(getKitConfig().getString(slotPath + "map.view.world")));
+                MapView mapView = Bukkit.createMap(Objects.requireNonNull(world));
+                int id = getKitConfig().getInt(slotPath + "map.view.id");
+                mapMeta.setMapId(id);
+                MapView.Scale scale = MapView.Scale.valueOf(getKitConfig().getString(slotPath + "map.view.scale"));
+                mapView.setScale(scale);
+                mapView.setWorld(world);
+                int centerX = getKitConfig().getInt(slotPath + "map.view.centerX");
+                mapView.setCenterX(centerX);
+                int centerZ = getKitConfig().getInt(slotPath + "map.view.centerZ");
+                mapView.setCenterZ(centerZ);
+                boolean locked = getKitConfig().getBoolean(slotPath + "map.view.locked");
+                mapView.setLocked(locked);
+                boolean tracked = getKitConfig().getBoolean(slotPath + "map.view.tracking");
+                if (Main.version > 22) {
+                    mapView.setTrackingPosition(tracked);
+                }
+                boolean unlimitedTracking = getKitConfig().getBoolean(slotPath + "map.view.unlimitedTracking");
+                mapView.setUnlimitedTracking(unlimitedTracking);
+                mapMeta.setMapView(mapView);
+            }
         }
 
         if (im instanceof PotionMeta) {
@@ -323,7 +347,7 @@ public final class GiveKit implements KitCommand {
                 boolean metaUpgraded = getKitConfig().getBoolean(slotPath + "potion.upgraded");
                 potionMeta.setBasePotionData(new PotionData(potionMetaType, metaExtended, metaUpgraded));
                 is.setItemMeta(potionMeta);
-            } else if (version >= 13) {
+            } else {
                 PotionType potionType = PotionType.valueOf(getKitConfig().getString(slotPath + "potion.type"));
                 int level = getKitConfig().getInt(slotPath + "potion.level");
                 boolean splash = getKitConfig().getBoolean(slotPath + "potion.splash");
@@ -342,15 +366,19 @@ public final class GiveKit implements KitCommand {
         if (im instanceof SkullMeta) {
             SkullMeta skullMeta = (SkullMeta) im;
             String uuidString = getKitConfig().getString(slotPath + "skull.owner");
-            UUID uuid = UUID.fromString(Objects.requireNonNull(uuidString));
-            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(uuid));
+            if (Main.version <= 18) {
+                skullMeta.setOwner(uuidString);
+            } else {
+                UUID uuid = UUID.fromString(Objects.requireNonNull(uuidString));
+                skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(uuid));
+            }
             if (version >= 32) {
-                NamespacedKey noteblockSound = NamespacedKey.fromString(Objects.requireNonNull(getKitConfig().getString(slotPath + "skull.sound")));
+                NamespacedKey noteblockSound = fromString(Objects.requireNonNull(getKitConfig().getString(slotPath + "skull.sound")));
                 skullMeta.setNoteBlockSound(noteblockSound);
             }
         }
 
-        if (im instanceof SuspiciousStewMeta) {
+        if (Main.version > 22 && im instanceof SuspiciousStewMeta) {
             SuspiciousStewMeta stewMeta = (SuspiciousStewMeta) im;
             ConfigurationSection stewSection = getKitConfig().getConfigurationSection(slotPath + "stew");
             for (String stew : Objects.requireNonNull(stewSection).getKeys(false)) {
@@ -369,7 +397,7 @@ public final class GiveKit implements KitCommand {
             }
         }
 
-        if (im instanceof TropicalFishBucketMeta) {
+        if (Main.version >= 19 && im instanceof TropicalFishBucketMeta) {
             TropicalFishBucketMeta fishMeta = (TropicalFishBucketMeta) im;
             DyeColor fishBodyColor = DyeColor.valueOf(getKitConfig().getString(slotPath + "fish.bodyColor"));
             fishMeta.setBodyColor(fishBodyColor);
@@ -389,5 +417,40 @@ public final class GiveKit implements KitCommand {
             setKit(player, kitName);
             send(player, "kit-given");
         } else send(player, "kit-not-exists");
+    }
+
+    private static final java.util.regex.Pattern VALID_KEY = java.util.regex.Pattern.compile("[a-z0-9/._-]+");
+
+    @Nullable
+    public static NamespacedKey fromString(@NotNull String string, @Nullable Plugin defaultNamespace) {
+        Preconditions.checkArgument(!string.isEmpty(), "Input string must not be empty or null");
+        String[] components = string.split(":", 3);
+        if (components.length > 2) {
+            return null;
+        } else {
+            String key = components.length == 2 ? components[1] : "";
+            if (components.length == 1) {
+                String value = components[0];
+                if (!value.isEmpty() && VALID_KEY.matcher(value).matches()) {
+                    return defaultNamespace != null ? new NamespacedKey(defaultNamespace, value) : NamespacedKey.minecraft(value);
+                } else {
+                    return null;
+                }
+            } else if (components.length == 2 && !VALID_KEY.matcher(key).matches()) {
+                return null;
+            } else {
+                String namespace = components[0];
+                if (namespace.isEmpty()) {
+                    return defaultNamespace != null ? new NamespacedKey(defaultNamespace, key) : NamespacedKey.minecraft(key);
+                } else {
+                    return !VALID_KEY.matcher(namespace).matches() ? null : new NamespacedKey(namespace, key);
+                }
+            }
+        }
+    }
+
+    @Nullable
+    public static NamespacedKey fromString(@NotNull String key) {
+        return fromString(key, null);
     }
 }

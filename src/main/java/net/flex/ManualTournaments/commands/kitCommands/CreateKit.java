@@ -91,8 +91,10 @@ public final class CreateKit implements KitCommand {
             if (effect.hasParticles()) {
                 getKitConfig().set(effectPath + "particles", effect.hasParticles());
             }
-            if (effect.hasIcon()) {
-                getKitConfig().set(effectPath+ "icon", effect.hasIcon());
+            if (Main.version > 19) {
+                if (effect.hasIcon()) {
+                    getKitConfig().set(effectPath + "icon", effect.hasIcon());
+                }
             }
         });
 
@@ -129,7 +131,7 @@ public final class CreateKit implements KitCommand {
             config.set(path + "flags", set);
         }
 
-        if (im.hasCustomModelData()) {
+        if (Main.version >= 21 && im.hasCustomModelData()) {
             config.set(path + "modelData", im.getCustomModelData());
         }
 
@@ -142,12 +144,16 @@ public final class CreateKit implements KitCommand {
             Collection<String> enchantList = new ArrayList<>();
             for (Enchantment e : enchants.keySet()) {
                 int level = enchants.get(e);
-                enchantList.add(e.getKey() + " = " + level);
+                if (Main.version <= 18) {
+                    enchantList.add(e.getName() + " = " + level);
+                } else {
+                    enchantList.add(e.getKey() + " = " + level);
+                }
             }
             getKitConfig().set(path + "enchants", enchantList);
         }
 
-        if (im instanceof AxolotlBucketMeta) {
+        if (Main.version >= 26 && im instanceof AxolotlBucketMeta) {
             AxolotlBucketMeta axolotlMeta = (AxolotlBucketMeta) im;
             if (axolotlMeta.hasVariant()) {
                 getKitConfig().set(path + "variant", axolotlMeta.getVariant().name());
@@ -164,7 +170,7 @@ public final class CreateKit implements KitCommand {
             getKitConfig().set(path + "patterns", patterns);
         }
 
-        if (im instanceof BlockStateMeta) {
+        if (Main.version >= 17 && im instanceof BlockStateMeta) {
             BlockStateMeta blockStateMeta = (BlockStateMeta) im;
             if (blockStateMeta.getBlockState() instanceof ShulkerBox) {
                 ShulkerBox shulkerBox = (ShulkerBox) blockStateMeta.getBlockState();
@@ -182,8 +188,10 @@ public final class CreateKit implements KitCommand {
             if (bookMeta.hasAuthor()) {
                 getKitConfig().set(path + "book.author", bookMeta.getAuthor());
             }
-            if (bookMeta.hasGeneration()) {
-                getKitConfig().set(path + "book.generation", bookMeta.getGeneration());
+            if (Main.version >= 16) {
+                if (bookMeta.hasGeneration()) {
+                    getKitConfig().set(path + "book.generation", bookMeta.getGeneration());
+                }
             }
             if (bookMeta.hasTitle()) {
                 getKitConfig().set(path + "book.title", bookMeta.getTitle());
@@ -197,7 +205,7 @@ public final class CreateKit implements KitCommand {
             }
         }
 
-        if (im instanceof CompassMeta) {
+        if (Main.version >= 23 && im instanceof CompassMeta) {
             CompassMeta compassMeta = (CompassMeta) im;
             if (compassMeta.hasLodestone()) {
                 saveLodestoneLocation(Objects.requireNonNull(compassMeta.getLodestone()), path + "lodestone.location.");
@@ -207,7 +215,7 @@ public final class CreateKit implements KitCommand {
             }
         }
 
-        if (im instanceof CrossbowMeta) {
+        if (Main.version >= 19 && im instanceof CrossbowMeta) {
             CrossbowMeta crossbowMeta = (CrossbowMeta) im;
             if (crossbowMeta.hasChargedProjectiles()) {
                 List<ItemStack> projectiles = crossbowMeta.getChargedProjectiles();
@@ -217,7 +225,7 @@ public final class CreateKit implements KitCommand {
             }
         }
 
-        if (im instanceof Damageable) {
+        if (Main.version >= 19 && im instanceof Damageable) {
             Damageable damageable = (Damageable) im;
             if (damageable.hasDamage()) {
                 getKitConfig().set(path + "damage", damageable.getDamage());
@@ -230,7 +238,11 @@ public final class CreateKit implements KitCommand {
             Map<Enchantment, Integer> storedEnchants = storageMeta.getStoredEnchants();
             for (Enchantment enchantment : storedEnchants.keySet()) {
                 int level = storedEnchants.get(enchantment);
-                enchantList.add(enchantment.getKey() + " = " + level);
+                if (Main.version <= 18) {
+                    enchantList.add(enchantment.getName() + " = " + level);
+                } else {
+                    enchantList.add(enchantment.getKey() + " = " + level);
+                }
             }
             getKitConfig().set(path + "storedEnchants", enchantList);
         }
@@ -260,7 +272,7 @@ public final class CreateKit implements KitCommand {
             }
         }
 
-        if (im instanceof KnowledgeBookMeta) {
+        if (Main.version >= 18 && im instanceof KnowledgeBookMeta) {
             KnowledgeBookMeta knowledgeBookMeta = (KnowledgeBookMeta) im;
             if (knowledgeBookMeta.hasRecipes()) {
                 List<String> recipeKeys = new ArrayList<>();
@@ -280,34 +292,32 @@ public final class CreateKit implements KitCommand {
 
         if (im instanceof MapMeta) {
             MapMeta mapMeta = (MapMeta) im;
-            if (mapMeta.hasColor()) {
-                Color color = mapMeta.getColor();
-                if (color != null) {
-                    getKitConfig().set(path + "map.color", color.asRGB());
+            if (Main.version >= 17) {
+                if (mapMeta.hasColor()) {
+                    Color color = mapMeta.getColor();
+                    if (color != null) {
+                        getKitConfig().set(path + "map.color", color.asRGB());
+                    }
                 }
             }
             if (mapMeta.isScaling()) {
                 getKitConfig().set(path + "map.scaling", mapMeta.isScaling());
             }
-            if (mapMeta.hasMapView() && mapMeta.getMapView() != null) {
-                MapView mapView = mapMeta.getMapView();
-                getKitConfig().set(path + "map.view.id", mapView.getId());
-                getKitConfig().set(path + "map.view.scale", mapView.getScale().name());
-                getKitConfig().set(path + "map.view.world", Objects.requireNonNull(mapView.getWorld()).getName());
-                getKitConfig().set(path + "map.view.centerX", mapMeta.getMapView().getCenterX());
-                getKitConfig().set(path + "map.view.centerZ", mapMeta.getMapView().getCenterZ());
-                getKitConfig().set(path + "map.view.locked", mapView.isLocked());
-                getKitConfig().set(path + "map.view.tracking", mapView.isTrackingPosition());
-                getKitConfig().set(path + "map.view.unlimitedTracking", mapView.isUnlimitedTracking());
+            if (Main.version >= 21) {
+                if (mapMeta.hasMapView() && mapMeta.getMapView() != null) {
+                    MapView mapView = mapMeta.getMapView();
+                    getKitConfig().set(path + "map.view.id", mapView.getId());
+                    getKitConfig().set(path + "map.view.scale", mapView.getScale().name());
+                    getKitConfig().set(path + "map.view.world", Objects.requireNonNull(mapView.getWorld()).getName());
+                    getKitConfig().set(path + "map.view.centerX", mapMeta.getMapView().getCenterX());
+                    getKitConfig().set(path + "map.view.centerZ", mapMeta.getMapView().getCenterZ());
+                    getKitConfig().set(path + "map.view.locked", mapView.isLocked());
+                    if (Main.version >= 22) {
+                        getKitConfig().set(path + "map.view.tracking", mapView.isTrackingPosition());
+                    }
+                    getKitConfig().set(path + "map.view.unlimitedTracking", mapView.isUnlimitedTracking());
+                }
             }
-        }
-
-        if (Main.version <= 13 && im instanceof Potion) {
-            Potion potion = (Potion) im;
-            getKitConfig().set(path + "potion.type", potion.getType().name());
-            getKitConfig().set(path + "potion.extended", potion.hasExtendedDuration());
-            getKitConfig().set(path + "potion.level", potion.getLevel());
-            getKitConfig().set(path + "potion.splash", potion.isSplash());
         }
 
         if (Main.version >= 14 && im instanceof PotionMeta) {
@@ -315,13 +325,22 @@ public final class CreateKit implements KitCommand {
             getKitConfig().set(path + "potion.type", potionMeta.getBasePotionData().getType().name());
             getKitConfig().set(path + "potion.extended", potionMeta.getBasePotionData().isExtended());
             getKitConfig().set(path + "potion.upgraded", potionMeta.getBasePotionData().isUpgraded());
-            if (potionMeta.hasColor()) {
-                Color color = potionMeta.getColor();
-                if (color != null) {
-                    getKitConfig().set(path + "potion.color", color.getRed() + ", " + color.getGreen() + ", " + color.getBlue());
+            if (Main.version >= 17) {
+                if (potionMeta.hasColor()) {
+                    Color color = potionMeta.getColor();
+                    if (color != null) {
+                        getKitConfig().set(path + "potion.color", color.asRGB());
+                    }
                 }
             }
-            getKitConfig().set(path + "lore", potionMeta.getLore());
+        }
+
+        if (Main.version <= 13 && im instanceof PotionMeta) {
+            Potion potion = Potion.fromItemStack(is);
+            getKitConfig().set(path + "potion.type", potion.getType().name());
+            getKitConfig().set(path + "potion.extended", potion.hasExtendedDuration());
+            getKitConfig().set(path + "potion.level", potion.getLevel());
+            getKitConfig().set(path + "potion.splash", potion.isSplash());
         }
 
         if (im instanceof Repairable) {
@@ -334,14 +353,18 @@ public final class CreateKit implements KitCommand {
         if (im instanceof SkullMeta) {
             SkullMeta skullMeta = (SkullMeta) im;
             if (skullMeta.hasOwner()) {
-                getKitConfig().set(path + "skull.owner", Objects.requireNonNull(Objects.requireNonNull(skullMeta.getOwnerProfile()).getUniqueId()).toString());
+                if (Main.version <= 18) {
+                    getKitConfig().set(path + "skull.owner", skullMeta.getOwner());
+                } else {
+                    getKitConfig().set(path + "skull.owner", Objects.requireNonNull(Objects.requireNonNull(skullMeta.getOwningPlayer()).getUniqueId()).toString());
+                }
             }
             if (version >= 32) {
                 getKitConfig().set(path + "skull.sound", skullMeta.getNoteBlockSound());
             }
         }
 
-        if (im instanceof SuspiciousStewMeta) {
+        if (Main.version > 22 && im instanceof SuspiciousStewMeta) {
             SuspiciousStewMeta stewMeta = (SuspiciousStewMeta) im;
             if (stewMeta.hasCustomEffects()) {
                 List<PotionEffect> potionEffects = stewMeta.getCustomEffects();
@@ -364,7 +387,7 @@ public final class CreateKit implements KitCommand {
             }
         }
 
-        if (im instanceof TropicalFishBucketMeta) {
+        if (Main.version >= 19 && im instanceof TropicalFishBucketMeta) {
             TropicalFishBucketMeta tropicalFishMeta = (TropicalFishBucketMeta) im;
             if (tropicalFishMeta.hasVariant()) {
                 getKitConfig().set(path + "fish.bodyColor", tropicalFishMeta.getBodyColor().name());

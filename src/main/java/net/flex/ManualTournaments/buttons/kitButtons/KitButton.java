@@ -21,7 +21,7 @@ public class KitButton extends ButtonBuilder {
     }
 
     protected Button configureButton(Player sender, String name) {
-        return new Button(new ItemBuilder(Material.GRASS_BLOCK)
+        return new Button(new ItemBuilder(Material.STONE_SWORD)
                 .name(config.getString("gui-kit-name-color") + name)
                 .lore(config.getString("gui-kit-lore-right-click"), config.getString("gui-kit-lore-left-click"))
                 .build()).withListener(event -> {
