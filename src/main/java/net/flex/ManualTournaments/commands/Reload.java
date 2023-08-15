@@ -1,7 +1,6 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,9 +19,9 @@ public final class Reload implements CommandExecutor, TabCompleter {
     public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
         if ((args.length == 1 && args[0].equals("reload")) || args.length == 0) {
             getPlugin().getLogger().info("Reloading...");
-            Main.getKitConfig().load(getKitConfigFile());
-            Main.getArenaConfig().load(getArenaConfigFile());
-            Main.getCustomConfig().load(getCustomConfigFile());
+            getKitConfig().load(getKitConfigFile());
+            getArenaConfig().load(getArenaConfigFile());
+            getCustomConfig().load(getCustomConfigFile());
             getPlugin().getLogger().info("Reloading complete");
             return true;
         } else return false;

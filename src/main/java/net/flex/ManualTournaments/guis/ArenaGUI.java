@@ -14,7 +14,7 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class ArenaGUI {
-    public static Menu arenaMenu = gui.create(getPlugin().getConfig().getString("gui-arena-menu-name"), 5, "Arena");
+    public static Menu arenaMenu = gui.create(getPlugin().getConfig().getString("gui-arena-menu-name"), 5);
     public static Map<String, Button> arenaMenuButtons = new HashMap<>();
     public static boolean opener = false;
     public static ButtonDirector director = new ButtonDirector();
@@ -30,7 +30,7 @@ public class ArenaGUI {
             Button button = new ArenaButton(sender, arenaName).buildButton();
             arenaMenu.setButton(i, button);
             arenaMenuButtons.put(arenaName, button);
-            if (Objects.equals(getPlugin().getConfig().getString("current-arena"), arenaName)) {
+            if (Objects.equals(config.getString("current-arena"), arenaName)) {
                 addEnchantment(button);
             } else removeEnchantment(button);
         });

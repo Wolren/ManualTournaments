@@ -14,11 +14,10 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.utils.SharedComponents.addEnchantment;
-import static net.flex.ManualTournaments.utils.SharedComponents.removeEnchantment;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class KitGUI {
-    public static Menu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5, "Kit");
+    public static Menu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5);
     public static Map<String, Button> kitMenuButtons = new HashMap<>();
     public static boolean opener = false;
     public static ButtonDirector director = new ButtonDirector();
@@ -34,7 +33,7 @@ public class KitGUI {
             Button button = new KitButton(sender, kitName).buildButton();
             kitMenu.setButton(i, button);
             kitMenuButtons.put(kitName, button);
-            if (Objects.equals(getPlugin().getConfig().getString("current-kit"), kitName)) {
+            if (Objects.equals(config.getString("current-kit"), kitName)) {
                 addEnchantment(button);
             } else removeEnchantment(button);
         });

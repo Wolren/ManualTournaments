@@ -9,8 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,14 +17,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.flex.ManualTournaments.Main.getCustomConfigFile;
-import static net.flex.ManualTournaments.Main.getPlugin;
-import static net.flex.ManualTournaments.utils.SharedComponents.optional;
-import static net.flex.ManualTournaments.utils.SharedComponents.send;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Settings implements TabCompleter, CommandExecutor {
-    private static final FileConfiguration config = getPlugin().getConfig();
-    Player player = null;
-
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
@@ -44,7 +37,7 @@ public class Settings implements TabCompleter, CommandExecutor {
 
     public @NotNull List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "kill_on_fight_end", "place_blocks");
+            return Arrays.asList("break_blocks", "current_arena", "current_kit", "drop_items", "drop_on_death", "endspawn", "freeze_on_start", "friendly_fire", "gui", "kill_on_fight_end", "place_blocks");
         } else if (args.length == 2) {
             switch (args[0]) {
                 case "break_blocks":

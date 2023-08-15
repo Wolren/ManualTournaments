@@ -58,8 +58,9 @@ public final class PlayerJumpEvent extends PlayerEvent implements Cancellable {
             if (vy > jump_vel_border && !isClimbing && !jumping.get(player)) {
                 PlayerJumpEvent jumpEvent = new PlayerJumpEvent(player);
                 Bukkit.getServer().getPluginManager().callEvent(jumpEvent);
-                if (jumpEvent.isCancelled())
+                if (jumpEvent.isCancelled()) {
                     player.setVelocity(new Vector(player.getVelocity().getX(), 0, player.getVelocity().getZ()));
+                }
                 jumping.replace(player, true);
             } else if (player.isOnGround() && jumping.get(player)) jumping.replace(player, false);
         }
@@ -78,7 +79,7 @@ public final class PlayerJumpEvent extends PlayerEvent implements Cancellable {
 
         @EventHandler
         public void onEnable(PluginEnableEvent event) {
-            for (Player player : Bukkit.getOnlinePlayers()) add(player);
+            Bukkit.getOnlinePlayers().forEach(this::add);
         }
 
         @EventHandler

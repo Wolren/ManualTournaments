@@ -11,13 +11,13 @@ import org.bukkit.entity.Player;
 
 import java.util.Objects;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.Main.gui;
+import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public class KitSettingsGUI {
     public static void kitSettingsGUI(Player sender, String kitName) {
-        String name = String.format(Objects.requireNonNull(getPlugin().getConfig().getString("gui-kit-settings-menu-name")), kitName);
-        Menu kitSetttingsMenu = gui.create(name, 0, name);
+        String name = String.format(Objects.requireNonNull(config.getString("gui-kit-settings-menu-name")), kitName);
+        Menu kitSetttingsMenu = gui.create(name, 0);
         kitSetttingsMenu.setBlockDefaultInteractions(true);
         kitSetttingsMenu.setToolbarBuilder((slot, page, type, menu) -> {
             if (slot == 8) return KitGUI.director.constructButton(new RemoveKitButton(sender, kitName));

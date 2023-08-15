@@ -10,7 +10,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -25,18 +24,16 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public final class Spectate implements TabCompleter, CommandExecutor {
-    private static final FileConfiguration config = getPlugin().getConfig();
     public static Collection<UUID> spectators = new HashSet<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team spectatorsBoard = board.registerNewTeam("spectators");
-    Player player = null;
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getCustomConfigFile());
-        Main.getArenaConfig().load(getArenaConfigFile());
+        getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) setSpectator(player);
         else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {
@@ -59,28 +56,30 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 player.setFoodLevel(20);
                 player.setHealth(20.0D);
                 spectatorsBoard.addEntry(player.getName());
-                for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                    other.hidePlayer(player);
-                }
+                Bukkit.getServer().getOnlinePlayers().forEach(other -> other.hidePlayer(player));
                 clear(player);
                 spectators.add(player.getUniqueId());
                 player.teleport(location(path, Main.getArenaConfig()));
-                ItemStack[] inventory = player.getInventory().getContents();
+
                 ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
-                ItemStack compass = new ItemStack(Material.COMPASS);
-                ItemMeta compassMeta = compass.getItemMeta();
                 ItemMeta redstoneBlockMeta = redstoneBlock.getItemMeta();
                 if (redstoneBlockMeta != null) {
                     redstoneBlockMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
                 }
+                redstoneBlock.setItemMeta(redstoneBlockMeta);
+
+                ItemStack compass = new ItemStack(Material.COMPASS);
+                ItemMeta compassMeta = compass.getItemMeta();
                 if (compassMeta != null) {
                     compassMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&7&lTeleportation menu"));
                 }
-                redstoneBlock.setItemMeta(redstoneBlockMeta);
                 compass.setItemMeta(compassMeta);
+
+                ItemStack[] inventory = player.getInventory().getContents();
                 inventory[8] = redstoneBlock;
                 inventory[0] = compass;
                 player.getInventory().setContents(inventory);
+
                 send(player, "spectator-started-spectating");
             } else send(player, "arena-spectator-not-set");
         } else send(player, "current-arena-not-set");
@@ -102,7 +101,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 player.teleport(location(path, config));
             }
         }
-        for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
+        Bukkit.getServer().getOnlinePlayers().forEach(other -> other.showPlayer(player));
         send(player, "spectator-stopped-spectating");
         spectatorsBoard.removeEntry(player.getName());
         if (Main.version >= 14) player.setCollidable(true);

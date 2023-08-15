@@ -1,7 +1,6 @@
 package net.flex.ManualTournaments.commands;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.fightCommands.DefaultFight;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
@@ -16,6 +15,7 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
@@ -31,9 +31,9 @@ public class Fight implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        Main.getKitConfig().load(getKitConfigFile());
-        Main.getArenaConfig().load(getArenaConfigFile());
-        Main.getCustomConfig().load(getCustomConfigFile());
+        getKitConfig().load(getKitConfigFile());
+        getArenaConfig().load(getArenaConfigFile());
+        getCustomConfig().load(getCustomConfigFile());
         fighters.clear();
         IntStream.range(1, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
         if (args.length == 1 && args[0].equals("stop")) {
@@ -52,7 +52,7 @@ public class Fight implements CommandExecutor, TabCompleter {
             list.add("stop");
             list.add("team");
             list.add("ffa");
-        } else for (Player online : Bukkit.getOnlinePlayers()) list.add(online.getDisplayName());
+        } else list = Bukkit.getOnlinePlayers().stream().map(Player::getDisplayName).collect(Collectors.toList());
         return list;
     }
 }

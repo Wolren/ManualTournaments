@@ -7,11 +7,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.Main.gui;
+import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public class SpectatorGUI {
-    public static Menu spectatorMenu = gui.create("Teleportation Menu", 5, "Spectator");
+    public static Menu spectatorMenu = gui.create("Teleportation Menu", 5);
 
     public static void teleportationGUI(Player sender) {
         Bukkit.getOnlinePlayers().forEach(player -> {
@@ -23,7 +23,7 @@ public class SpectatorGUI {
     private static Button teleportButton(Player sender, Player player) {
         return new Button(new ItemBuilder(Material.PLAYER_HEAD)
                 .skullOwner(player)
-                .name(getPlugin().getConfig().getString("gui-spectator-color") + player.getDisplayName())
+                .name(config.getString("gui-spectator-color") + player.getDisplayName())
                 .build())
                 .withListener(event -> {
                     sender.teleport(player.getLocation());

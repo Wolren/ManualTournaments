@@ -267,7 +267,7 @@ public final class CreateKit implements KitCommand {
                 getKitConfig().set(path + "potion.upgraded", potionMeta.getBasePotionData().isUpgraded());
                 if (Main.version >= 17) {
                     Color color = potionMeta.getColor();
-                    if (color != null) {
+                    if (potionMeta.hasColor() && color != null) {
                         getKitConfig().set(path + "potion.color", color.asRGB());
                     }
                 }

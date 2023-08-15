@@ -344,8 +344,10 @@ public final class GiveKit implements KitCommand {
                 boolean upgraded = getKitConfig().getBoolean(slotPath + "potion.upgraded");
                 potionMeta.setBasePotionData(new PotionData(potionType, extended, upgraded));
                 if (Main.version >= 17) {
-                    Color color = Color.fromRGB(getKitConfig().getInt(slotPath + "potion.color"));
-                    potionMeta.setColor(color);
+                    if (getKitConfig().getInt(slotPath + "potion.color") != 0) {
+                        Color color = Color.fromRGB(getKitConfig().getInt(slotPath + "potion.color"));
+                        potionMeta.setColor(color);
+                    }
                 }
             } else {
                 int level = getKitConfig().getInt(slotPath + "potion.level");

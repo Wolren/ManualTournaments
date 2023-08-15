@@ -5,7 +5,6 @@ import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,7 +29,6 @@ import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
 
 public class TeamFightListener implements Listener {
-    static FileConfiguration config = getPlugin().getConfig();
     public static double regeneratedTeam1 = 0;
     public static double regeneratedTeam2 = 0;
     public static double damageTeam1 = 0;
@@ -141,17 +139,13 @@ public class TeamFightListener implements Listener {
                     Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
                     if (config.getBoolean("create-fights-folder")) endCounter();
                     if (config.getBoolean("kill-on-fight-end")) {
-                        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                            if (team.contains(p.getUniqueId())) p.setHealth(0);
-                        }
+                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> p.setHealth(0));
                     } else if (!config.getBoolean("kill-on-fight-end")) {
                         String path = "fight-end-spawn.";
-                        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                            if (team.contains(p.getUniqueId()) && config.isSet(path)) {
-                                clear(player);
-                                p.teleport(location(path, config));
-                            }
-                        }
+                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
+                            clear(player);
+                            p.teleport(location(path, config));
+                        });
                     }
                     cancel();
                 }
@@ -173,17 +167,13 @@ public class TeamFightListener implements Listener {
                     Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
                     if (config.getBoolean("create-fights-folder")) endCounter();
                     if (config.getBoolean("kill-on-fight-end")) {
-                        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                            if (team.contains(p.getUniqueId())) p.setHealth(0);
-                        }
+                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> p.setHealth(0));
                     } else if (!config.getBoolean("kill-on-fight-end")) {
                         String path = "fight-end-spawn.";
-                        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                            if (team.contains(p.getUniqueId()) && config.isSet(path)) {
-                                clear(player);
-                                p.teleport(location(path, config));
-                            }
-                        }
+                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
+                            clear(player);
+                            p.teleport(location(path, config));
+                        });
                     }
                     cancel();
                 }

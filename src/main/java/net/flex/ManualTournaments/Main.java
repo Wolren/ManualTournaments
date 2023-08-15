@@ -1,6 +1,5 @@
 package net.flex.ManualTournaments;
 
-import com.mojang.authlib.GameProfileRepository;
 import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
@@ -11,7 +10,7 @@ import net.flex.ManualTournaments.listeners.SpectateListener;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
 import net.flex.ManualTournaments.utils.UpdateChecker;
-import net.flex.ManualTournaments.utils.gui.SpiGUI;
+import net.flex.ManualTournaments.utils.gui.GUI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -30,9 +29,7 @@ public final class Main extends JavaPlugin {
     public static Main getPlugin() {
         return getPlugin(Main.class);
     }
-    public static GameProfileRepository profileRepository;
-
-    public static SpiGUI gui;
+    public static GUI gui;
     public static int version;
     public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>();
     private static File KitsConfigfile, ArenaConfigFile, CustomConfigFile;
@@ -95,7 +92,7 @@ public final class Main extends JavaPlugin {
         super.onEnable();
         new UpdateChecker();
         initializeData();
-        gui = new SpiGUI(this);
+        gui = new GUI(this);
         setCommands();
         registerEvents();
     }
@@ -195,5 +192,4 @@ public final class Main extends JavaPlugin {
     private void created(boolean create) {
         if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");
     }
-
 }

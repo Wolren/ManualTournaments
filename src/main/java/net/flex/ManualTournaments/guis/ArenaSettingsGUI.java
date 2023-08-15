@@ -7,18 +7,15 @@ import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.Main.gui;
+import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public class ArenaSettingsGUI {
-    public static Set<Button> arenaSettingsMenuButtons = new HashSet<>();
     public static void arenaSettingsGUI(Player sender, String arenaName) {
-        String name = String.format(Objects.requireNonNull(getPlugin().getConfig().getString("gui-arena-settings-menu-name")), arenaName);
-        Menu arenaSettingsMenu = gui.create(name, 2, name);
+        String name = String.format(Objects.requireNonNull(config.getString("gui-arena-settings-menu-name")), arenaName);
+        Menu arenaSettingsMenu = gui.create(name, 2);
         arenaSettingsMenu.setBlockDefaultInteractions(true);
         arenaSettingsMenu.setToolbarBuilder((slot, page, type, menu) -> {
             if (slot == 8) return ArenaGUI.director.constructButton(new RemoveArenaButton(sender, arenaName));

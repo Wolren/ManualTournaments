@@ -107,7 +107,7 @@ public class SpectateListener implements Listener {
             player.setAllowFlight(false);
             player.setFlying(false);
             player.getInventory().clear();
-            for (Player other : Bukkit.getServer().getOnlinePlayers()) other.showPlayer(player);
+            Bukkit.getServer().getOnlinePlayers().forEach(other -> other.showPlayer(player));
             Spectate.spectatorsBoard.removeEntry(player.getName());
             if (Main.version >= 14) player.setCollidable(true);
             spectators.remove(player.getUniqueId());
@@ -160,12 +160,10 @@ public class SpectateListener implements Listener {
     @EventHandler
     private void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-            if (spectators.contains(other.getUniqueId())) {
-                SpectatorGUI.spectatorMenu.refreshInventory(other);
-                player.hidePlayer(other);
-            }
-        }
+        Bukkit.getServer().getOnlinePlayers().stream().filter(other -> spectators.contains(other.getUniqueId())).forEachOrdered(other -> {
+            SpectatorGUI.spectatorMenu.refreshInventory(other);
+            player.hidePlayer(other);
+        });
     }
 
     @EventHandler

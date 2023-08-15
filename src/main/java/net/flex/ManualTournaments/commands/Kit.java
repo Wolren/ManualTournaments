@@ -9,28 +9,24 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.utils.SharedComponents.optional;
-import static net.flex.ManualTournaments.utils.SharedComponents.send;
+import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Kit implements TabCompleter, CommandExecutor {
-    private static final FileConfiguration config = getPlugin().getConfig();
-    private final Set<String> kits = Main.kitNames;
-    Player player = null;
-
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getCustomConfigFile());
-        Main.getKitConfig().load(getKitConfigFile());
+        getKitConfig().load(getKitConfigFile());
         if (args.length == 0) {
             KitGUI.kitGUI(player);
         } else if (args.length == 1) {
@@ -43,12 +39,12 @@ public class Kit implements TabCompleter, CommandExecutor {
 
     @Nullable
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if (args.length == 1) return new ArrayList<>(Arrays.asList("create", "give", "list", "remove", "unbreakable"));
+        if (args.length == 1) return new ArrayList<>(Arrays.asList("create", "give", "gui", "list", "remove", "unbreakable"));
         else if (args.length == 2) {
-            List<String> arr = new ArrayList<>();
-            if (args[0].equals("create")) arr.add("[name]");
-            else if (args[0].equals("remove") || args[0].equals("give")) arr.addAll(kits);
-            return arr;
+            List<String> list = new ArrayList<>();
+            if (args[0].equals("create")) list.add("[name]");
+            else if (args[0].equals("remove") || args[0].equals("give")) list.addAll(kitNames);
+            return list;
         }
         return Collections.emptyList();
     }

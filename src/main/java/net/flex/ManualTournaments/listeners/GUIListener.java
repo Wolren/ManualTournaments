@@ -19,28 +19,36 @@ public class GUIListener implements Listener {
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         String message = event.getMessage();
-        if (message.startsWith("*")) {
-            if (ArenaGUI.opener && player.hasPermission("mt.arena")) {
-                if (message.endsWith("cancel")) {
-                    ArenaGUI.opener = false;
-                    send(player, "gui-arena-creation-cancelled");
-                } else {
-                    String arenaName = message.replace("*", "");
-                    ArenaFactory.getCommand("CREATE").execute(player, arenaName, Main.arenaNames.contains(arenaName));
-                    Bukkit.getScheduler().runTask(getPlugin(), () -> ArenaGUI.arenaGUI(player));
-                }
-                event.setCancelled(true);
-            } else if (KitGUI.opener && player.hasPermission("mt.kit")) {
-                if (message.endsWith("cancel")) {
-                    KitGUI.opener = false;
-                    send(player, "gui-kit-creation-cancelled");
-                } else {
-                    String kitName = message.replace("*", "");
-                    KitFactory.getCommand("CREATE").execute(player, kitName, Main.kitNames.contains(kitName));
-                    Bukkit.getScheduler().runTask(getPlugin(), () -> KitGUI.kitGUI(player));
-                }
-                event.setCancelled(true);
-            }
+        if (!message.startsWith("*")) return;
+        if (ArenaGUI.opener && player.hasPermission("mt.arena")) {
+            handleArenaGUI(player, message);
+            event.setCancelled(true);
+        } else if (KitGUI.opener && player.hasPermission("mt.kit")) {
+            handleKitGUI(player, message);
+            event.setCancelled(true);
+        }
+    }
+
+    private void handleArenaGUI(Player player, String message) {
+        if (message.endsWith("cancel")) {
+            ArenaGUI.opener = false;
+            send(player, "gui-arena-creation-cancelled");
+        } else {
+            String arenaName = message.replace("*", "");
+            ArenaFactory.getCommand("CREATE").execute(player, arenaName, Main.arenaNames.contains(arenaName));
+            Bukkit.getScheduler().runTask(getPlugin(), () -> ArenaGUI.arenaGUI(player));
+        }
+    }
+
+    private void handleKitGUI(Player player, String message) {
+        if (message.endsWith("cancel")) {
+            KitGUI.opener = false;
+            send(player, "gui-kit-creation-cancelled");
+        } else {
+            String kitName = message.replace("*", "");
+            KitFactory.getCommand("CREATE").execute(player, kitName, Main.kitNames.contains(kitName));
+            Bukkit.getScheduler().runTask(getPlugin(), () -> KitGUI.kitGUI(player));
         }
     }
 }
+

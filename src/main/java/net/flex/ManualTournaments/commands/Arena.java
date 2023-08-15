@@ -24,8 +24,8 @@ public class Arena implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
-        getPlugin().getConfig().load(getCustomConfigFile());
-        Main.getArenaConfig().load(getArenaConfigFile());
+        config.load(getCustomConfigFile());
+        getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) {
             ArenaGUI.arenaGUI(player);
         } else if (args.length == 1) {
@@ -38,15 +38,15 @@ public class Arena implements CommandExecutor, TabCompleter {
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (args.length == 1)
-            return Arrays.asList("create", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
+            return Arrays.asList("create", "gui", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
         else if (args.length == 2) {
-            List<String> arrayList = new ArrayList<>();
-            if (args[0].equals("create")) arrayList.add("(arena name)");
+            List<String> list = new ArrayList<>();
+            if (args[0].equals("create")) list.add("(arena name)");
             else if (args[0].equals("remove") || args[0].equals("pos1") || args[0].equals("pos2") ||
                     args[0].equals("spectator") || args[0].equals("teleport") || args[0].equals("validate")) {
-                arrayList.addAll(Main.arenaNames);
+                list.addAll(Main.arenaNames);
             }
-            return arrayList;
+            return list;
         } else return Collections.emptyList();
     }
 }

@@ -16,10 +16,11 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public class SettingsGUI {
     private static final Collection<String> buttonConfigSet = new HashSet<>(Arrays.asList("break-blocks", "drop-items", "drop-on-death", "freeze-on-start", "friendly-fire", "kill-on-fight-end", "place-blocks"));
-    public static Menu settingsMenu = gui.create(getPlugin().getConfig().getString("gui-settings-menu-name"), 3, "Settings");
+    public static Menu settingsMenu = gui.create(config.getString("gui-settings-menu-name"), 3);
     @SneakyThrows
     public static void settingsGUI(Player sender) {
         AtomicInteger index = new AtomicInteger(1);
@@ -39,12 +40,12 @@ public class SettingsGUI {
 
     private static Button createButton(String buttonName, Menu menu, Player sender) {
         ItemStack trueIs = new ItemBuilder(Material.GREEN_WOOL)
-                .lore(getPlugin().getConfig().getString("gui-settings-button-true-lore"))
-                .name(getPlugin().getConfig().getString("gui-settings-button-name-color") + buttonName.replaceAll("-", " "))
+                .lore(config.getString("gui-settings-button-true-lore"))
+                .name(config.getString("gui-settings-button-name-color") + buttonName.replaceAll("-", " "))
                 .build();
         ItemStack falseIs = new ItemBuilder(Material.RED_WOOL)
-                .lore(getPlugin().getConfig().getString("gui-settings-button-false-lore"))
-                .name(getPlugin().getConfig().getString("gui-settings-button-name-color") + buttonName.replaceAll("-", " "))
+                .lore(config.getString("gui-settings-button-false-lore"))
+                .name(config.getString("gui-settings-button-name-color") + buttonName.replaceAll("-", " "))
                 .build();
         Button setting = new Button(new ItemBuilder(Material.WHITE_WOOL).build());
         updateButtonIcon(setting, buttonName, trueIs, falseIs);
@@ -53,16 +54,16 @@ public class SettingsGUI {
     }
 
     private static void updateButtonIcon(Button setting, String buttonConfig, ItemStack trueIs, ItemStack falseIs) {
-        boolean configValue = getPlugin().getConfig().getBoolean(buttonConfig);
+        boolean configValue = config.getBoolean(buttonConfig);
         setting.setIcon(configValue ? trueIs : falseIs);
     }
 
     @SneakyThrows
     private static void updateButtonOnEvent(Button setting, String buttonConfig, ItemStack trueIs, ItemStack falseIs, Menu menu, Player sender) {
-        boolean configValue = !getPlugin().getConfig().getBoolean(buttonConfig);
-        getPlugin().getConfig().set(buttonConfig, configValue);
+        boolean configValue = !config.getBoolean(buttonConfig);
+        config.set(buttonConfig, configValue);
         updateButtonIcon(setting, buttonConfig, trueIs, falseIs);
         menu.refreshInventory(sender);
-        getPlugin().getConfig().save(getCustomConfigFile());
+        config.save(getCustomConfigFile());
     }
 }
