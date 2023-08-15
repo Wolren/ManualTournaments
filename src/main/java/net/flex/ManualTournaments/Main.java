@@ -16,7 +16,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -98,13 +98,9 @@ public final class Main extends JavaPlugin {
     }
 
     public void onDisable() {
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (playerIsInTeam(player.getUniqueId())) player.getInventory().clear();
-        }
+        Bukkit.getServer().getOnlinePlayers().stream().filter(player -> playerIsInTeam(player.getUniqueId())).forEach(player -> player.getInventory().clear());
         FightFactory.fight.stopFight();
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (Spectate.spectators.contains(player.getUniqueId())) Spectate.stopSpectator(player);
-        }
+        Bukkit.getServer().getOnlinePlayers().stream().filter(player -> Spectate.spectators.contains(player.getUniqueId())).forEach(Spectate::stopSpectator);
         ArenaGUI.opener = false;
         KitGUI.opener = false;
         super.onDisable();
@@ -133,7 +129,6 @@ public final class Main extends JavaPlugin {
         commandsMap.put("manualtournaments_reload", new Reload());
         commandsMap.put("manualtournaments_settings", new Settings());
         commandsMap.put("manualtournaments_spectate", new Spectate());
-
         commandsMap.forEach((command, executor) -> {
             Objects.requireNonNull(getCommand(command)).setExecutor(executor);
             Objects.requireNonNull(getCommand(command)).setTabCompleter((TabCompleter) executor);
@@ -141,11 +136,12 @@ public final class Main extends JavaPlugin {
     }
 
     private void registerEvents() {
-        getServer().getPluginManager().registerEvents(new GUIListener(), this);
-        getServer().getPluginManager().registerEvents(new SpectateListener(), this);
-        getServer().getPluginManager().registerEvents(new TeamFightListener(), this);
-        getServer().getPluginManager().registerEvents(new TemporaryListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
+        PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new GUIListener(), this);
+        pluginManager.registerEvents(new SpectateListener(), this);
+        pluginManager.registerEvents(new TeamFightListener(), this);
+        pluginManager.registerEvents(new TemporaryListener(), this);
+        pluginManager.registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
     }
 
     static String getNMSVersion() {

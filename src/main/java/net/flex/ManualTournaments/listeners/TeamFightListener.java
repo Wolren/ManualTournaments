@@ -229,7 +229,7 @@ public class TeamFightListener implements Listener {
     private void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         if (playerIsInTeam(player.getUniqueId())) {
-            if (config.getStringList("spectator-allowed-commands").contains(event.getMessage()) || player.isOp()) {
+            if (config.getStringList("fight-allowed-commands").contains(event.getMessage()) || player.isOp()) {
                 event.setCancelled(false);
             } else {
                 player.sendMessage(message("not-allowed"));

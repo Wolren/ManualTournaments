@@ -9,6 +9,8 @@ import net.flex.ManualTournaments.utils.gui.toolbar.ToolbarBuilder;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import static net.flex.ManualTournaments.utils.SharedComponents.config;
+
 public class GUI {
     private final JavaPlugin plugin;
     private boolean blockDefaultInteractions = true;
@@ -20,23 +22,23 @@ public class GUI {
             case PREV_BUTTON:
                 if (menu.getCurrentPage() > 0)
                     return new Button(new ItemBuilder(Material.ARROW)
-                            .name("&a&l← Previous Page")
-                            .lore("&aClick to move back to", "&apage " + menu.getCurrentPage() + ".")
+                            .name(config.getString("gui-menu-previous"))
+                            .lore(config.getString("gui-menu-move-back") + menu.getCurrentPage())
                             .build()).withListener(event -> {
                         event.setCancelled(true);
                         menu.previousPage(event.getWhoClicked());
                     });
                 else return null;
             case CURRENT_BUTTON:
-                return new Button(new ItemBuilder(Material.NAME_TAG)
-                        .name("&7&lPage " + (menu.getCurrentPage() + 1) + " of " + menu.getMaxPage())
-                        .lore("&7You are currently viewing", "&7page " + (menu.getCurrentPage() + 1) + ".").build())
-                        .withListener(event -> event.setCancelled(true));
+                return new Button(new ItemBuilder(Material.BOOK)
+                        .name(config.getString("gui-menu-page") + (menu.getCurrentPage() + 1) + "/" + menu.getMaxPage())
+                        .lore(config.getString("gui-menu-current") + (menu.getCurrentPage() + 1))
+                        .build()).withListener(event -> event.setCancelled(true));
             case NEXT_BUTTON:
                 if (menu.getCurrentPage() < menu.getMaxPage() - 1)
                     return new Button(new ItemBuilder(Material.ARROW)
-                            .name("&a&lNext Page →")
-                            .lore("&aClick to move forward to", "&apage " + (menu.getCurrentPage() + 2) + ".")
+                            .name(config.getString("gui-menu-next"))
+                            .lore(config.getString("gui-menu-move-forward") + (menu.getCurrentPage() + 2))
                             .build()).withListener(event -> {
                         event.setCancelled(true);
                         menu.nextPage(event.getWhoClicked());

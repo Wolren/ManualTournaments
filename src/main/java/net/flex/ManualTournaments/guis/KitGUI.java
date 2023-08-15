@@ -28,7 +28,7 @@ public class KitGUI {
             else return gui.getDefaultToolbarBuilder().buildToolbarButton(slot, page, type, menu);
         });
         kitMenu.clearAllButStickiedSlots();
-        IntStream.range(0, kitNames.size()).forEach(i -> {
+        IntStream.range(0, kitNames.size()).forEachOrdered(i -> {
             String kitName = new ArrayList<>(kitNames).get(i);
             Button button = new KitButton(sender, kitName).buildButton();
             kitMenu.setButton(i, button);
