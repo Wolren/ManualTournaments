@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.utils;
 
+import com.google.common.base.Preconditions;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.buttons.Button;
@@ -13,8 +14,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -139,5 +143,53 @@ public class SharedComponents {
 
     public static void removeEnchantment(Button button) {
         button.getIcon().removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
+    }
+
+    public static void saveLodestoneLocation(Location location, String path) {
+        getKitConfig().set(path + "world", Objects.requireNonNull(location.getWorld()).getName());
+        getKitConfig().set(path + "x", location.getX());
+        getKitConfig().set(path + "y", location.getY());
+        getKitConfig().set(path + "z", location.getZ());
+    }
+
+    public static Location lodestoneLocation(String path) {
+        World world = Bukkit.getWorld(Objects.requireNonNull(getKitConfig().get(path + "world")).toString());
+        double x = getKitConfig().getDouble(path + "x");
+        double y = getKitConfig().getDouble(path + "y");
+        double z = getKitConfig().getDouble(path + "z");
+        return new Location(world, x, y, z);
+    }
+
+    private static final java.util.regex.Pattern VALID_KEY = java.util.regex.Pattern.compile("[a-z0-9/._-]+");
+
+    @Nullable
+    public static NamespacedKey fromString(@NotNull String string, @Nullable Plugin defaultNamespace) {
+        Preconditions.checkArgument(!string.isEmpty(), "Input string must not be empty or null");
+        String[] components = string.split(":", 3);
+        if (components.length > 2) {
+            return null;
+        } else {
+            String key = components.length == 2 ? components[1] : "";
+            if (components.length == 1) {
+                String value = components[0];
+                if (!value.isEmpty() && VALID_KEY.matcher(value).matches()) {
+                    return defaultNamespace != null ? new NamespacedKey(defaultNamespace, value) : NamespacedKey.minecraft(value);
+                } else return null;
+            } else if (components.length == 2 && !VALID_KEY.matcher(key).matches()) {
+                return null;
+            } else {
+                String namespace = components[0];
+                if (namespace.isEmpty()) {
+                    return defaultNamespace != null ? new NamespacedKey(defaultNamespace, key) : NamespacedKey.minecraft(key);
+                } else {
+                    return !VALID_KEY.matcher(namespace).matches() ? null : new NamespacedKey(namespace, key);
+                }
+            }
+        }
+    }
+
+    @Nullable
+    public static NamespacedKey fromString(@NotNull String key) {
+        return fromString(key, null);
     }
 }
