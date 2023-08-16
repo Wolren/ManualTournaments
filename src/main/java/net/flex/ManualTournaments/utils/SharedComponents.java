@@ -111,21 +111,20 @@ public class SharedComponents {
         for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
     }
 
-    public static void removeEntries() {
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
-                Team team = entry.getKey();
-                Set<UUID> playerUUIDs = entry.getValue();
-                if (playerUUIDs.contains(player.getUniqueId())) {
-                    if (team.getName().equals("1")) {
-                        TeamFight.team1.removeEntry(player.getName());
-                    } else if (team.getName().equals("2")) {
-                        TeamFight.team2.removeEntry(player.getName());
-                    }
-                    break;
+    public static void removeEntry(Player player) {
+        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
+            Team team = entry.getKey();
+            Set<UUID> playerUUIDs = entry.getValue();
+            if (playerUUIDs.contains(player.getUniqueId())) {
+                if (team.getName().equals("1")) {
+                    TeamFight.team1.removeEntry(player.getName());
+                } else if (team.getName().equals("2")) {
+                    TeamFight.team2.removeEntry(player.getName());
                 }
+                break;
             }
         }
+
     }
 
     public static boolean playerIsInTeam(UUID player) {

@@ -1,7 +1,6 @@
 package net.flex.ManualTournaments.listeners;
 
 import lombok.SneakyThrows;
-import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -23,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.commands.Fight.teams;
 import static net.flex.ManualTournaments.commands.fightCommands.TeamFight.FightsConfig;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
@@ -33,13 +33,14 @@ public class TeamFightListener implements Listener {
     public static double regeneratedTeam2 = 0;
     public static double damageTeam1 = 0;
     public static double damageTeam2 = 0;
+    private static boolean isForcedDeath = false;
     public static boolean stopper;
 
     @EventHandler
     private void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         Player killer = player.getKiller();
-        removeEntries();
+        removeEntry(player);
         if (playerIsInTeam(player.getUniqueId())) {
             event.setDroppedExp(0);
             event.setDeathMessage(null);
@@ -57,7 +58,7 @@ public class TeamFightListener implements Listener {
 
     @SneakyThrows
     private static void endCounter() {
-        if (Fight.teams.values().isEmpty()) {
+        if (teams.values().isEmpty()) {
             FightsConfig.load(TeamFight.FightsConfigFile);
             FightsConfig.set("duration", TeamFight.duration - 3);
             durationUpdate(TeamFight.duration - 3);
@@ -67,11 +68,11 @@ public class TeamFightListener implements Listener {
     }
 
     @SneakyThrows
-    private void teamRemover(Player player) {
+    private static void teamRemover(Player player) {
         Set<UUID> team1 = new HashSet<>();
         Set<UUID> team2 = new HashSet<>();
         Map<Team, Set<UUID>> ffaTeams = new HashMap<>();
-        for (Map.Entry<Team, Set<UUID>> entry : Fight.teams.entrySet()) {
+        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
             if (entry.getValue().contains(player.getUniqueId())) {
                 entry.getValue().remove(player.getUniqueId());
             }
@@ -83,10 +84,12 @@ public class TeamFightListener implements Listener {
                 ffaTeams.put(entry.getKey(), entry.getValue());
             }
         }
-        if (team1.isEmpty() && !team2.isEmpty()) {
-            teamHandler(team2, "2");
-        } else if (!team1.isEmpty() && team2.isEmpty()) {
-            teamHandler(team1, "1");
+        if (!isForcedDeath) {
+            if (team1.isEmpty() && !team2.isEmpty()) {
+                teamHandler(team2, "2");
+            } else if (!team1.isEmpty() && team2.isEmpty()) {
+                teamHandler(team1, "1");
+            }
         }
         int filledTeams = 0;
         Map.Entry<Team, Set<UUID>> nonEmptyTeam = null;
@@ -139,13 +142,16 @@ public class TeamFightListener implements Listener {
                     Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
                     if (config.getBoolean("create-fights-folder")) endCounter();
                     if (config.getBoolean("kill-on-fight-end")) {
+                        isForcedDeath = true;
                         Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> p.setHealth(0));
+                        isForcedDeath = false;
                     } else if (!config.getBoolean("kill-on-fight-end")) {
                         String path = "fight-end-spawn.";
                         Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
                             clear(player);
                             p.teleport(location(path, config));
                         });
+                        teams.clear();
                     }
                     cancel();
                 }
@@ -174,6 +180,7 @@ public class TeamFightListener implements Listener {
                             clear(player);
                             p.teleport(location(path, config));
                         });
+                        teams.clear();
                     }
                     cancel();
                 }
@@ -242,7 +249,7 @@ public class TeamFightListener implements Listener {
     public void onEntityDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        for (Map.Entry<Team, Set<UUID>> entry : Fight.teams.entrySet()) {
+        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
             Team team = entry.getKey();
             if (entry.getValue().contains(player.getUniqueId())) {
                 if (team.getName().equals("1")) {
@@ -259,7 +266,7 @@ public class TeamFightListener implements Listener {
     public void onHealthRegain(EntityRegainHealthEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        for (Map.Entry<Team, Set<UUID>> entry : Fight.teams.entrySet()) {
+        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
             Team team = entry.getKey();
             if (entry.getValue().contains(player.getUniqueId())) {
                 if (team.getName().equals("1")) {

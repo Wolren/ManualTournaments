@@ -5,6 +5,7 @@ import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
 import net.flex.ManualTournaments.interfaces.FightType;
+import net.flex.ManualTournaments.utils.SharedComponents;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -71,7 +72,7 @@ public class FfaFight implements FightType {
     @Override
     public void stopFight() {
         player.setWalkSpeed(0.2F);
-        removeEntries();
+        Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
         cancelled.set(true);
         Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
             if (version <= 13) collidableReflection(player, true);

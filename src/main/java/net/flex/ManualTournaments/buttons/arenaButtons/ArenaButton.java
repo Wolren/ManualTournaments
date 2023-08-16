@@ -20,7 +20,7 @@ public class ArenaButton extends ButtonBuilder {
     }
 
     protected Button configureButton(Player sender, String name) {
-        return new Button(new ItemBuilder(Material.GRASS_BLOCK)
+        return new Button(new ItemBuilder(Material.DIRT)
                 .name(config.getString("gui-arena-name-color") + name)
                 .lore(config.getString("gui-arena-lore-right-click"), config.getString("gui-arena-lore-left-click"))
                 .build()).withListener(event -> {

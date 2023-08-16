@@ -6,6 +6,7 @@ import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
+import net.flex.ManualTournaments.utils.SharedComponents;
 import net.flex.ManualTournaments.utils.SqlMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -28,7 +29,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class TeamFight implements FightType {
     private static final Set<Player> distinctFighters = new HashSet<>();
-    public static Team team1 = Fight.board.registerNewTeam("1"), team2 = Fight.board.registerNewTeam("2");
+    public static Team team1, team2;
     public static File FightsConfigFile;
     public static FileConfiguration FightsConfig;
     public static int duration;
@@ -40,8 +41,10 @@ public class TeamFight implements FightType {
             return;
         }
         distinctFighters.addAll(fighters);
-        if (distinctFighters.size() == fighters.size()) {
+        if (distinctFighters.size() == fighters.size() && fighters.size() % 2 == 0) {
             clearBeforeFight();
+            team1 = Fight.board.registerNewTeam("1");
+            team2 = Fight.board.registerNewTeam("2");
             setBoard(team1);
             setBoard(team2);
             config.load(getCustomConfigFile());
@@ -89,7 +92,7 @@ public class TeamFight implements FightType {
     @SneakyThrows
     public void stopFight() {
         player.setWalkSpeed(0.2F);
-        removeEntries();
+        Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
         cancelled.set(true);
         Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
             if (version <= 13) collidableReflection(player, true);
@@ -101,7 +104,7 @@ public class TeamFight implements FightType {
             }
         });
         teams.clear();
-        if (!FightsConfig.isSet("cancelled")) {
+        if (config.getBoolean("create-fights-folder") && !FightsConfig.isSet("cancelled")) {
             FightsConfig.set("cancelled", true);
             FightsConfig.save(FightsConfigFile);
         }

@@ -13,30 +13,30 @@ commands:
       - mta
       - arena
     permission: mt.arena
-    permission-message: "You don't have permission to use that command"
-    usage: "Usage: /arena [list|create|remove|teleport|validate...]"
+    permission-message: "You don't have permission to use this command"
+    usage: "Usage: /arena [list|create|gui...]"
   manualtournaments_fight:
     aliases:
       - mt_fight
       - mtf
       - fight
     permission: mt.fight
-    permission-message: "You don't have permission to use that command"
-    usage: "Usage: /fight {type}/stop [player1] [player2]..."
+    permission-message: "You don't have permission to use this command"
+    usage: "Usage: /fight {type} [player1] [player2]..."
   manualtournaments_kit:
     aliases:
       - mt_kit
       - mtk
       - kit
-    permissions: mt.kit
-    permission-message: "You don't have permission to use that command"
-    usage: "Usage: /kit [kit name] / [list|unbreakable|create|remove|give]"
+    permission: mt.kit
+    permission-message: "You don't have permission to use this command"
+    usage: "Usage: /kit [kit name] / [list|create|gui...]"
   manualtournaments_reload:
     aliases:
       - mt_reload
       - mtr
-    permissions: mt.reload
-    permission-message: "You don't have permission to use that command"
+    permission: mt.reload
+    permission-message: "You don't have permission to use this command"
     usage: "Usage: /mtr reload"
   manualtournaments_settings:
     aliases:
@@ -44,7 +44,7 @@ commands:
       - mts
       - settings
     permission: mt.settings
-    permission-message: "You don't have permission to use that command"
+    permission-message: "You don't have permission to use this command"
     usage: "Usage: /settings [current_arena|current_kit...]"
   manualtournaments_spectate:
     aliases:
@@ -53,18 +53,22 @@ commands:
       - spec
       - spectate
     permission: mt.spectate
-    permission-message: "You have to have spectator permission to use this command!"
+    permission-message: "You don't have permission to use this command"
     usage: "Usage: /spectate"
     default: true
 permissions:
   mt.arena:
     description: Allows for creating and managing arenas
+    default: false
   mt.fight:
     description: Allows for starting the fight between players
+    default: false
   mt.kit:
     description: Allows for creating and managing kits
+    default: false
   mt.settings:
     description: Allows for changing settings
+    default: false
   mt.spectate:
     description: Allows for spectating arenas
     default: true
