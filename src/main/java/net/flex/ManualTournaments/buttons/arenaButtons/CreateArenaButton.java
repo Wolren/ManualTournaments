@@ -24,7 +24,7 @@ public class CreateArenaButton extends ButtonBuilder {
             if (event.isLeftClick()) {
                 sender.closeInventory();
                 send(sender, "gui-arena-create-message");
-                ArenaGUI.opener = true;
+                ArenaGUI.isOpenerActive = true;
             }
         });
     }
