@@ -5,10 +5,7 @@ import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.SettingsFactory;
 import net.flex.ManualTournaments.factories.SettingsShortFactory;
 import net.flex.ManualTournaments.guis.SettingsGUI;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -22,7 +19,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class Settings implements TabCompleter, CommandExecutor {
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null) return false;
+        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
         else player = optional(sender);
         config.load(getCustomConfigFile());
         getPresetConfig().load(getPresetConfigFile());

@@ -5,10 +5,9 @@ import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.KitFactory;
 import net.flex.ManualTournaments.factories.KitShortFactory;
 import net.flex.ManualTournaments.guis.KitGUI;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.Bukkit;
+import org.bukkit.command.*;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +22,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class Kit implements TabCompleter, CommandExecutor {
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null) return false;
+        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
         else player = optional(sender);
         config.load(getCustomConfigFile());
         getKitConfig().load(getKitConfigFile());
@@ -33,6 +32,11 @@ public class Kit implements TabCompleter, CommandExecutor {
             KitShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
             KitFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], Main.kitNames.contains(args[1]));
+        } else if (args.length == 3) {
+            Player target = Bukkit.getPlayer(args[2]);
+            if (target != null) {
+                KitFactory.getCommand(args[0].toUpperCase()).execute(target, args[1], Main.kitNames.contains(args[1]));
+            }
         } else send(player, "kit-usage");
         return true;
     }

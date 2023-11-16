@@ -98,9 +98,9 @@ public final class Main extends JavaPlugin {
 
     public void onEnable() {
         super.onEnable();
+        gui = new GUI(this);
         new UpdateChecker();
         initializeData();
-        gui = new GUI(this);
         setCommands();
         registerEvents();
     }
@@ -129,7 +129,7 @@ public final class Main extends JavaPlugin {
         if (Arenas.getConfigurationSection("Arenas") != null) {
             arenaNames.addAll(Objects.requireNonNull(Arenas.getConfigurationSection("Arenas")).getKeys(false));
         }
-        if (Arenas.getConfigurationSection("Presets") != null) {
+        if (Presets.getConfigurationSection("Presets") != null) {
             presetNames.addAll(Objects.requireNonNull(Presets.getConfigurationSection("Presets")).getKeys(false));
         }
     }

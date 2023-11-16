@@ -5,10 +5,7 @@ import net.flex.ManualTournaments.commands.fightCommands.DefaultFight;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -29,7 +26,7 @@ public class Fight implements CommandExecutor, TabCompleter {
     @SneakyThrows
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null) return false;
+        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
         else player = optional(sender);
         getKitConfig().load(getKitConfigFile());
         getArenaConfig().load(getArenaConfigFile());

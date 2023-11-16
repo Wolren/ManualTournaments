@@ -8,6 +8,7 @@ import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -40,6 +41,7 @@ public class SharedComponents {
     }
 
     public static Player optional(CommandSender sender) {
+        if (sender instanceof ConsoleCommandSender) return null;
         Optional<Player> playerOptional = Optional.ofNullable(((OfflinePlayer) sender).getPlayer());
         if (!playerOptional.isPresent() || !(sender instanceof Player)) {
             sender.sendMessage("sender-not-a-player");
