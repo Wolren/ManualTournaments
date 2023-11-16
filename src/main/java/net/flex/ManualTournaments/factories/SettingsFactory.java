@@ -15,6 +15,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.send;
 public class SettingsFactory {
     public static Map<String, SettingsCommand> settingsCommandMap = new HashMap<String, SettingsCommand>() {{
         put("BREAK_BLOCKS", new BreakBlocksSettings());
+        put("CREATE", new CreatePreset());
         put("CURRENT_ARENA", new CurrentArenaSettings());
         put("CURRENT_KIT", new CurrentKitSettings());
         put("DROP_ITEMS", new DropItemsSettings());
@@ -26,7 +27,7 @@ public class SettingsFactory {
     }};
 
     public static SettingsCommand getCommand(String command) {
-        return settingsCommandMap.getOrDefault(command, (player, setting, value) -> send(player, "settings-usage"));
+        return settingsCommandMap.getOrDefault(command, (player, context, value) -> send(player, "settings-usage"));
     }
 
     @SneakyThrows

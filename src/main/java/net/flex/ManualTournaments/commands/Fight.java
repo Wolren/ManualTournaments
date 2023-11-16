@@ -28,7 +28,7 @@ public class Fight implements CommandExecutor, TabCompleter {
 
     @SneakyThrows
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         getKitConfig().load(getKitConfigFile());
@@ -46,7 +46,7 @@ public class Fight implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, String[] args) {
         List<String> list = new ArrayList<>();
         if (args.length == 1) {
             list.add("stop");

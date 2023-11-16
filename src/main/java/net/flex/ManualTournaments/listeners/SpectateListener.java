@@ -169,6 +169,7 @@ public class SpectateListener implements Listener {
     @EventHandler
     private void onLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        event.setQuitMessage(null);
         if (spectators.contains(player.getUniqueId())) {
             if (getPlugin().getConfig().getBoolean("kill-on-fight-end")) {
                 player.setGameMode(Bukkit.getServer().getDefaultGameMode());

@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 public class GuiSettings implements SettingsShortCommand {
     @Override
-    public void execute(Player player) {
+    public void execute(Player player, String context) {
         SettingsGUI.settingsGUI(player);
     }
 }

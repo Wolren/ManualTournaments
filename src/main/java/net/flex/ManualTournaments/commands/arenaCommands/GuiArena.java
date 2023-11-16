@@ -7,6 +7,6 @@ import org.bukkit.entity.Player;
 public class GuiArena implements ArenaShortCommand {
     @Override
     public void execute(Player player, String arg) {
-        ArenaGUI.arenaGUI(player);
+        new ArenaGUI().arenaGUI(player);
     }
 }

@@ -22,7 +22,7 @@ public class SpectatorArenaButton extends ButtonBuilder {
     protected Button configureButton(Player sender, String name, Menu menu) {
         return new Button(new ItemBuilder(Material.MAP)
                 .name(config.getString("gui-arena-settings-spectator-name"))
-                .lore(ArenaGUI.getLore("Arenas." + name + ".spectator."))
+                .lore(new ArenaGUI().getLore("Arenas." + name + ".spectator."))
                 .build()).withListener(event1 -> {
             ArenaFactory.getCommand("SPECTATOR").execute(sender, name, arenaNames.contains(name));
             sender.openInventory(ArenaGUI.arenaMenu.getInventory());

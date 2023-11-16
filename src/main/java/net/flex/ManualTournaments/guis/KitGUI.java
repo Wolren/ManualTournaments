@@ -19,7 +19,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class KitGUI {
     public static Menu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5);
     public static Map<String, Button> kitMenuButtons = new HashMap<>();
-    public static boolean opener = false;
+    public static boolean isOpenerActive = false;
     public static ButtonDirector director = new ButtonDirector();
 
     public static void kitGUI(Player sender) {

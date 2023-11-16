@@ -31,9 +31,9 @@ public final class Main extends JavaPlugin {
     }
     public static GUI gui;
     public static int version;
-    public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>();
-    private static File KitsConfigfile, ArenaConfigFile, CustomConfigFile;
-    private static FileConfiguration KitsConfig, ArenaConfig, CustomConfig;
+    public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>(), presetNames = new HashSet<>();
+    private static File KitsConfigFile, ArenaConfigFile, PresetConfigFile, CustomConfigFile;
+    private static FileConfiguration KitsConfig, ArenaConfig, PresetConfig, CustomConfig;
     private static final Map<String, Integer> versionMap = new HashMap<String, Integer>() {{
         put("v1_8_R1", 11);
         put("v1_8_R2", 12);
@@ -60,11 +60,15 @@ public final class Main extends JavaPlugin {
     }};
 
     public static File getKitConfigFile() {
-        return KitsConfigfile;
+        return KitsConfigFile;
     }
 
     public static File getArenaConfigFile() {
         return ArenaConfigFile;
+    }
+
+    public static File getPresetConfigFile() {
+        return PresetConfigFile;
     }
 
     public static File getCustomConfigFile() {
@@ -77,6 +81,10 @@ public final class Main extends JavaPlugin {
 
     public static FileConfiguration getArenaConfig() {
         return ArenaConfig;
+    }
+
+    public static FileConfiguration getPresetConfig() {
+        return PresetConfig;
     }
 
     public static FileConfiguration getCustomConfig() {
@@ -101,23 +109,28 @@ public final class Main extends JavaPlugin {
         Bukkit.getServer().getOnlinePlayers().stream().filter(player -> playerIsInTeam(player.getUniqueId())).forEach(player -> player.getInventory().clear());
         FightFactory.fight.stopFight();
         Bukkit.getServer().getOnlinePlayers().stream().filter(player -> Spectate.spectators.contains(player.getUniqueId())).forEach(Spectate::stopSpectator);
-        ArenaGUI.opener = false;
-        KitGUI.opener = false;
+        ArenaGUI.isOpenerActive = false;
+        KitGUI.isOpenerActive = false;
         super.onDisable();
     }
 
     private void initializeData() {
         createKitsConfig();
         createArenaConfig();
+        createPresetConfig();
         createCustomConfig();
         getConfig().options().copyDefaults(true);
-        FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigfile);
+        FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigFile);
         FileConfiguration Arenas = YamlConfiguration.loadConfiguration(ArenaConfigFile);
+        FileConfiguration Presets = YamlConfiguration.loadConfiguration(PresetConfigFile);
         if (Kits.getConfigurationSection("Kits") != null) {
             kitNames.addAll(Objects.requireNonNull(Kits.getConfigurationSection("Kits")).getKeys(false));
         }
         if (Arenas.getConfigurationSection("Arenas") != null) {
             arenaNames.addAll(Objects.requireNonNull(Arenas.getConfigurationSection("Arenas")).getKeys(false));
+        }
+        if (Arenas.getConfigurationSection("Presets") != null) {
+            presetNames.addAll(Objects.requireNonNull(Presets.getConfigurationSection("Presets")).getKeys(false));
         }
     }
 
@@ -155,16 +168,6 @@ public final class Main extends JavaPlugin {
         else return 100;
     }
 
-    private void createCustomConfig() {
-        CustomConfigFile = new File(getDataFolder(), "config.yml");
-        CustomConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(CustomConfigFile);
-        if (!CustomConfigFile.exists()) {
-            created(CustomConfigFile.getParentFile().mkdirs());
-            saveResource("config.yml", false);
-        }
-    }
-
     private void createArenaConfig() {
         ArenaConfigFile = new File(getDataFolder(), "arenas.yml");
         ArenaConfig = new YamlConfiguration();
@@ -176,14 +179,35 @@ public final class Main extends JavaPlugin {
     }
 
     private void createKitsConfig() {
-        KitsConfigfile = new File(getDataFolder(), "kits.yml");
+        KitsConfigFile = new File(getDataFolder(), "kits.yml");
         KitsConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(KitsConfigfile);
-        if (!KitsConfigfile.exists()) {
-            created(KitsConfigfile.getParentFile().mkdirs());
+        YamlConfiguration.loadConfiguration(KitsConfigFile);
+        if (!KitsConfigFile.exists()) {
+            created(KitsConfigFile.getParentFile().mkdirs());
             saveResource("kits.yml", false);
         }
     }
+
+    private void createPresetConfig() {
+        PresetConfigFile = new File(getDataFolder(), "presets.yml");
+        PresetConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(PresetConfigFile);
+        if (!PresetConfigFile.exists()) {
+            created(PresetConfigFile.getParentFile().mkdirs());
+            saveResource("presets.yml", false);
+        }
+    }
+
+    private void createCustomConfig() {
+        CustomConfigFile = new File(getDataFolder(), "config.yml");
+        CustomConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(CustomConfigFile);
+        if (!CustomConfigFile.exists()) {
+            created(CustomConfigFile.getParentFile().mkdirs());
+            saveResource("config.yml", false);
+        }
+    }
+
 
     private void created(boolean create) {
         if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create config directory");

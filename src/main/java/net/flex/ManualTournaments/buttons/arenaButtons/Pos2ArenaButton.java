@@ -22,7 +22,7 @@ public class Pos2ArenaButton extends ButtonBuilder {
     protected Button configureButton(Player sender, String name, Menu menu) {
         return new Button(new ItemBuilder(Material.MAP)
                 .name(config.getString("gui-arena-settings-pos2-name"))
-                .lore(ArenaGUI.getLore("Arenas." + name + ".pos2."))
+                .lore(new ArenaGUI().getLore("Arenas." + name + ".pos2."))
                 .build()).withListener(event1 -> {
             ArenaFactory.getCommand("POS2").execute(sender, name, arenaNames.contains(name));
             sender.openInventory(ArenaGUI.arenaMenu.getInventory());

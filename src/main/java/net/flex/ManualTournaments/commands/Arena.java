@@ -21,13 +21,13 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Arena implements CommandExecutor, TabCompleter {
     @SneakyThrows
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (optional(sender) == null) return false;
         else player = optional(sender);
         config.load(getCustomConfigFile());
         getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) {
-            ArenaGUI.arenaGUI(player);
+            new ArenaGUI().arenaGUI(player);
         } else if (args.length == 1) {
             ArenaShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
         } else if (args.length == 2) {
@@ -36,7 +36,7 @@ public class Arena implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, String[] args) {
         if (args.length == 1)
             return Arrays.asList("create", "gui", "list", "pos1", "pos2", "remove", "spectator", "teleport", "validate");
         else if (args.length == 2) {

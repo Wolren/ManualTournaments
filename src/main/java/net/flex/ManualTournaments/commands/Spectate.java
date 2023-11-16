@@ -13,6 +13,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
@@ -51,8 +52,8 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                     spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                     player.setCollidable(false);
                 } else collidableReflection(player, false);
+
                 player.setGameMode(GameMode.ADVENTURE);
-                player.setAllowFlight(true);
                 player.setFoodLevel(20);
                 player.setHealth(20.0D);
                 spectatorsBoard.addEntry(player.getName());
@@ -60,6 +61,13 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 clear(player);
                 spectators.add(player.getUniqueId());
                 player.teleport(location(path, Main.getArenaConfig()));
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        player.setAllowFlight(true);
+                    }
+                }.runTaskLater(getPlugin(), 6L);
 
                 ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
                 ItemMeta redstoneBlockMeta = redstoneBlock.getItemMeta();
@@ -83,7 +91,6 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 send(player, "spectator-started-spectating");
             } else send(player, "arena-spectator-not-set");
         } else send(player, "current-arena-not-set");
-
     }
 
     public static void stopSpectator(Player player) {
@@ -108,9 +115,21 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         spectators.remove(player.getUniqueId());
     }
 
+    public static void stopWithoutKill(Player player) {
+        if (Main.version <= 13) collidableReflection(player, true);
+        player.setAllowFlight(false);
+        player.setFlying(false);
+        player.getInventory().clear();
+        Bukkit.getServer().getOnlinePlayers().forEach(other -> other.showPlayer(player));
+        send(player, "spectator-stopped-spectating");
+        spectatorsBoard.removeEntry(player.getName());
+        if (Main.version >= 14) player.setCollidable(true);
+        spectators.remove(player.getUniqueId());
+    }
+
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (args.length == 1) return Collections.singletonList("stop");
         return null;
     }

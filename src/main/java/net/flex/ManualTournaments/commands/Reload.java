@@ -16,7 +16,7 @@ import static net.flex.ManualTournaments.Main.*;
 
 public final class Reload implements CommandExecutor, TabCompleter {
     @SneakyThrows
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
+    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String string, @Nonnull String[] args) {
         if ((args.length == 1 && args[0].equals("reload")) || args.length == 0) {
             getPlugin().getLogger().info("Reloading...");
             getKitConfig().load(getKitConfigFile());
@@ -29,7 +29,7 @@ public final class Reload implements CommandExecutor, TabCompleter {
 
     @Nullable
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (args.length == 1) return Collections.singletonList("reload");
         else return null;
     }

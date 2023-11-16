@@ -22,7 +22,7 @@ public class Pos1ArenaButton extends ButtonBuilder {
     protected Button configureButton(Player sender, String name, Menu menu) {
         return new Button(new ItemBuilder(Material.MAP)
                 .name(config.getString("gui-arena-settings-pos1-name"))
-                .lore(ArenaGUI.getLore("Arenas." + name + ".pos1."))
+                .lore(new ArenaGUI().getLore("Arenas." + name + ".pos1."))
                 .build()).withListener(event1 -> {
             ArenaFactory.getCommand("POS1").execute(sender, name, arenaNames.contains(name));
             sender.openInventory(ArenaGUI.arenaMenu.getInventory());

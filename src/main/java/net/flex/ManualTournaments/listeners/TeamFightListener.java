@@ -173,12 +173,16 @@ public class TeamFightListener implements Listener {
                     Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
                     if (config.getBoolean("create-fights-folder")) endCounter();
                     if (config.getBoolean("kill-on-fight-end")) {
-                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> p.setHealth(0));
+                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> {
+                            p.setHealth(0);
+                            p.setWalkSpeed(0.2F);
+                        });
                     } else if (!config.getBoolean("kill-on-fight-end")) {
                         String path = "fight-end-spawn.";
                         Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
                             clear(player);
                             p.teleport(location(path, config));
+                            p.setWalkSpeed(0.2F);
                         });
                         teams.clear();
                     }

@@ -38,7 +38,7 @@ public class Kit implements TabCompleter, CommandExecutor {
     }
 
     @Nullable
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
         if (args.length == 1) return new ArrayList<>(Arrays.asList("create", "give", "gui", "list", "remove", "unbreakable"));
         else if (args.length == 2) {
             List<String> list = new ArrayList<>();

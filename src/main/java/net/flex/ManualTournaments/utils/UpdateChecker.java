@@ -26,7 +26,7 @@ public final class UpdateChecker {
         logger.log(Level.WARNING, "https://www.spigotmc.org/resources/manual-tournaments.105850/");
     }
 
-    private CompletableFuture<Boolean> checkUpdate() {
+    public CompletableFuture<Boolean> checkUpdate() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         logger.log(Level.INFO, "Checking for Updates...");
         try {

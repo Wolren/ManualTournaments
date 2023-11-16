@@ -14,12 +14,12 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class ArenaGUI {
-    public static Menu arenaMenu = gui.create(getPlugin().getConfig().getString("gui-arena-menu-name"), 5);
+    public static Menu arenaMenu = gui.create(config.getString("gui-arena-menu-name"), 5);
     public static Map<String, Button> arenaMenuButtons = new HashMap<>();
-    public static boolean opener = false;
+    public static boolean isOpenerActive = false;
     public static ButtonDirector director = new ButtonDirector();
 
-    public static void arenaGUI(Player sender) {
+    public void arenaGUI(Player sender) {
         arenaMenu.setToolbarBuilder((slot, page, type, menu) -> {
             if (slot == 8) return director.constructButton(new CreateArenaButton(sender));
             else return gui.getDefaultToolbarBuilder().buildToolbarButton(slot, page, type, menu);
@@ -37,14 +37,13 @@ public class ArenaGUI {
         sender.openInventory(arenaMenu.getInventory());
     }
 
-    public static List<String> getLore(String path) {
-        return Arrays.asList(
-                config.getString("gui-arena-settings-lore-color") + "x: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "x"),
-                config.getString("gui-arena-settings-lore-color") + "y: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "y"),
-                config.getString("gui-arena-settings-lore-color") + "z: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "z"),
-                config.getString("gui-arena-settings-lore-color") + "yaw: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "yaw"),
-                config.getString("gui-arena-settings-lore-color") + "pitch: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getDouble(path + "pitch"),
-                config.getString("gui-arena-settings-lore-color") + "world: " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().getString(path + "world")
-        );
+    public List<String> getLore(String path) {
+        List<String> lore = new ArrayList<>();
+        String[] keys = {"x", "y", "z", "yaw", "pitch", "world"};
+        for (String key : keys) {
+            String value = config.getString("gui-arena-settings-lore-color") + key + ": " + config.getString("gui-arena-settings-lore-value-color") + getArenaConfig().get(path + key);
+            lore.add(value);
+        }
+        return lore;
     }
 }

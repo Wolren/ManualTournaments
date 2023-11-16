@@ -3,6 +3,7 @@ package net.flex.ManualTournaments.commands.fightCommands;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Fight;
+import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
@@ -69,7 +70,7 @@ public class TeamFight implements FightType {
     @SneakyThrows
     private void setupFighter(Player fighter, List<Player> fighters) {
         fighter.setGameMode(GameMode.SURVIVAL);
-        if (Main.version <= 13) collidableReflection(fighter, false);
+        Spectate.stopWithoutKill(fighter);
         Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? team1 : team2;
         team.addEntry(fighter.getName());
         teams.computeIfAbsent(team, k -> new HashSet<>()).add(fighter.getUniqueId());
@@ -91,11 +92,11 @@ public class TeamFight implements FightType {
 
     @SneakyThrows
     public void stopFight() {
-        player.setWalkSpeed(0.2F);
         Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
         cancelled.set(true);
         Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
-            if (version <= 13) collidableReflection(player, true);
+            online.setWalkSpeed(0.2F);
+            if (version <= 13) collidableReflection(online, true);
             if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
             else if (!config.getBoolean("kill-on-fight-end")) {
                 String path = "fight-end-spawn.";

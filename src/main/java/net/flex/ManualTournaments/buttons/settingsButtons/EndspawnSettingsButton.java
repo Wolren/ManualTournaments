@@ -27,7 +27,7 @@ public class EndspawnSettingsButton extends ButtonBuilder {
                         config.getString("gui-settings-endspawn-lore-color") + "pitch: " + config.getString("gui-settings-endspawn-lore-value-color") + config.getDouble("fight-end-spawn." + "pitch"),
                         config.getString("gui-settings-endspawn-lore-color") + "world: " + config.getString("gui-settings-endspawn-lore-value-color") + config.getString("fight-end-spawn." + "world"))
                 .build()).withListener(event1 -> {
-            SettingsShortFactory.getCommand("ENDSPAWN").execute(sender);
+            SettingsShortFactory.getCommand("ENDSPAWN").execute(sender, "default");
             sender.openInventory(sender.getInventory());
             SettingsGUI.settingsGUI(sender);
         });
