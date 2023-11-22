@@ -6,7 +6,10 @@ import org.bukkit.entity.Player;
 
 public final class DropOnDeathSettings implements SettingsCommand {
     @Override
-    public void execute(Player player, String setting, String value) {
-        SettingsFactory.updateConfigAndNotify(player, "drop-on-death", value);
+    public void execute(Player player, String context, String value) {
+        if (context.equals("default")) SettingsFactory.updateDefaultConfig(player, "drop-on-death", value);
+        else {
+            SettingsFactory.updatePresetConfig(player, "drop-on-death", context, value);
+        }
     }
 }

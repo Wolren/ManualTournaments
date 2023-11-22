@@ -11,7 +11,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.send;
 public final class CurrentKitSettings implements SettingsCommand {
     @SneakyThrows
     @Override
-    public void execute(Player player, String setting, String value) {
+    public void execute(Player player, String context, String value) {
         if (kitNames.contains(value)) {
             config.set("current-kit", value);
             config.save(getCustomConfigFile());

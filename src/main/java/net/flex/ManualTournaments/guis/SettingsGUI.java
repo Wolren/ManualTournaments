@@ -20,14 +20,17 @@ public class SettingsGUI {
     public static Menu settingsMenu = gui.create(config.getString("gui-settings-menu-name"), 5);
     public static Map<String, Button> settingsMenuButtons = new HashMap<>();
     public static boolean isOpenerActive = false;
-    public static ButtonDirector director = new ButtonDirector();
+    private static final ButtonDirector director = new ButtonDirector();
     public static void settingsGUI(Player sender) {
         settingsMenu.setToolbarBuilder((slot, page, type, menu) -> {
             if (slot == 8) return director.constructButton(new CreatePresetButton(sender));
             else return gui.getDefaultToolbarBuilder().buildToolbarButton(slot, page, type, menu);
         });
         settingsMenu.clearAllButStickiedSlots();
-        IntStream.range(0, presetNames.size()).forEach(i -> {
+        Button defaultButton = new PresetButton(sender, "default").buildButton();
+        settingsMenu.setButton(0, defaultButton);
+        settingsMenuButtons.put("default", defaultButton);
+        IntStream.range(1, presetNames.size()).forEach(i -> {
             String presetName = new ArrayList<>(presetNames).get(i);
             Button button = new PresetButton(sender, presetName).buildButton();
             settingsMenu.setButton(i, button);

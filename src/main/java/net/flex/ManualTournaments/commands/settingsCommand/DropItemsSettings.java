@@ -6,7 +6,10 @@ import org.bukkit.entity.Player;
 
 public final class DropItemsSettings implements SettingsCommand {
     @Override
-    public void execute(Player player, String setting, String value) {
-        SettingsFactory.updateConfigAndNotify(player, "drop-items", value);
+    public void execute(Player player, String context, String value) {
+        if (context.equals("default")) SettingsFactory.updateDefaultConfig(player, "drop-items", value);
+        else {
+            SettingsFactory.updatePresetConfig(player, "drop-items", context, value);
+        }
     }
 }

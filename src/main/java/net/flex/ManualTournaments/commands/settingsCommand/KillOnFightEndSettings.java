@@ -6,7 +6,10 @@ import org.bukkit.entity.Player;
 
 public final class KillOnFightEndSettings implements SettingsCommand {
     @Override
-    public void execute(Player player, String setting, String value) {
-        SettingsFactory.updateConfigAndNotify(player, "kill-on-fight-end", value);
+    public void execute(Player player, String context, String value) {
+        if (context.equals("default")) SettingsFactory.updateDefaultConfig(player, "kill-on-fight-end", value);
+        else {
+            SettingsFactory.updatePresetConfig(player, "kill-on-fight-end", context, value);
+        }
     }
 }

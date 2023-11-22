@@ -13,15 +13,13 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TropicalFish;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.map.MapView;
 import org.bukkit.potion.*;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -53,24 +51,27 @@ public final class GiveKit implements KitCommand {
         ConfigurationSection armorSection = getKitConfig().getConfigurationSection(path + "armor");
         ConfigurationSection offhandSection = getKitConfig().getConfigurationSection(path + "offhand");
         ConfigurationSection effectsSection = getKitConfig().getConfigurationSection(path + "effects");
-        setItems(player, path, player.getInventory(), itemsSection);
+        List<ItemStack> itemStackList = setItems(player, path, itemsSection);
+        ItemStack[] itemStacks = Objects.requireNonNull(itemStackList).toArray(new ItemStack[0]);
+        player.getInventory().setContents(itemStacks);
         setArmor(player, path, armorSection);
         if (Main.version >= 15) setOffhand(player, path, offhandSection);
         setPlayerEffects(player, path, effectsSection);
     }
 
     @SneakyThrows
-    private static ItemStack[] setItems(Player player, String path, Inventory inventory, ConfigurationSection itemSection) {
+    private static List<ItemStack> setItems(Player player, String path, ConfigurationSection itemSection) {
+        List<ItemStack> items = new ArrayList<>();
         if (itemSection == null) return null;
         for (String string : Objects.requireNonNull(itemSection).getKeys(false)) {
             if (!string.equals("armor") && !string.equals("offhand") && !string.equals("effects")) {
                 int slot = Integer.parseInt(string);
                 String slotPath = path + slot + ".";
                 ItemStack is = setItemMeta(player, slotPath);
-                inventory.setItem(slot, is);
+                items.add(is);
             }
         }
-        return inventory.getContents();
+        return items;
     }
 
     private static void setArmor(Player player, String path, ConfigurationSection armorSection) {
@@ -196,7 +197,7 @@ public final class GiveKit implements KitCommand {
             if (blockStateMeta.getBlockState() instanceof ShulkerBox) {
                 ShulkerBox shulkerBox = (ShulkerBox) blockStateMeta.getBlockState();
                 ConfigurationSection storageSection = getKitConfig().getConfigurationSection(slotPath + "storage");
-                ItemStack[] playerInventory = setItems(player, slotPath + "storage.", shulkerBox.getInventory(), storageSection);
+                ItemStack[] playerInventory = Objects.requireNonNull(setItems(player, slotPath + "storage.", storageSection)).toArray(new ItemStack[0]);
                 shulkerBox.getInventory().setContents(playerInventory);
                 blockStateMeta.setBlockState(shulkerBox);
             }
@@ -235,11 +236,8 @@ public final class GiveKit implements KitCommand {
         if (Main.version >= 19 && im instanceof CrossbowMeta) {
             CrossbowMeta crossbowMeta = (CrossbowMeta) im;
             ConfigurationSection crossbowSection = getKitConfig().getConfigurationSection(slotPath + "projectiles");
-            Inventory projecticlesInventory = Bukkit.createInventory(null, InventoryType.PLAYER, "");
-            ItemStack[] projectiles = setItems(player, slotPath + "projectiles.", projecticlesInventory, crossbowSection);
-            if (projectiles != null) {
-                Arrays.stream(projectiles).forEachOrdered(crossbowMeta::addChargedProjectile);
-            }
+            List<ItemStack> projectiles = setItems(player, slotPath + "projectiles.", crossbowSection);
+            crossbowMeta.setChargedProjectiles(projectiles);
         }
 
         if (Main.version >= 19 && im instanceof Damageable) {
@@ -268,26 +266,28 @@ public final class GiveKit implements KitCommand {
         if (im instanceof FireworkMeta) {
             FireworkMeta fireworkMeta = (FireworkMeta) im;
             ConfigurationSection fireworkSection = getKitConfig().getConfigurationSection(slotPath + "firework");
-            for (String firework : Objects.requireNonNull(fireworkSection).getKeys(false)) {
-                int fireworkSlot = Integer.parseInt(firework);
-                String fireworkPath = slotPath + "firework." + fireworkSlot + ".";
-                FireworkEffect.Type fireworkType = FireworkEffect.Type.valueOf(getKitConfig().getString(fireworkPath + "type"));
-                boolean flicker = getKitConfig().getBoolean(fireworkPath + "flicker");
-                boolean trail = getKitConfig().getBoolean(fireworkPath + "trail");
-                List<Integer> colorList = getKitConfig().getIntegerList(fireworkPath + "colors");
-                List<Color> colors = colorList.stream().mapToInt(color -> color).mapToObj(Color::fromRGB).collect(Collectors.toList());
-                List<Integer> fadeColorList = getKitConfig().getIntegerList(fireworkPath + "fadeColors");
-                List<Color> fadeColors = fadeColorList.stream().mapToInt(color -> color).mapToObj(Color::fromRGB).collect(Collectors.toList());
-                FireworkEffect fireworkEffect = FireworkEffect.builder()
-                        .with(fireworkType)
-                        .flicker(flicker)
-                        .trail(trail)
-                        .withColor(colors)
-                        .withFade(fadeColors)
-                        .build();
-                fireworkMeta.addEffect(fireworkEffect);
-                int fireworkDuration = getKitConfig().getInt(fireworkPath + "duration");
-                fireworkMeta.setPower(fireworkDuration);
+            if (fireworkSection != null) {
+                for (String firework : fireworkSection.getKeys(false)) {
+                    int fireworkSlot = Integer.parseInt(firework);
+                    String fireworkPath = slotPath + "firework." + fireworkSlot + ".";
+                    FireworkEffect.Type fireworkType = FireworkEffect.Type.valueOf(getKitConfig().getString(fireworkPath + "type"));
+                    boolean flicker = getKitConfig().getBoolean(fireworkPath + "flicker");
+                    boolean trail = getKitConfig().getBoolean(fireworkPath + "trail");
+                    List<Integer> colorList = getKitConfig().getIntegerList(fireworkPath + "colors");
+                    List<Color> colors = colorList.stream().mapToInt(color -> color).mapToObj(Color::fromRGB).collect(Collectors.toList());
+                    List<Integer> fadeColorList = getKitConfig().getIntegerList(fireworkPath + "fadeColors");
+                    List<Color> fadeColors = fadeColorList.stream().mapToInt(color -> color).mapToObj(Color::fromRGB).collect(Collectors.toList());
+                    FireworkEffect fireworkEffect = FireworkEffect.builder()
+                            .with(fireworkType)
+                            .flicker(flicker)
+                            .trail(trail)
+                            .withColor(colors)
+                            .withFade(fadeColors)
+                            .build();
+                    fireworkMeta.addEffect(fireworkEffect);
+                    int fireworkDuration = getKitConfig().getInt(fireworkPath + "duration");
+                    fireworkMeta.setPower(fireworkDuration);
+                }
             }
         }
 

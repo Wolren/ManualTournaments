@@ -62,7 +62,7 @@ public class GUIListener implements Listener {
             send(player, "gui-preset-creation-cancelled");
         } else {
             String presetName = message.replace("*", "");
-            SettingsFactory.getCommand("CREATE").execute(player, "default", presetName);
+            SettingsFactory.getCommand("CREATE").execute(player, presetName, presetName);
             Bukkit.getScheduler().runTask(getPlugin(), () -> SettingsGUI.settingsGUI(player));
         }
     }

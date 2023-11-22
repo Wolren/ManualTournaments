@@ -10,17 +10,17 @@ import org.bukkit.entity.Player;
 import static net.flex.ManualTournaments.utils.SharedComponents.config;
 
 public class PresetButton extends ButtonBuilder {
-    public PresetButton(Player sender, String presetName) {
-        super(sender, presetName);
+    public PresetButton(Player sender, String context) {
+        super(sender, context);
     }
 
-    protected Button configureButton(Player sender, String presetName) {
+    protected Button configureButton(Player sender, String context) {
         return new Button(new ItemBuilder(Material.MAP)
-                .name(config.getString("gui-arena-name-color") + presetName)
+                .name(config.getString("gui-arena-name-color") + context)
                 .lore(config.getString("gui-arena-lore-right-click"), config.getString("gui-arena-lore-left-click"))
                 .build()).withListener(event -> {
             if (event.isLeftClick()) {
-                SettingsPresetGUI.settingsPresetGUI(sender);
+                SettingsPresetGUI.settingsPresetGUI(sender, context);
             }
         });
     }

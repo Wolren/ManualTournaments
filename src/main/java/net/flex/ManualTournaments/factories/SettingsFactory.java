@@ -8,8 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.flex.ManualTournaments.Main.getCustomConfigFile;
-import static net.flex.ManualTournaments.Main.getPlugin;
+import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
 
 public class SettingsFactory {
@@ -31,11 +30,24 @@ public class SettingsFactory {
     }
 
     @SneakyThrows
-    public static void updateConfigAndNotify(Player player, String configKey, String value) {
+    public static void updateDefaultConfig(Player player, String configKey, String value) {
         if (value.equals("true") || value.equals("false")) {
-            getPlugin().getConfig().set(configKey, true);
+            getPlugin().getConfig().set(configKey, value);
             send(player, "config-updated-successfully");
             getPlugin().getConfig().save(getCustomConfigFile());
         } else send(player, "config-options");
     }
+
+    @SneakyThrows
+    public static void updatePresetConfig(Player player, String configKey, String context, String value) {
+        String path = "Presets." + context + "." + configKey;
+        if (value.equals("true") || value.equals("false")) {
+            getPresetConfig().set(path, value);
+            send(player, "config-updated-successfully");
+            getPresetConfig().save(getPresetConfigFile());
+        } else send(player, "config-options");
+    }
 }
+
+
+

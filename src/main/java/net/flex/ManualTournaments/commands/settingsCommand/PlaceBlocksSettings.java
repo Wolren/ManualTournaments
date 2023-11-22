@@ -6,7 +6,10 @@ import org.bukkit.entity.Player;
 
 public final class PlaceBlocksSettings implements SettingsCommand {
     @Override
-    public void execute(Player player, String setting, String value) {
-        SettingsFactory.updateConfigAndNotify(player, "place-blocks", value);
+    public void execute(Player player, String context, String value) {
+        if (context.equals("default")) SettingsFactory.updateDefaultConfig(player, "place-blocks", value);
+        else {
+            SettingsFactory.updatePresetConfig(player, "place-blocks", context, value);
+        }
     }
 }
