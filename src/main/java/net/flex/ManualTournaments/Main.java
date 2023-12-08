@@ -1,7 +1,9 @@
 package net.flex.ManualTournaments;
 
 import net.flex.ManualTournaments.commands.*;
+import net.flex.ManualTournaments.commands.Queue;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
+import net.flex.ManualTournaments.expansions.TeamPrefix;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
 import net.flex.ManualTournaments.guis.KitGUI;
@@ -103,6 +105,9 @@ public final class Main extends JavaPlugin {
         initializeData();
         setCommands();
         registerEvents();
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new TeamPrefix().register();
+        }
     }
 
     public void onDisable() {
@@ -142,6 +147,7 @@ public final class Main extends JavaPlugin {
         commandsMap.put("manualtournaments_reload", new Reload());
         commandsMap.put("manualtournaments_settings", new Settings());
         commandsMap.put("manualtournaments_spectate", new Spectate());
+        commandsMap.put("manualtournaments_queue", new Queue());
         commandsMap.forEach((command, executor) -> {
             Objects.requireNonNull(getCommand(command)).setExecutor(executor);
             Objects.requireNonNull(getCommand(command)).setTabCompleter((TabCompleter) executor);

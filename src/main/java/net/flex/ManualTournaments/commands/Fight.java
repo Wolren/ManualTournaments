@@ -33,10 +33,16 @@ public class Fight implements CommandExecutor, TabCompleter {
         getCustomConfig().load(getCustomConfigFile());
         fighters.clear();
         IntStream.range(1, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
-        if (args.length == 1 && args[0].equals("stop")) {
-            FightFactory.fight.stopFight();
-            FightFactory.fight = new DefaultFight();
-        } else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop"))) {
+        if (args.length == 1) {
+            if (args[0].equals("stop")) {
+                FightFactory.fight.stopFight();
+                FightFactory.fight = new DefaultFight();
+            } else if (args[0].equals("queue")) {
+                FightType currentFight = new FightFactory().createFight(args[0]);
+                currentFight.startFight(player, Collections.emptyList());
+            }
+        }
+        else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop"))) {
             FightType currentFight = new FightFactory().createFight(args[0]);
             currentFight.startFight(player, fighters);
         } else send(player, "fight-usage");
@@ -49,6 +55,7 @@ public class Fight implements CommandExecutor, TabCompleter {
             list.add("stop");
             list.add("team");
             list.add("ffa");
+            list.add("queue");
         } else list = Bukkit.getOnlinePlayers().stream().map(Player::getDisplayName).collect(Collectors.toList());
         return list;
     }

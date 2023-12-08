@@ -19,10 +19,7 @@ import org.bukkit.inventory.meta.*;
 import org.bukkit.map.MapView;
 import org.bukkit.potion.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.flex.ManualTournaments.Main.getKitConfig;
@@ -51,24 +48,27 @@ public final class GiveKit implements KitCommand {
         ConfigurationSection armorSection = getKitConfig().getConfigurationSection(path + "armor");
         ConfigurationSection offhandSection = getKitConfig().getConfigurationSection(path + "offhand");
         ConfigurationSection effectsSection = getKitConfig().getConfigurationSection(path + "effects");
-        List<ItemStack> itemStackList = setItems(player, path, itemsSection);
-        ItemStack[] itemStacks = Objects.requireNonNull(itemStackList).toArray(new ItemStack[0]);
-        player.getInventory().setContents(itemStacks);
+
+        Map<Integer, ItemStack> itemStackMap = setItems(player, path, itemsSection);
+        for (Map.Entry<Integer, ItemStack> entry : itemStackMap.entrySet()) {
+            player.getInventory().setItem(entry.getKey(), entry.getValue());
+        }
+
         setArmor(player, path, armorSection);
         if (Main.version >= 15) setOffhand(player, path, offhandSection);
         setPlayerEffects(player, path, effectsSection);
     }
 
     @SneakyThrows
-    private static List<ItemStack> setItems(Player player, String path, ConfigurationSection itemSection) {
-        List<ItemStack> items = new ArrayList<>();
+    private static Map<Integer, ItemStack> setItems(Player player, String path, ConfigurationSection itemSection) {
+        Map<Integer, ItemStack> items = new HashMap<>();
         if (itemSection == null) return null;
         for (String string : Objects.requireNonNull(itemSection).getKeys(false)) {
             if (!string.equals("armor") && !string.equals("offhand") && !string.equals("effects")) {
                 int slot = Integer.parseInt(string);
                 String slotPath = path + slot + ".";
                 ItemStack is = setItemMeta(player, slotPath);
-                items.add(is);
+                items.put(slot, is);
             }
         }
         return items;
@@ -197,7 +197,7 @@ public final class GiveKit implements KitCommand {
             if (blockStateMeta.getBlockState() instanceof ShulkerBox) {
                 ShulkerBox shulkerBox = (ShulkerBox) blockStateMeta.getBlockState();
                 ConfigurationSection storageSection = getKitConfig().getConfigurationSection(slotPath + "storage");
-                ItemStack[] playerInventory = Objects.requireNonNull(setItems(player, slotPath + "storage.", storageSection)).toArray(new ItemStack[0]);
+                ItemStack[] playerInventory = Objects.requireNonNull(setItems(player, slotPath + "storage.", storageSection)).values().toArray(new ItemStack[0]);
                 shulkerBox.getInventory().setContents(playerInventory);
                 blockStateMeta.setBlockState(shulkerBox);
             }
@@ -236,8 +236,10 @@ public final class GiveKit implements KitCommand {
         if (Main.version >= 19 && im instanceof CrossbowMeta) {
             CrossbowMeta crossbowMeta = (CrossbowMeta) im;
             ConfigurationSection crossbowSection = getKitConfig().getConfigurationSection(slotPath + "projectiles");
-            List<ItemStack> projectiles = setItems(player, slotPath + "projectiles.", crossbowSection);
-            crossbowMeta.setChargedProjectiles(projectiles);
+            Map<Integer, ItemStack> projectiles = setItems(player, slotPath + "projectiles.", crossbowSection);
+            if (projectiles != null) {
+                crossbowMeta.setChargedProjectiles(new ArrayList<>(projectiles.values()));
+            }
         }
 
         if (Main.version >= 19 && im instanceof Damageable) {

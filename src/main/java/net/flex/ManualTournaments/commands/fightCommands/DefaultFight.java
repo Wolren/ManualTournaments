@@ -73,7 +73,7 @@ public class DefaultFight implements FightType {
         }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
-    private static void playSound(Player fighter) {
+    static void playSound(Player fighter) {
         if (Main.version >= 18) {
             fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
         } else {
@@ -81,7 +81,7 @@ public class DefaultFight implements FightType {
         }
     }
 
-    private static void playNote(Player fighter) {
+    static void playNote(Player fighter) {
         if (Main.version >= 18) {
             fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         } else {

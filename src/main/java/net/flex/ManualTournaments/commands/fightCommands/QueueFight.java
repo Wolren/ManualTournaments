@@ -3,56 +3,47 @@ package net.flex.ManualTournaments.commands.fightCommands;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Fight;
+import net.flex.ManualTournaments.commands.Queue;
 import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.utils.SharedComponents;
-import net.flex.ManualTournaments.utils.SqlMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.logging.Level;
+import java.util.*;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.commands.Fight.teams;
+import static net.flex.ManualTournaments.commands.fightCommands.TeamFight.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
-public class TeamFight implements FightType {
+public class QueueFight implements FightType {
     private static final Set<Player> distinctFighters = new HashSet<>();
-    public static Team team1, team2;
-    public static File FightsConfigFile;
-    public static FileConfiguration FightsConfig;
     public static int duration;
 
     @SneakyThrows
     public void startFight(Player player, List<Player> fighters) {
-        if (fighters.stream().anyMatch(Objects::isNull)) {
+        List<Player> queueFighters = Queue.playerQueue;
+        if (queueFighters.stream().anyMatch(Objects::isNull)) {
             send(player, "fighter-error");
             return;
         }
-        distinctFighters.addAll(fighters);
-        if (distinctFighters.size() == fighters.size() && fighters.size() % 2 == 0) {
+        distinctFighters.addAll(queueFighters);
+        if (distinctFighters.size() == queueFighters.size()) {
             clearBeforeFight();
             team1 = Fight.board.registerNewTeam("1");
             team2 = Fight.board.registerNewTeam("2");
             setBoard(team1);
             setBoard(team2);
             config.load(getCustomConfigFile());
-            fighters.forEach(fighter -> setupFighter(fighter, fighters));
+            setupFighter(queueFighters);
             if (config.getBoolean("count-fights")) DefaultFight.countFights();
             if (config.getBoolean("create-fights-folder")) setFightsFolder();
-            if (config.getBoolean("mysql-enabled")) SqlMethods.sqlFights();
             if (config.getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
             else if (config.getBoolean("fight-good-luck-enabled")) {
                 Bukkit.broadcastMessage(message("fight-good-luck"));
@@ -68,16 +59,19 @@ public class TeamFight implements FightType {
     }
 
     @SneakyThrows
-    private void setupFighter(Player fighter, List<Player> fighters) {
-        fighter.setGameMode(GameMode.SURVIVAL);
-        Spectate.stopWithoutKill(fighter);
-        Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? team1 : team2;
-        team.addEntry(fighter.getName());
-        teams.computeIfAbsent(team, k -> new HashSet<>()).add(fighter.getUniqueId());
-        fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos" + (team == team1 ? "1" : "2") + ".", getArenaConfig()));
-        GiveKit.setKit(fighter, config.getString("current-kit"));
-        if (config.getBoolean("freeze-on-start")) {
-            DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
+    private void setupFighter(List<Player> fighters) {
+        Collections.shuffle(fighters);
+        for (Player fighter : fighters) {
+            fighter.setGameMode(GameMode.SURVIVAL);
+            Spectate.stopWithoutKill(fighter);
+            Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? team1 : team2;
+            team.addEntry(fighter.getName());
+            teams.computeIfAbsent(team, k -> new HashSet<>()).add(fighter.getUniqueId());
+            fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos" + (team == team1 ? "1" : "2") + ".", getArenaConfig()));
+            GiveKit.setKit(fighter, config.getString("current-kit"));
+            if (config.getBoolean("freeze-on-start")) {
+                DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
+            }
         }
     }
 
@@ -115,19 +109,21 @@ public class TeamFight implements FightType {
     public boolean canStartFight(String type) {
         if (Main.kitNames.contains(config.getString("current-kit"))) {
             if (Main.arenaNames.contains(config.getString("current-arena"))) {
-                if (type.equalsIgnoreCase("team")) {
-                    if (teams.values().stream().allMatch(Set::isEmpty)) {
-                        String path = "Arenas." + config.getString("current-arena") + ".";
-                        boolean pos1 = getArenaConfig().isSet(path + "pos1");
-                        boolean pos2 = getArenaConfig().isSet(path + "pos2");
-                        boolean spectator = getArenaConfig().isSet(path + "spectator");
-                        if (pos1 && pos2 && spectator) return true;
-                        else {
-                            if (!pos1) send(player, "arena-lacks-pos1");
-                            if (!pos2) send(player, "arena-lacks-pos2");
-                            if (!spectator) send(player, "arena-lacks-spectator");
-                        }
-                    } else send(player, "fight-concurrent");
+                if (type.equalsIgnoreCase("queue")) {
+                    if (Queue.playerQueue.size() > 1) {
+                        if (teams.values().stream().allMatch(Set::isEmpty)) {
+                            String path = "Arenas." + config.getString("current-arena") + ".";
+                            boolean pos1 = getArenaConfig().isSet(path + "pos1");
+                            boolean pos2 = getArenaConfig().isSet(path + "pos2");
+                            boolean spectator = getArenaConfig().isSet(path + "spectator");
+                            if (pos1 && pos2 && spectator) return true;
+                            else {
+                                if (!pos1) send(player, "arena-lacks-pos1");
+                                if (!pos2) send(player, "arena-lacks-pos2");
+                                if (!spectator) send(player, "arena-lacks-spectator");
+                            }
+                        } else send(player, "fight-concurrent");
+                    } else send(player, "fight-requirements");
                 }
             } else send(player, "current-arena-not-set");
         } else send(player, "current-kit-not-set");
@@ -156,19 +152,5 @@ public class TeamFight implements FightType {
         FightsConfig.set("duration", 0);
         FightsConfig.set("winners", "");
         FightsConfig.save(FightsConfigFile);
-    }
-
-
-    static void createFightsFolder() {
-        File fightsConfigFolder = new File(getPlugin().getDataFolder(), "fights");
-        if (!fightsConfigFolder.exists()) {
-            boolean create = fightsConfigFolder.mkdir();
-            if (!create) getPlugin().getLogger().log(Level.SEVERE, "Failed to create fights directory");
-        }
-        File[] filesInFightsFolder = fightsConfigFolder.listFiles();
-        int i = (filesInFightsFolder != null ? filesInFightsFolder.length : 0) + 1;
-        FightsConfigFile = new File(getPlugin().getDataFolder(), "fights/fight" + i + ".yml");
-        FightsConfig = new YamlConfiguration();
-        YamlConfiguration.loadConfiguration(FightsConfigFile);
     }
 }

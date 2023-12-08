@@ -22,7 +22,7 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public final class Spectate implements TabCompleter, CommandExecutor {
-    public static Collection<UUID> spectators = new HashSet<>();
+    public static Set<UUID> spectators = new HashSet<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team spectatorsBoard = board.registerNewTeam("spectators");
 

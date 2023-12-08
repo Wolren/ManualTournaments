@@ -5,6 +5,7 @@ description: Plugin you can use to make manual tournaments
 api-version: 1.13
 load: POSTWORLD
 author: Wolren
+softdepend: [PlaceholderAPI]
 website: ""
 commands:
   manualtournaments_arena:
@@ -56,6 +57,16 @@ commands:
     permission-message: "You don't have permission to use this command"
     usage: "Usage: /spectate"
     default: true
+  manualtournaments_queue:
+    aliases:
+      - mt_queue
+      - queue
+      - enlist
+      - dolacz
+    permission: mt.queue
+    permission-message: "You don't have permission to use this command"
+    usage: "Usage: /enlist"
+    default: true
 permissions:
   mt.arena:
     description: Allows for creating and managing arenas
@@ -72,6 +83,9 @@ permissions:
   mt.spectate:
     description: Allows for spectating arenas
     default: true
+  mt.queue:
+    description: Allows for spectating arenas
+    default: true
   mt.*:
     description: Permission allowing using all ManualTournaments commands
     children:
@@ -80,3 +94,4 @@ permissions:
       mt.kit: true
       mt.settings: true
       mt.spectate: true
+      mt.queue: true
