@@ -1,15 +1,44 @@
-Copyright (c) 2025 Wolren
+# Wolren's Open License v1.0
 
-This plugin and its source code are provided for public use under the following conditions:
+Copyright (c) 2026 Wolren
 
-You MAY:
-- Use the plugin on your own Minecraft server (public or private).
-- Modify the plugin for your own use.
-- Read and learn from the source code.
+Permission is granted to any individual or entity to use, copy, modify, and
+redistribute this software under the following terms and conditions:
 
-You MAY NOT:
-- Sell this plugin or any derivative version.
-- Distribute modified or unmodified versions for money (e.g., as a paid plugin, in a paid modpack, or behind a paywall).
-- Claim authorship of the plugin or remove credit to the original author.
+## Allowed Uses
 
-Redistribution of modified or unmodified versions is permitted only if it remains free of charge and includes attribution.
+1. **Personal and Server Use** — You may run the software on any system,
+   including public or private servers, without restriction.
+
+2. **Modification** — You may modify the software for personal or internal use.
+
+3. **Learning** — You may study, inspect, and learn from the source code.
+
+4. **Distribution** — You may redistribute the software, whether modified or
+   unmodified, provided that:
+   a. The distribution is **free of charge** — no payment, donation requirement,
+      paywall, or monetary transaction of any kind is involved.
+   b. **Attribution** is given to the original author (Wolren) in a reasonable
+      manner, such as a credit in the description, README, or about page.
+   c. This license notice is included with the distribution.
+
+## Prohibited Uses
+
+1. **Commercial Sale** — You may not sell the software or any derivative
+   version, whether as a standalone product, in a bundle, inside a paid modpack,
+   behind a paywall, or as part of a paid service.
+
+2. **Misrepresentation** — You may not claim authorship of the software or
+   remove existing credit to the original author.
+
+3. **Trademark Use** — You may not use the author's name, logo, or trademarks
+   to promote derivative products without permission.
+
+## Disclaimer
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
