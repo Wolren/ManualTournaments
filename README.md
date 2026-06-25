@@ -1,3 +1,11 @@
+[![License](https://img.shields.io/github/license/Wolren/ManualTournaments)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments/commits)
+[![Issues](https://img.shields.io/github/issues/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments/issues)
+[![Repo size](https://img.shields.io/github/repo-size/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments)
+[![Java](https://img.shields.io/badge/Java-17-orange?logo=java)](pom.xml)
+[![Spigot](https://img.shields.io/badge/Spigot-1.20-yellow)](pom.xml)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20-green?logo=minecraft)](https://minecraft.net)
+
 General information
 There are numerous automated event solutions available, but only a limited number of manual ones. Sometimes there is a need for a serious tournament with cash prizes, where full control over all aspects, such as kits, settings, and cooldowns, becomes essential. This plugin offers precisely that capability by enabling you to organize fights between teams of varying sizes
 
