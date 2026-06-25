@@ -6,3 +6,4 @@
 [![Spigot](https://img.shields.io/badge/Spigot-1.20-yellow)](pom.xml)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20-green?logo=minecraft)](https://minecraft.net)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Wolren/ManualTournaments/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Wolren/ManualTournaments)
+[![Socket](https://img.shields.io/badge/Socket-Supply%20Chain%20Security-333?logo=socketdotdev)](https://socket.dev)
