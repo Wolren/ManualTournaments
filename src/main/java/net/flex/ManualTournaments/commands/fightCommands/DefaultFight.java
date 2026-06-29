@@ -1,6 +1,5 @@
 package net.flex.ManualTournaments.commands.fightCommands;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.interfaces.FightType;
 import org.bukkit.Bukkit;
@@ -14,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.getCustomConfigFile;
 import static net.flex.ManualTournaments.Main.getPlugin;
@@ -37,17 +37,19 @@ public class DefaultFight implements FightType {
                 } else {
                     Bukkit.broadcastMessage(String.format(message("fight-will-start"), countdownTime));
                 }
-
                 countdownTime--;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
-    @SneakyThrows
     static void countFights() {
-        int fightCount = config.getInt("fight-count");
-        config.set("fight-count", ++fightCount);
-        config.save(getCustomConfigFile());
+        try {
+            int fightCount = config.getInt("fight-count");
+            config.set("fight-count", ++fightCount);
+            config.save(getCustomConfigFile());
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to save fight count", e);
+        }
     }
 
     static void freezeOnStart(Player fighter, UUID fighterId) {
@@ -67,7 +69,6 @@ public class DefaultFight implements FightType {
                     player.setWalkSpeed(0.2F);
                     cancel();
                 } else playNote(fighter);
-
                 countdownTime--;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
@@ -102,4 +103,3 @@ public class DefaultFight implements FightType {
         return false;
     }
 }
-

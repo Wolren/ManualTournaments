@@ -1,9 +1,9 @@
 package net.flex.ManualTournaments.listeners;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,7 +18,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
@@ -26,7 +28,6 @@ import static net.flex.ManualTournaments.commands.Fight.teams;
 import static net.flex.ManualTournaments.commands.fightCommands.TeamFight.FightsConfig;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 import static net.flex.ManualTournaments.utils.SqlMethods.*;
-
 
 public class TeamFightListener implements Listener {
     public static double regeneratedTeam1 = 0;
@@ -56,141 +57,152 @@ public class TeamFightListener implements Listener {
         }
     }
 
-    @SneakyThrows
     private static void endCounter() {
-        if (teams.values().isEmpty()) {
-            FightsConfig.load(TeamFight.FightsConfigFile);
-            FightsConfig.set("duration", TeamFight.duration - 3);
-            durationUpdate(TeamFight.duration - 3);
-            stopper = false;
-            FightsConfig.save(TeamFight.FightsConfigFile);
+        try {
+            if (teams.values().isEmpty()) {
+                FightsConfig.load(TeamFight.FightsConfigFile);
+                FightsConfig.set("duration", TeamFight.duration - 3);
+                durationUpdate(TeamFight.duration - 3);
+                stopper = false;
+                FightsConfig.save(TeamFight.FightsConfigFile);
+            }
+        } catch (IOException | InvalidConfigurationException e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to update fight duration", e);
         }
     }
 
-    @SneakyThrows
     private static void teamRemover(Player player) {
-        Set<UUID> team1 = new HashSet<>();
-        Set<UUID> team2 = new HashSet<>();
-        Map<Team, Set<UUID>> ffaTeams = new HashMap<>();
-        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
-            if (entry.getValue().contains(player.getUniqueId())) {
-                entry.getValue().remove(player.getUniqueId());
+        try {
+            Set<UUID> team1 = new HashSet<>();
+            Set<UUID> team2 = new HashSet<>();
+            Map<Team, Set<UUID>> ffaTeams = new HashMap<>();
+            for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
+                if (entry.getValue().contains(player.getUniqueId())) {
+                    entry.getValue().remove(player.getUniqueId());
+                }
+                if (entry.getKey().getName().equals("1")) {
+                    team1 = entry.getValue();
+                } else if (entry.getKey().getName().equals("2")) {
+                    team2 = entry.getValue();
+                } else {
+                    ffaTeams.put(entry.getKey(), entry.getValue());
+                }
             }
-            if (entry.getKey().getName().equals("1")) {
-                team1 = entry.getValue();
-            } else if (entry.getKey().getName().equals("2")) {
-                team2 = entry.getValue();
-            } else {
-                ffaTeams.put(entry.getKey(), entry.getValue());
+            if (!isForcedDeath) {
+                if (team1.isEmpty() && !team2.isEmpty()) {
+                    teamHandler(team2, "2");
+                } else if (!team1.isEmpty() && team2.isEmpty()) {
+                    teamHandler(team1, "1");
+                }
             }
-        }
-        if (!isForcedDeath) {
-            if (team1.isEmpty() && !team2.isEmpty()) {
-                teamHandler(team2, "2");
-            } else if (!team1.isEmpty() && team2.isEmpty()) {
-                teamHandler(team1, "1");
+            int filledTeams = 0;
+            Map.Entry<Team, Set<UUID>> nonEmptyTeam = null;
+            for (Map.Entry<Team, Set<UUID>> entry : ffaTeams.entrySet()) {
+                if (!entry.getValue().isEmpty()) {
+                    filledTeams++;
+                    nonEmptyTeam = entry;
+                }
             }
-        }
-        int filledTeams = 0;
-        Map.Entry<Team, Set<UUID>> nonEmptyTeam = null;
-        for (Map.Entry<Team, Set<UUID>> entry : ffaTeams.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
-                filledTeams++;
-                nonEmptyTeam = entry;
+            if (filledTeams == 1) {
+                teamFfaHandler(nonEmptyTeam.getValue());
             }
-        }
-        if (filledTeams == 1) {
-            teamFfaHandler(nonEmptyTeam.getValue());
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Error in teamRemover", e);
         }
     }
 
-    @SneakyThrows
     private static void teamHandler(Set<UUID> team, String winner) {
-        if (config.getBoolean("mysql-enabled")) {
-            regeneratedUpdate(regeneratedTeam1, regeneratedTeam2);
-            damageUpdate(damageTeam1, damageTeam2);
-        }
-        if (config.getBoolean("create-fights-folder")) {
-            FightsConfig.set("damageTeam1", damageTeam1);
-            FightsConfig.set("damageTeam2", damageTeam2);
-            FightsConfig.set("regeneratedTeam1", regeneratedTeam1);
-            FightsConfig.set("regeneratedTeam2", regeneratedTeam2);
-            FightsConfig.save(TeamFight.FightsConfigFile);
-        }
-        regeneratedTeam1 = 0;
-        regeneratedTeam2 = 0;
-        damageTeam1 = 0;
-        damageTeam2 = 0;
-        if (config.getBoolean("mysql-enabled")) {
-            winnersUpdate(teamList(winner));
-        }
-        if (config.getBoolean("create-fights-folder")) {
-            FightsConfig.load(TeamFight.FightsConfigFile);
-            FightsConfig.set("winners", teamList(winner));
-            FightsConfig.set("cancelled", false);
-            FightsConfig.save(TeamFight.FightsConfigFile);
-        }
-        Collection<String> array = team.stream().map(uuid -> Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName()).collect(Collectors.toList());
-        String listString = String.join(", ", array);
-        new BukkitRunnable() {
-            int i = config.getInt("teleport-countdown-time");
-
-            @SneakyThrows
-            public void run() {
-                if (i == 0) {
-                    String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
-                    Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
-                    if (config.getBoolean("create-fights-folder")) endCounter();
-                    if (config.getBoolean("kill-on-fight-end")) {
-                        isForcedDeath = true;
-                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> p.setHealth(0));
-                        isForcedDeath = false;
-                    } else if (!config.getBoolean("kill-on-fight-end")) {
-                        String path = "fight-end-spawn.";
-                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
-                            clear(player);
-                            p.teleport(location(path, config));
-                        });
-                        teams.clear();
-                    }
-                    cancel();
-                }
-                --i;
+        try {
+            if (config.getBoolean("mysql-enabled")) {
+                regeneratedUpdate(regeneratedTeam1, regeneratedTeam2);
+                damageUpdate(damageTeam1, damageTeam2);
             }
-        }.runTaskTimer(getPlugin(), 0L, 20L);
+            if (config.getBoolean("create-fights-folder")) {
+                FightsConfig.set("damageTeam1", damageTeam1);
+                FightsConfig.set("damageTeam2", damageTeam2);
+                FightsConfig.set("regeneratedTeam1", regeneratedTeam1);
+                FightsConfig.set("regeneratedTeam2", regeneratedTeam2);
+                FightsConfig.save(TeamFight.FightsConfigFile);
+            }
+            regeneratedTeam1 = 0;
+            regeneratedTeam2 = 0;
+            damageTeam1 = 0;
+            damageTeam2 = 0;
+            if (config.getBoolean("mysql-enabled")) {
+                winnersUpdate(teamList(winner));
+            }
+            if (config.getBoolean("create-fights-folder")) {
+                FightsConfig.load(TeamFight.FightsConfigFile);
+                FightsConfig.set("winners", teamList(winner));
+                FightsConfig.set("cancelled", false);
+                FightsConfig.save(TeamFight.FightsConfigFile);
+            }
+            Collection<String> array = team.stream().map(uuid -> Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName()).collect(Collectors.toList());
+            String listString = String.join(", ", array);
+            new BukkitRunnable() {
+                int i = config.getInt("teleport-countdown-time");
+
+                public void run() {
+                    if (i == 0) {
+                        String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
+                        Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
+                        if (config.getBoolean("create-fights-folder")) endCounter();
+                        if (config.getBoolean("kill-on-fight-end")) {
+                            isForcedDeath = true;
+                            Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> p.setHealth(0));
+                            isForcedDeath = false;
+                        } else {
+                            String path = "fight-end-spawn.";
+                            Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
+                                clear(player);
+                                p.teleport(location(path, config));
+                            });
+                            teams.clear();
+                        }
+                        cancel();
+                    }
+                    --i;
+                }
+            }.runTaskTimer(getPlugin(), 0L, 20L);
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Error in teamHandler", e);
+        }
     }
 
     private static void teamFfaHandler(Set<UUID> team) {
-        Collection<String> array = team.stream().map(uuid -> Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName()).collect(Collectors.toList());
-        String listString = String.join(", ", array);
-        new BukkitRunnable() {
-            int i = config.getInt("teleport-countdown-time");
+        try {
+            Collection<String> array = team.stream().map(uuid -> Objects.requireNonNull(Bukkit.getPlayer(uuid)).getDisplayName()).collect(Collectors.toList());
+            String listString = String.join(", ", array);
+            new BukkitRunnable() {
+                int i = config.getInt("teleport-countdown-time");
 
-            @SneakyThrows
-            public void run() {
-                if (i == 0) {
-                    String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
-                    Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
-                    if (config.getBoolean("create-fights-folder")) endCounter();
-                    if (config.getBoolean("kill-on-fight-end")) {
-                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> {
-                            p.setHealth(0);
-                            p.setWalkSpeed(0.2F);
-                        });
-                    } else if (!config.getBoolean("kill-on-fight-end")) {
-                        String path = "fight-end-spawn.";
-                        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
-                            clear(player);
-                            p.teleport(location(path, config));
-                            p.setWalkSpeed(0.2F);
-                        });
-                        teams.clear();
+                public void run() {
+                    if (i == 0) {
+                        String replace = Objects.requireNonNull(config.getString("fight-winners")).replace("{team}", listString);
+                        Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', replace));
+                        if (config.getBoolean("create-fights-folder")) endCounter();
+                        if (config.getBoolean("kill-on-fight-end")) {
+                            Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId())).forEachOrdered(p -> {
+                                p.setHealth(0);
+                                p.setWalkSpeed(0.2F);
+                            });
+                        } else {
+                            String path = "fight-end-spawn.";
+                            Bukkit.getServer().getOnlinePlayers().stream().filter(p -> team.contains(p.getUniqueId()) && config.isSet(path)).forEachOrdered(p -> {
+                                clear(player);
+                                p.teleport(location(path, config));
+                                p.setWalkSpeed(0.2F);
+                            });
+                            teams.clear();
+                        }
+                        cancel();
                     }
-                    cancel();
+                    --i;
                 }
-                --i;
-            }
-        }.runTaskTimer(getPlugin(), 0L, 20L);
+            }.runTaskTimer(getPlugin(), 0L, 20L);
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Error in teamFfaHandler", e);
+        }
     }
 
     @EventHandler

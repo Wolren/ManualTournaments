@@ -1,6 +1,5 @@
 package net.flex.ManualTournaments.commands.fightCommands;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.Spectate;
@@ -17,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
@@ -26,21 +26,25 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class FfaFight implements FightType {
     private static final Set<Player> distinctFighters = new HashSet<>();
 
-    @SneakyThrows
     @Override
     public void startFight(Player player, List<Player> fighters) {
-        clearBeforeFight();
-        distinctFighters.addAll(fighters);
-        if (distinctFighters.size() == fighters.size()) {
-            IntStream.range(0, fighters.size()).forEach(i -> {
-                Player fighter = fighters.get(i);
-                setupFighter(fighter, i, fighters.size());
-            });
-            if (config.getBoolean("count-fights")) DefaultFight.countFights();
-            if (config.getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
-            else if (config.getBoolean("fight-good-luck-enabled")) {
-                Bukkit.broadcastMessage(message("fight-good-luck"));
+        try {
+            clearBeforeFight();
+            distinctFighters.addAll(fighters);
+            if (distinctFighters.size() == fighters.size()) {
+                IntStream.range(0, fighters.size()).forEach(i -> {
+                    Player fighter = fighters.get(i);
+                    setupFighter(fighter, i, fighters.size());
+                });
+                if (config.getBoolean("count-fights")) DefaultFight.countFights();
+                if (config.getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
+                else if (config.getBoolean("fight-good-luck-enabled")) {
+                    Bukkit.broadcastMessage(message("fight-good-luck"));
+                }
             }
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to start FFA fight", e);
+            if (player != null) player.sendMessage("§cAn error occurred. Check console for details.");
         }
     }
 
@@ -51,27 +55,28 @@ public class FfaFight implements FightType {
         distinctFighters.clear();
     }
 
-    @SneakyThrows
     private void setupFighter(Player fighter, int index, int total) {
-        Team team = Fight.board.registerNewTeam("Team " + fighter.getName());
-        setBoard(team, fighter);
-        teams.put(team, new HashSet<>(Collections.singleton(fighter.getUniqueId())));
-        fighter.setGameMode(GameMode.SURVIVAL);
-        Spectate.stopWithoutKill(fighter);
-        config.load(getCustomConfigFile());
-        Location center = location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig());
-        double radius = 3.0;
-        double angle = 2 * Math.PI * index / total;
-        double newX = center.getX() + radius * Math.cos(angle);
-        double newZ = center.getZ() + radius * Math.sin(angle);
-        Location newLocation = new Location(center.getWorld(), newX, center.getY(), newZ);
-        fighter.teleport(newLocation);
-        GiveKit.setKit(fighter, config.getString("current-kit"));
-        if (config.getBoolean("freeze-on-start")) {
-            DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
+        try {
+            Team team = Fight.board.registerNewTeam("Team " + fighter.getName());
+            setBoard(team, fighter);
+            teams.put(team, new HashSet<>(Collections.singleton(fighter.getUniqueId())));
+            fighter.setGameMode(GameMode.SURVIVAL);
+            Spectate.stopWithoutKill(fighter);
+            Location center = location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig());
+            double radius = 3.0;
+            double angle = 2 * Math.PI * index / total;
+            double newX = center.getX() + radius * Math.cos(angle);
+            double newZ = center.getZ() + radius * Math.sin(angle);
+            Location newLocation = new Location(center.getWorld(), newX, center.getY(), newZ);
+            fighter.teleport(newLocation);
+            GiveKit.setKit(fighter, config.getString("current-kit"));
+            if (config.getBoolean("freeze-on-start")) {
+                DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
+            }
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to setup FFA fighter " + fighter.getName(), e);
         }
     }
-
 
     private void setBoard(Team team, Player fighter) {
         if (Main.version >= 14) {
@@ -83,19 +88,25 @@ public class FfaFight implements FightType {
 
     @Override
     public void stopFight() {
-        Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
-        cancelled.set(true);
-        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
-            online.setWalkSpeed(0.2F);
-            if (version <= 13) collidableReflection(online, true);
-            if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
-            else if (!config.getBoolean("kill-on-fight-end")) {
-                String path = "fight-end-spawn.";
-                clear(online);
-                online.teleport(location(path, config));
-            }
-        });
-        teams.clear();
+        try {
+            Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
+            cancelled.set(true);
+            Bukkit.getServer().getOnlinePlayers().stream()
+                    .filter(online -> playerIsInTeam(online.getUniqueId()))
+                    .forEach(online -> {
+                        online.setWalkSpeed(0.2F);
+                        if (version <= 13) collidableReflection(online, true);
+                        if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
+                        else {
+                            String path = "fight-end-spawn.";
+                            clear(online);
+                            online.teleport(location(path, config));
+                        }
+                    });
+            teams.clear();
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Error stopping FFA fight", e);
+        }
     }
 
     @Override
