@@ -1,5 +1,7 @@
 package net.flex.ManualTournaments.utils;
 
+import com.google.common.base.Preconditions;
+import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.buttons.Button;
 import net.flex.ManualTournaments.commands.Fight;
@@ -13,25 +15,21 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.commands.Fight.teams;
 
 public class SharedComponents {
     public static FileConfiguration config = getPlugin().getConfig();
-
-    /**
-     * Mutable global state used as a command context workaround.
-     * Should be replaced with proper parameter passing in a future refactor.
-     */
     public static Player player = null;
 
     public static String message(String s) {
@@ -55,48 +53,31 @@ public class SharedComponents {
         player.sendMessage(message("arena-not-exists"));
     }
 
+    @SneakyThrows
     public static void getLocation(String pathing, Player player, ConfigurationSection cfg) {
-        try {
-            double x = player.getLocation().getX();
-            double y = player.getLocation().getY();
-            double z = player.getLocation().getZ();
-            float yaw = player.getLocation().getYaw();
-            float pitch = player.getLocation().getPitch();
-            String world = Objects.requireNonNull(player.getLocation().getWorld()).getName();
-            cfg.set(pathing + "x", x);
-            cfg.set(pathing + "y", y);
-            cfg.set(pathing + "z", z);
-            cfg.set(pathing + "yaw", yaw);
-            cfg.set(pathing + "pitch", pitch);
-            cfg.set(pathing + "world", world);
-            getArenaConfig().save(getArenaConfigFile());
-        } catch (IOException e) {
-            getPlugin().getLogger().log(Level.SEVERE, "Failed to save arena config at path: " + pathing, e);
-            player.sendMessage(ChatColor.RED + "An error occurred while saving the location. Check console for details.");
-        }
+        double x = player.getLocation().getX();
+        double y = player.getLocation().getY();
+        double z = player.getLocation().getZ();
+        float yaw = player.getLocation().getYaw();
+        float pitch = player.getLocation().getPitch();
+        String world = Objects.requireNonNull(player.getLocation().getWorld()).getName();
+        cfg.set(pathing + "x", x);
+        cfg.set(pathing + "y", y);
+        cfg.set(pathing + "z", z);
+        cfg.set(pathing + "yaw", yaw);
+        cfg.set(pathing + "pitch", pitch);
+        cfg.set(pathing + "world", world);
+        getArenaConfig().save(getArenaConfigFile());
     }
 
-    /**
-     * Sets whether a player collides with entities. Uses the direct API method
-     * on Spigot 1.20+ (Player.setCollidable), falling back to reflection for
-     * older server versions.
-     *
-     * @param fighter the player to modify
-     * @param value   true to enable collision, false to disable
-     */
     public static void collidableReflection(Player fighter, boolean value) {
         try {
-            // Spigot 1.20+ has setCollidable on Entity/Player directly
-            fighter.setCollidable(value);
-        } catch (NoSuchMethodError e) {
-            // Fallback for older server versions via Player.Spigot reflection
-            try {
-                Method setCollidesWithEntities = Player.Spigot.class.getMethod("setCollidesWithEntities", boolean.class);
-                setCollidesWithEntities.invoke(fighter.spigot(), value);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-                getPlugin().getLogger().log(Level.WARNING,
-                        "Failed to set collision for player " + fighter.getName(), ex);
-            }
+            Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
+            Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
+            setCollidesWithEntities.invoke(fighter.spigot(), value);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -145,7 +126,6 @@ public class SharedComponents {
                 break;
             }
         }
-
     }
 
     public static boolean playerIsInTeam(UUID player) {
@@ -155,14 +135,14 @@ public class SharedComponents {
     public static void addEnchantment(Button button) {
         ItemMeta meta = button.getIcon().getItemMeta();
         if (meta != null) {
-            meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
+            meta.addEnchant(Enchantment.PROTECTION, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             button.getIcon().setItemMeta(meta);
         }
     }
 
     public static void removeEnchantment(Button button) {
-        button.getIcon().removeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL);
+        button.getIcon().removeEnchantment(Enchantment.PROTECTION);
     }
 
     public static void saveLodestoneLocation(Location location, String path) {
@@ -178,5 +158,38 @@ public class SharedComponents {
         double y = getKitConfig().getDouble(path + "y");
         double z = getKitConfig().getDouble(path + "z");
         return new Location(world, x, y, z);
+    }
+
+    private static final java.util.regex.Pattern VALID_KEY = java.util.regex.Pattern.compile("[a-z0-9/._-]+");
+
+    @Nullable
+    public static NamespacedKey fromString(@NotNull String string, @Nullable Plugin defaultNamespace) {
+        Preconditions.checkArgument(!string.isEmpty(), "Input string must not be empty or null");
+        String[] components = string.split(":", 3);
+        if (components.length > 2) {
+            return null;
+        } else {
+            String key = components.length == 2 ? components[1] : "";
+            if (components.length == 1) {
+                String value = components[0];
+                if (!value.isEmpty() && VALID_KEY.matcher(value).matches()) {
+                    return defaultNamespace != null ? new NamespacedKey(defaultNamespace, value) : NamespacedKey.minecraft(value);
+                } else return null;
+            } else if (components.length == 2 && !VALID_KEY.matcher(key).matches()) {
+                return null;
+            } else {
+                String namespace = components[0];
+                if (namespace.isEmpty()) {
+                    return defaultNamespace != null ? new NamespacedKey(defaultNamespace, key) : NamespacedKey.minecraft(key);
+                } else {
+                    return !VALID_KEY.matcher(namespace).matches() ? null : new NamespacedKey(namespace, key);
+                }
+            }
+        }
+    }
+
+    @Nullable
+    public static NamespacedKey fromString(@NotNull String key) {
+        return fromString(key, null);
     }
 }

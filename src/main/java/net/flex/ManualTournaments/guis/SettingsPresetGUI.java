@@ -27,8 +27,10 @@ public class SettingsPresetGUI {
     public static void settingsPresetGUI(Player sender, String context) {
         String name = String.format(Objects.requireNonNull(config.getString("gui-preset-settings-menu-name")), context);
         Menu settingsMenu = gui.create(name, 3);
-        AtomicInteger index = new AtomicInteger(1);
+        AtomicInteger index = new AtomicInteger(3);
         settingsMenu.setButton(0, KitGUI.director.constructButton(new EndspawnSettingsButton(sender, context)));
+        settingsMenu.setButton(1, KitGUI.director.constructButton(new EndspawnSettingsButton(sender, context)));
+        settingsMenu.setButton(2, KitGUI.director.constructButton(new EndspawnSettingsButton(sender, context)));
         SettingsFactory.settingsCommandMap.keySet().stream()
                 .map(settingsCommand -> settingsCommand.toLowerCase().replaceAll("_", "-"))
                 .forEachOrdered(buttonName -> {

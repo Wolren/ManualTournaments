@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.map.MapView;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.*;
@@ -272,11 +271,14 @@ public final class CreateKit implements KitCommand {
                     }
                 }
             } else {
-                Potion potion = Potion.fromItemStack(is);
-                getKitConfig().set(path + "potion.type", potion.getType().name());
-                getKitConfig().set(path + "potion.extended", potion.hasExtendedDuration());
-                getKitConfig().set(path + "potion.level", potion.getLevel());
-                getKitConfig().set(path + "potion.splash", potion.isSplash());
+                try {
+                    Class<?> potionClass = Class.forName("org.bukkit.potion.Potion");
+                    Object potion = potionClass.getMethod("fromItemStack", ItemStack.class).invoke(null, is);
+                    getKitConfig().set(path + "potion.type", potionClass.getMethod("getType").invoke(potion).toString());
+                    getKitConfig().set(path + "potion.extended", potionClass.getMethod("hasExtendedDuration").invoke(potion));
+                    getKitConfig().set(path + "potion.level", potionClass.getMethod("getLevel").invoke(potion));
+                    getKitConfig().set(path + "potion.splash", potionClass.getMethod("isSplash").invoke(potion));
+                } catch (ReflectiveOperationException ignored) { }
             }
         }
 

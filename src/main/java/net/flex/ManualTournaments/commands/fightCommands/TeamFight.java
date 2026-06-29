@@ -1,32 +1,27 @@
 package net.flex.ManualTournaments.commands.fightCommands;
 
+import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
-import net.flex.ManualTournaments.commands.Fight;
 import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
+import net.flex.ManualTournaments.listeners.TemporaryListener;
 import net.flex.ManualTournaments.utils.SharedComponents;
 import net.flex.ManualTournaments.utils.SqlMethods;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.commands.Fight.teams;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class TeamFight implements FightType {
@@ -36,56 +31,56 @@ public class TeamFight implements FightType {
     public static FileConfiguration FightsConfig;
     public static int duration;
 
-    @Override
-    public void startFight(Player player, List<Player> fighters) {
-        try {
-            if (fighters.stream().anyMatch(Objects::isNull)) {
-                send(player, "fighter-error");
-                return;
+    @SneakyThrows
+    public void startFight(Player player, List<Player> fighters, String arenaName, Map<Team, Set<UUID>> teams, Scoreboard board) {
+        TeamFightListener listener = new TeamFightListener(this, teams, board);
+        TemporaryListener temporaryListener = new TemporaryListener(frozen);
+        Bukkit.getPluginManager().registerEvents(listener, Main.getPlugin());
+        Bukkit.getPluginManager().registerEvents(temporaryListener, Main.getPlugin());
+        Main.getPlugin().addFightListener(listener);
+        Main.getPlugin().addTemporaryListener(temporaryListener);
+
+        if (fighters.stream().anyMatch(Objects::isNull)) {
+            send(player, "fighter-error");
+            return;
+        }
+        distinctFighters.addAll(fighters);
+        if (distinctFighters.size() == fighters.size() && fighters.size() % 2 == 0) {
+            clearBeforeFight(board);
+            team1 = board.registerNewTeam("1");
+            team2 = board.registerNewTeam("2");
+            setBoard(team1);
+            setBoard(team2);
+            config.load(getCustomConfigFile());
+            fighters.forEach(fighter -> setupFighter(fighter, fighters, teams));
+            if (config.getBoolean("count-fights")) countFights();
+            if (config.getBoolean("create-fights-folder")) setFightsFolder();
+            if (config.getBoolean("mysql-enabled")) SqlMethods.sqlFights();
+            if (config.getBoolean("freeze-on-start")) countdownBeforeFight(fighters);
+            else if (config.getBoolean("fight-good-luck-enabled")) {
+                Bukkit.broadcastMessage(message("fight-good-luck"));
             }
-            distinctFighters.addAll(fighters);
-            if (distinctFighters.size() == fighters.size() && fighters.size() % 2 == 0) {
-                clearBeforeFight();
-                team1 = Fight.board.registerNewTeam("1");
-                team2 = Fight.board.registerNewTeam("2");
-                setBoard(team1);
-                setBoard(team2);
-                fighters.forEach(fighter -> setupFighter(fighter, fighters));
-                if (config.getBoolean("count-fights")) DefaultFight.countFights();
-                if (config.getBoolean("create-fights-folder")) setFightsFolder();
-                if (config.getBoolean("mysql-enabled")) SqlMethods.sqlFights();
-                if (config.getBoolean("freeze-on-start")) DefaultFight.countdownBeforeFight();
-                else if (config.getBoolean("fight-good-luck-enabled")) {
-                    Bukkit.broadcastMessage(message("fight-good-luck"));
-                }
-            }
-        } catch (Exception e) {
-            getPlugin().getLogger().log(Level.SEVERE, "Failed to start fight", e);
-            if (player != null) player.sendMessage("§cAn error occurred while starting the fight. Check console for details.");
+            Bukkit.getOnlinePlayers().forEach(online -> online.setScoreboard(board));
         }
     }
 
-    private static void clearBeforeFight() {
-        Fight.board.getTeams().forEach(Team::unregister);
-        teams.clear();
+    private static void clearBeforeFight(Scoreboard board) {
+        board.getTeams().forEach(Team::unregister);
         cancelled.set(false);
         distinctFighters.clear();
     }
 
-    private void setupFighter(Player fighter, List<Player> fighters) {
-        try {
-            fighter.setGameMode(GameMode.SURVIVAL);
-            Spectate.stopWithoutKill(fighter);
-            Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? team1 : team2;
-            team.addEntry(fighter.getName());
-            teams.computeIfAbsent(team, k -> new HashSet<>()).add(fighter.getUniqueId());
-            fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos" + (team == team1 ? "1" : "2") + ".", getArenaConfig()));
-            GiveKit.setKit(fighter, config.getString("current-kit"));
-            if (config.getBoolean("freeze-on-start")) {
-                DefaultFight.freezeOnStart(fighter, fighter.getUniqueId());
-            }
-        } catch (Exception e) {
-            getPlugin().getLogger().log(Level.SEVERE, "Failed to setup fighter " + fighter.getName(), e);
+    @SneakyThrows
+    private void setupFighter(Player fighter, List<Player> fighters, Map<Team, Set<UUID>> teams) {
+        fighter.setGameMode(GameMode.SURVIVAL);
+        Spectate.stopWithoutKill(fighter);
+        Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? team1 : team2;
+        team.addEntry(fighter.getName());
+        teams.computeIfAbsent(team, k -> new HashSet<>()).add(fighter.getUniqueId());
+        fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos" + (team == team1 ? "1" : "2") + ".", getArenaConfig()));
+        GiveKit.setKit(fighter, config.getString("current-kit"));
+        if (config.getBoolean("freeze-on-start")) {
+            freezeOnStart(fighter, fighter.getUniqueId());
         }
     }
 
@@ -93,34 +88,27 @@ public class TeamFight implements FightType {
         if (team.getName().equals("1")) team.setPrefix(message("team1-prefix"));
         else if (team.getName().equals("2")) team.setPrefix(message("team2-prefix"));
         if (Main.version >= 14) team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-        team.setAllowFriendlyFire(config.getBoolean("friendly-fire"));
-        Bukkit.getOnlinePlayers().forEach(online -> online.setScoreboard(Fight.board));
+        if (!config.getBoolean("friendly-fire")) team.setAllowFriendlyFire(false);
+        else if (config.getBoolean("friendly-fire")) team.setAllowFriendlyFire(true);
     }
 
-    @Override
+    @SneakyThrows
     public void stopFight() {
-        try {
-            Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
-            cancelled.set(true);
-            Bukkit.getServer().getOnlinePlayers().stream()
-                    .filter(online -> playerIsInTeam(online.getUniqueId()))
-                    .forEach(online -> {
-                        online.setWalkSpeed(0.2F);
-                        if (version <= 13) collidableReflection(online, true);
-                        if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
-                        else {
-                            String path = "fight-end-spawn.";
-                            clear(online);
-                            online.teleport(location(path, config));
-                        }
-                    });
-            teams.clear();
-            if (config.getBoolean("create-fights-folder") && !FightsConfig.isSet("cancelled")) {
-                FightsConfig.set("cancelled", true);
-                FightsConfig.save(FightsConfigFile);
+        Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
+        cancelled.set(true);
+        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
+            online.setWalkSpeed(0.2F);
+            if (version <= 13) collidableReflection(online, true);
+            if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
+            else if (!config.getBoolean("kill-on-fight-end")) {
+                String path = "fight-end-spawn.";
+                clear(online);
+                online.teleport(location(path, config));
             }
-        } catch (Exception e) {
-            getPlugin().getLogger().log(Level.SEVERE, "Error stopping fight", e);
+        });
+        if (config.getBoolean("create-fights-folder") && !FightsConfig.isSet("cancelled")) {
+            FightsConfig.set("cancelled", true);
+            FightsConfig.save(FightsConfigFile);
         }
     }
 
@@ -129,7 +117,6 @@ public class TeamFight implements FightType {
         if (Main.kitNames.contains(config.getString("current-kit"))) {
             if (Main.arenaNames.contains(config.getString("current-arena"))) {
                 if (type.equalsIgnoreCase("team")) {
-                    if (teams.values().stream().allMatch(Set::isEmpty)) {
                         String path = "Arenas." + config.getString("current-arena") + ".";
                         boolean pos1 = getArenaConfig().isSet(path + "pos1");
                         boolean pos2 = getArenaConfig().isSet(path + "pos2");
@@ -140,13 +127,13 @@ public class TeamFight implements FightType {
                             if (!pos2) send(player, "arena-lacks-pos2");
                             if (!spectator) send(player, "arena-lacks-spectator");
                         }
-                    } else send(player, "fight-concurrent");
                 }
             } else send(player, "current-arena-not-set");
         } else send(player, "current-kit-not-set");
         return false;
     }
 
+    @SneakyThrows
     private void setFightsFolder() {
         duration = 0;
         TeamFightListener.stopper = true;
@@ -167,12 +154,9 @@ public class TeamFight implements FightType {
         FightsConfig.set("kit", config.getString("current-kit"));
         FightsConfig.set("duration", 0);
         FightsConfig.set("winners", "");
-        try {
-            FightsConfig.save(FightsConfigFile);
-        } catch (IOException e) {
-            getPlugin().getLogger().log(Level.SEVERE, "Failed to save fight config", e);
-        }
+        FightsConfig.save(FightsConfigFile);
     }
+
 
     static void createFightsFolder() {
         File fightsConfigFolder = new File(getPlugin().getDataFolder(), "fights");
@@ -184,14 +168,83 @@ public class TeamFight implements FightType {
         int i = (filesInFightsFolder != null ? filesInFightsFolder.length : 0) + 1;
         FightsConfigFile = new File(getPlugin().getDataFolder(), "fights/fight" + i + ".yml");
         FightsConfig = new YamlConfiguration();
-        // Actually load the existing file if it exists
-        if (FightsConfigFile.exists()) {
-            try {
-                FightsConfig.load(FightsConfigFile);
-            } catch (IOException | InvalidConfigurationException e) {
-                getPlugin().getLogger().log(Level.WARNING, "Could not load existing fight file, creating new one", e);
-                FightsConfig = new YamlConfiguration();
+        YamlConfiguration.loadConfiguration(FightsConfigFile);
+    }
+
+    public final Set<UUID> frozen = new HashSet<>();
+
+    static void countdownBeforeFight(List<Player> fighters) {
+        new BukkitRunnable() {
+            int countdownTime = config.getInt("countdown-time");
+
+            public void run() {
+                if (countdownTime == 0) {
+                    if (config.getBoolean("fight-good-luck-enabled")) {
+                        for (Player fighter : fighters) {
+                            fighter.sendMessage(message("fight-good-luck"));
+                        }
+                    }
+                    cancel();
+                } else if (cancelled.get()) {
+                    cancel();
+                } else {
+                    for (Player fighter : fighters) {
+                        fighter.sendMessage(String.format(message("fight-will-start"), countdownTime));
+                    }
+                }
+
+                countdownTime--;
             }
+        }.runTaskTimer(getPlugin(), 0L, 20L);
+    }
+
+    @SneakyThrows
+    static void countFights() {
+        int fightCount = config.getInt("fight-count");
+        config.set("fight-count", ++fightCount);
+        config.save(getCustomConfigFile());
+    }
+
+    void freezeOnStart(Player fighter, UUID fighterId) {
+        new BukkitRunnable() {
+            int countdownTime = config.getInt("countdown-time");
+
+            public void run() {
+                frozen.add(fighterId);
+                player.setWalkSpeed(0.0F);
+                if (countdownTime == 0) {
+                    frozen.remove(fighterId);
+                    player.setWalkSpeed(0.2F);
+                    playSound(fighter);
+                    cancel();
+                } else if (cancelled.get()) {
+                    frozen.clear();
+                    player.setWalkSpeed(0.2F);
+                    cancel();
+                } else playNote(fighter);
+
+                countdownTime--;
+            }
+        }.runTaskTimer(getPlugin(), 0L, 20L);
+    }
+
+    public boolean isPlayerFrozen(UUID playerId) {
+        return frozen.contains(playerId);
+    }
+
+    static void playSound(Player fighter) {
+        if (Main.version >= 18) {
+            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+        } else {
+            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
+        }
+    }
+
+    static void playNote(Player fighter) {
+        if (Main.version >= 18) {
+            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+        } else {
+            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
         }
     }
 }

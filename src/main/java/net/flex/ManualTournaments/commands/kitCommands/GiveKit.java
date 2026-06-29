@@ -355,8 +355,13 @@ public final class GiveKit implements KitCommand {
                 int level = getKitConfig().getInt(slotPath + "potion.level");
                 boolean splash = getKitConfig().getBoolean(slotPath + "potion.splash");
                 boolean extended = getKitConfig().getBoolean(slotPath + "potion.extended");
-                Potion potion = new Potion(potionType, level, splash, extended);
-                is.setItemMeta(potion.toItemStack(amount).getItemMeta());
+                try {
+                    Class<?> potionClass = Class.forName("org.bukkit.potion.Potion");
+                    Object potion = potionClass.getConstructor(String.class, int.class, boolean.class, boolean.class)
+                            .newInstance(potionType, level, splash, extended);
+                    Object tempStack = potionClass.getMethod("toItemStack", int.class).invoke(potion, amount);
+                    is.setItemMeta((ItemMeta) tempStack.getClass().getMethod("getItemMeta").invoke(tempStack));
+                } catch (ReflectiveOperationException ignored) { }
             }
         }
 

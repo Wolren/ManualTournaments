@@ -42,6 +42,8 @@ place-blocks: false
 fight-allowed-commands: []
 #List of allowed commands other than /spectate stop you can use while spectating
 spectator-allowed-commands: []
+#Whether queue type of fights should be allowed
+queue-allow: true
 
 #Scoreboard section
 #Before starting the fight those have to be specified so that the plugin knows which one to pick
@@ -153,6 +155,8 @@ not-supported: "&6This command isn't supported for this version"
 preset-create: "&7Remember to change settings in GUI"
 queue-added: "&7Added to the queue"
 queue-already-in: "&6You are already in the queue"
+queue-list: "&e&l"
+queue-removed: "&7Removed from the queue"
 queue-usage: "&7Usage: /queue | /enlist"
 sender-not-a-player: "&4Sender must be a player!"
 settings-usage: "&7Usage: /settings &e&l(setting) (value)"

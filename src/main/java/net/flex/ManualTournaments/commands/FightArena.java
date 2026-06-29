@@ -18,10 +18,10 @@ import java.util.stream.IntStream;
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
-public class Fight implements CommandExecutor, TabCompleter {
-    public static Map<Team, Set<UUID>> teams = new HashMap<>();
+public class FightArena implements CommandExecutor, TabCompleter {
+    private Map<Team, Set<UUID>> teams = new HashMap<>();
     private final List<Player> fighters = new ArrayList<>();
-    public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
+    private Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
 
     @SneakyThrows
     @Override
@@ -32,7 +32,9 @@ public class Fight implements CommandExecutor, TabCompleter {
         getArenaConfig().load(getArenaConfigFile());
         getCustomConfig().load(getCustomConfigFile());
         fighters.clear();
-        IntStream.range(1, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
+        IntStream.range(2, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
+        teams = new HashMap<>();
+        board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
         if (args.length == 1) {
             if (args[0].equals("stop")) {
                 FightFactory.fight.stopFight();
@@ -43,8 +45,9 @@ public class Fight implements CommandExecutor, TabCompleter {
             }
         }
         else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop"))) {
+            String arenaName = args[1];
             FightType currentFight = new FightFactory().createFight(args[0], teams);
-            currentFight.startFight(player, fighters, null, teams, board);
+            currentFight.startFight(player, fighters, arenaName, teams, board);
         } else send(player, "fight-usage");
         return true;
     }
@@ -54,6 +57,7 @@ public class Fight implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             list.add("stop");
             list.add("team");
+            list.add("team_arena");
             list.add("ffa");
             list.add("queue");
         } else list = Bukkit.getOnlinePlayers().stream().map(Player::getDisplayName).collect(Collectors.toList());

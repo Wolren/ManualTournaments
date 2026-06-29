@@ -23,6 +23,8 @@ public class CreatePreset implements SettingsCommand {
             getPresetConfig().set(path + "friendly-fire", config.get("friendly-fire"));
             getPresetConfig().set(path + "kill-on-fight-end", config.get("kill-on-fight-end"));
             getPresetConfig().set(path + "place-blocks", config.get("place-blocks"));
+            getPresetConfig().set(path + "current-arena", config.get("current-arena"));
+            getPresetConfig().set(path + "current-kit", config.get("current-kit"));
             getPresetConfig().save(getPresetConfigFile());
             presetNames.add(presetName);
             send(player, "preset-create");
