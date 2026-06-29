@@ -1,12 +1,12 @@
 package net.flex.ManualTournaments.commands;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.command.*;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -16,7 +16,9 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
@@ -26,18 +28,21 @@ public final class Spectate implements TabCompleter, CommandExecutor {
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
     public static Team spectatorsBoard = board.registerNewTeam("spectators");
 
-    @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        config.load(getCustomConfigFile());
-        getArenaConfig().load(getArenaConfigFile());
-        if (args.length == 0) setSpectator(player);
-        else if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("stop")) {
-                stopSpectator(player);
-            } else send(player, "not-allowed");
-        } else send(player, "spectator-usage");
+        try {
+            if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
+            else player = optional(sender);
+            getArenaConfig().load(getArenaConfigFile());
+            if (args.length == 0) setSpectator(player);
+            else if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("stop")) {
+                    stopSpectator(player);
+                } else send(player, "not-allowed");
+            } else send(player, "spectator-usage");
+        } catch (IOException | InvalidConfigurationException e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to load arena config", e);
+            if (player != null) player.sendMessage("§cFailed to load config. Check console.");
+        }
         return true;
     }
 
@@ -69,21 +74,21 @@ public final class Spectate implements TabCompleter, CommandExecutor {
                 ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
                 ItemMeta redstoneBlockMeta = redstoneBlock.getItemMeta();
                 if (redstoneBlockMeta != null) {
-                    redstoneBlockMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
+                    redstoneBlockMeta.setDisplayName(
+                            ChatColor.translateAlternateColorCodes('&', "&c&lStop spectating"));
                 }
                 redstoneBlock.setItemMeta(redstoneBlockMeta);
 
                 ItemStack compass = new ItemStack(Material.COMPASS);
                 ItemMeta compassMeta = compass.getItemMeta();
                 if (compassMeta != null) {
-                    compassMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&7&lTeleportation menu"));
+                    compassMeta.setDisplayName(
+                            ChatColor.translateAlternateColorCodes('&', "&7&lTeleportation menu"));
                 }
                 compass.setItemMeta(compassMeta);
 
-                ItemStack[] inventory = player.getInventory().getContents();
-                inventory[8] = redstoneBlock;
-                inventory[0] = compass;
-                player.getInventory().setContents(inventory);
+                player.getInventory().setItem(0, compass);
+                player.getInventory().setItem(8, redstoneBlock);
 
                 send(player, "spectator-started-spectating");
             } else send(player, "arena-spectator-not-set");

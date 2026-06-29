@@ -1,35 +1,40 @@
 package net.flex.ManualTournaments.commands;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.ArenaFactory;
 import net.flex.ManualTournaments.factories.ArenaShortFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
 import org.bukkit.command.*;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Arena implements CommandExecutor, TabCompleter {
-    @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        config.load(getCustomConfigFile());
-        getArenaConfig().load(getArenaConfigFile());
-        if (args.length == 0) {
-            new ArenaGUI().arenaGUI(player);
-        } else if (args.length == 1) {
-            ArenaShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
-        } else if (args.length == 2) {
-            ArenaFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], Main.arenaNames.contains(args[1]));
-        } else send(player, "arena-usage");
+        try {
+            if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
+            else player = optional(sender);
+            getArenaConfig().load(getArenaConfigFile());
+            if (args.length == 0) {
+                new ArenaGUI().arenaGUI(player);
+            } else if (args.length == 1) {
+                ArenaShortFactory.getCommand(args[0].toUpperCase()).execute(player, args[0]);
+            } else if (args.length == 2) {
+                ArenaFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], Main.arenaNames.contains(args[1]));
+            } else send(player, "arena-usage");
+        } catch (IOException | InvalidConfigurationException e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to load arena config", e);
+            if (player != null) player.sendMessage("§cFailed to load config. Check console.");
+        }
         return true;
     }
 

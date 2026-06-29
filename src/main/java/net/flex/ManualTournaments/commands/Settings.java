@@ -1,38 +1,43 @@
 package net.flex.ManualTournaments.commands;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.factories.SettingsFactory;
 import net.flex.ManualTournaments.factories.SettingsShortFactory;
 import net.flex.ManualTournaments.guis.SettingsGUI;
 import org.bukkit.command.*;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Settings implements TabCompleter, CommandExecutor {
-    @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        config.load(getCustomConfigFile());
-        getPresetConfig().load(getPresetConfigFile());
-        if (args.length == 0) {
-            SettingsGUI.settingsGUI(player);
-        } else if (args.length == 1) {
-            SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player, "default");
-        } else if (args.length == 2) {
-            SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, "default", args[1]);
-        } else if (args.length == 3) {
-            SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], args[2]);
+        try {
+            if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
+            else player = optional(sender);
+            getCustomConfig().load(getCustomConfigFile());
+            getPresetConfig().load(getPresetConfigFile());
+            if (args.length == 0) {
+                SettingsGUI.settingsGUI(player);
+            } else if (args.length == 1) {
+                SettingsShortFactory.getCommand(args[0].toUpperCase()).execute(player, "default");
+            } else if (args.length == 2) {
+                SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, "default", args[1]);
+            } else if (args.length == 3) {
+                SettingsFactory.getCommand(args[0].toUpperCase()).execute(player, args[1], args[2]);
+            } else send(player, "settings-usage");
+        } catch (IOException | InvalidConfigurationException e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to load config", e);
+            if (player != null) player.sendMessage("§cFailed to load config. Check console.");
         }
-        else send(player, "settings-usage");
         return true;
     }
 
