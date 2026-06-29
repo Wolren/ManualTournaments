@@ -11,13 +11,16 @@ import java.util.Map;
 
 public class FightFactory {
 
-    public static final Map<String, FightType> fightTypesMap =  new HashMap<String, FightType>() {{
-        put("TEAM", new TeamFight());
-        put("FFA", new FfaFight());
-        put("QUEUE", new QueueFight());
-    }};
+    public static final Map<String, FightType> fightTypesMap = new HashMap<>();
+
+    static {
+        fightTypesMap.put("TEAM", new TeamFight());
+        fightTypesMap.put("FFA", new FfaFight());
+        fightTypesMap.put("QUEUE", new QueueFight());
+    }
 
     public static FightType fight = new DefaultFight();
+
     public FightType createFight(String type) {
         if (fightTypesMap.containsKey(type.toUpperCase())) {
             fight = fightTypesMap.get(type.toUpperCase());
@@ -28,4 +31,3 @@ public class FightFactory {
         else return new DefaultFight();
     }
 }
-

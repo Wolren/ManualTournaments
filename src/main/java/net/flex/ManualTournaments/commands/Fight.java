@@ -1,6 +1,5 @@
 package net.flex.ManualTournaments.commands;
 
-import lombok.SneakyThrows;
 import net.flex.ManualTournaments.commands.fightCommands.DefaultFight;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
@@ -12,10 +11,11 @@ import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static net.flex.ManualTournaments.Main.*;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Fight implements CommandExecutor, TabCompleter {
@@ -23,29 +23,31 @@ public class Fight implements CommandExecutor, TabCompleter {
     private final List<Player> fighters = new ArrayList<>();
     public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
 
-    @SneakyThrows
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        getKitConfig().load(getKitConfigFile());
-        getArenaConfig().load(getArenaConfigFile());
-        getCustomConfig().load(getCustomConfigFile());
-        fighters.clear();
-        IntStream.range(1, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
-        if (args.length == 1) {
-            if (args[0].equals("stop")) {
-                FightFactory.fight.stopFight();
-                FightFactory.fight = new DefaultFight();
-            } else if (args[0].equals("queue")) {
+        try {
+            if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
+            else player = optional(sender);
+
+            // Configs are cached in memory — no need to reload from disk on every command
+            fighters.clear();
+            IntStream.range(1, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
+            if (args.length == 1) {
+                if (args[0].equals("stop")) {
+                    FightFactory.fight.stopFight();
+                    FightFactory.fight = new DefaultFight();
+                } else if (args[0].equals("queue")) {
+                    FightType currentFight = new FightFactory().createFight(args[0]);
+                    currentFight.startFight(player, Collections.emptyList());
+                }
+            } else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop"))) {
                 FightType currentFight = new FightFactory().createFight(args[0]);
-                currentFight.startFight(player, Collections.emptyList());
-            }
+                currentFight.startFight(player, fighters);
+            } else send(player, "fight-usage");
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.SEVERE, "Error executing fight command", e);
+            if (player != null) player.sendMessage("§cAn internal error occurred. Check console for details.");
         }
-        else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop"))) {
-            FightType currentFight = new FightFactory().createFight(args[0]);
-            currentFight.startFight(player, fighters);
-        } else send(player, "fight-usage");
         return true;
     }
 
