@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.flex</groupId>
     <artifactId>ManualTournaments</artifactId>
-    <version>1.5</version>
+    <version>1.5.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <api.version>1.21.11-R0.1-SNAPSHOT</api.version>
