@@ -1,6 +1,5 @@
 package net.flex.ManualTournaments;
 
-import net.flex.ManualTournaments.commands.Queue;
 import net.flex.ManualTournaments.commands.*;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
@@ -27,9 +26,11 @@ import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.utils.SharedComponents.playerIsInTeam;
 
-public final class Main extends JavaPlugin {
+public class Main extends JavaPlugin {
+    private static Main instance;
+
     public static Main getPlugin() {
-        return getPlugin(Main.class);
+        return instance;
     }
     public static GUI gui;
     public static int version;
@@ -61,6 +62,10 @@ public final class Main extends JavaPlugin {
         put("v1_19_R2", 30);
         put("v1_19_R3", 31);
         put("v1_20_R1", 32);
+        put("v1_20_R2", 33);
+        put("v1_20_R3", 34);
+        put("v1_20_R4", 35);
+        put("v1_21_R1", 36);
     }};
 
     public static File getKitConfigFile() {
@@ -102,6 +107,7 @@ public final class Main extends JavaPlugin {
 
     public void onEnable() {
         super.onEnable();
+        instance = this;
         gui = new GUI(this);
         new UpdateChecker();
         initializeData();
@@ -121,6 +127,7 @@ public final class Main extends JavaPlugin {
         for (TeamFightListener fightListener : activeFightListeners) {
             fightListener.triggerBlockResetAsync();
         }
+        instance = null;
         super.onDisable();
     }
 
@@ -136,8 +143,8 @@ public final class Main extends JavaPlugin {
         activeTemporaryListeners.add(listener);
     }
 
-    public void removeTemporaryFightListener(TemporaryListener listener) {
-        activeTemporaryListeners.add(listener);
+    public void removeTemporaryListener(TemporaryListener listener) {
+        activeTemporaryListeners.remove(listener);
     }
 
     private void initializeData() {
@@ -197,9 +204,7 @@ public final class Main extends JavaPlugin {
     private void createArenaConfig() {
         ArenaConfigFile = new File(getDataFolder(), "arenas.yml");
         if (!ArenaConfigFile.exists()) {
-            if (!ArenaConfigFile.getParentFile().mkdirs()) {
-                getLogger().log(Level.SEVERE, "Failed to create config directory");
-            }
+            ArenaConfigFile.getParentFile().mkdirs();
             saveResource("arenas.yml", false);
         }
         ArenaConfig = YamlConfiguration.loadConfiguration(ArenaConfigFile);
@@ -208,9 +213,7 @@ public final class Main extends JavaPlugin {
     private void createKitsConfig() {
         KitsConfigFile = new File(getDataFolder(), "kits.yml");
         if (!KitsConfigFile.exists()) {
-            if (!KitsConfigFile.getParentFile().mkdirs()) {
-                getLogger().log(Level.SEVERE, "Failed to create config directory");
-            }
+            KitsConfigFile.getParentFile().mkdirs();
             saveResource("kits.yml", false);
         }
         KitsConfig = YamlConfiguration.loadConfiguration(KitsConfigFile);
@@ -219,9 +222,7 @@ public final class Main extends JavaPlugin {
     private void createPresetConfig() {
         PresetConfigFile = new File(getDataFolder(), "presets.yml");
         if (!PresetConfigFile.exists()) {
-            if (!PresetConfigFile.getParentFile().mkdirs()) {
-                getLogger().log(Level.SEVERE, "Failed to create config directory");
-            }
+            PresetConfigFile.getParentFile().mkdirs();
             saveResource("presets.yml", false);
         }
         PresetConfig = YamlConfiguration.loadConfiguration(PresetConfigFile);
@@ -230,9 +231,7 @@ public final class Main extends JavaPlugin {
     private void createCustomConfig() {
         CustomConfigFile = new File(getDataFolder(), "config.yml");
         if (!CustomConfigFile.exists()) {
-            if (!CustomConfigFile.getParentFile().mkdirs()) {
-                getLogger().log(Level.SEVERE, "Failed to create config directory");
-            }
+            CustomConfigFile.getParentFile().mkdirs();
             saveResource("config.yml", false);
         }
         CustomConfig = YamlConfiguration.loadConfiguration(CustomConfigFile);

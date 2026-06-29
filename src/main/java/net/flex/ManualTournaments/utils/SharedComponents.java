@@ -75,9 +75,10 @@ public class SharedComponents {
             Class<?> spigotEntityClass = Class.forName("org.bukkit.entity.Player$Spigot");
             Method setCollidesWithEntities = spigotEntityClass.getMethod("setCollidesWithEntities", boolean.class);
             setCollidesWithEntities.invoke(fighter.spigot(), value);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                 InvocationTargetException exception) {
-            throw new RuntimeException(exception);
+        } catch (ClassNotFoundException e) {
+            fighter.setCollidable(value);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
 

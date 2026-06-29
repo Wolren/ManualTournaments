@@ -100,11 +100,11 @@ public final class CreateKit implements KitCommand {
 
         if (!im.getItemFlags().isEmpty()) {
             Set<String> set = im.getItemFlags().stream().map(Enum::name).collect(Collectors.toSet());
-            config.set(path + "flags", set);
+            getKitConfig().set(path + "flags", set);
         }
 
         if (Main.version >= 21 && im.hasCustomModelData()) {
-            config.set(path + "modelData", im.getCustomModelData());
+            getKitConfig().set(path + "modelData", im.getCustomModelData());
         }
 
         if (Main.version >= 17 && im.isUnbreakable()) {

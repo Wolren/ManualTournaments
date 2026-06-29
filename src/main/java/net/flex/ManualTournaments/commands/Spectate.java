@@ -24,7 +24,14 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public final class Spectate implements TabCompleter, CommandExecutor {
     public static Set<UUID> spectators = new HashSet<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    public static Team spectatorsBoard = board.registerNewTeam("spectators");
+    private static Team spectatorsBoard;
+
+    private static Team getSpectatorsBoard() {
+        if (spectatorsBoard == null) {
+            spectatorsBoard = board.registerNewTeam("spectators");
+        }
+        return spectatorsBoard;
+    }
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
@@ -32,10 +39,9 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         else player = optional(sender);
         config.load(getCustomConfigFile());
         getArenaConfig().load(getArenaConfigFile());
-        /*if (args.length == 0) {
+        if (args.length == 0) {
             setSpectator(player);
-        }*/
-        if (args.length == 1) {
+        } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("stop")) {
                 stopSpectator(player);
             } else if (arenaNames.contains(args[0])) {
@@ -49,15 +55,15 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         String path = "Arenas." + arenaName + ".spectator.";
         if (Main.getArenaConfig().isSet(path)) {
             if (Main.version >= 14) {
-                spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                spectatorsBoard.setAllowFriendlyFire(false);
+                getSpectatorsBoard().setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                getSpectatorsBoard().setAllowFriendlyFire(false);
                 player.setCollidable(false);
             } else collidableReflection(player, false);
 
             player.setGameMode(GameMode.ADVENTURE);
             player.setFoodLevel(20);
             player.setHealth(20.0D);
-            spectatorsBoard.addEntry(player.getName());
+            getSpectatorsBoard().addEntry(player.getName());
             clear(player);
             spectators.add(player.getUniqueId());
             player.teleport(location(path, Main.getArenaConfig()));
@@ -83,14 +89,14 @@ public final class Spectate implements TabCompleter, CommandExecutor {
             String path = "Arenas." + config.getString("current-arena") + ".spectator.";
             if (Main.getArenaConfig().isSet(path)) {
                 if (Main.version >= 14) {
-                    spectatorsBoard.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                    getSpectatorsBoard().setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                     player.setCollidable(false);
                 } else collidableReflection(player, false);
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.setFoodLevel(20);
                 player.setHealth(20.0D);
-                spectatorsBoard.addEntry(player.getName());
+                getSpectatorsBoard().addEntry(player.getName());
                 Bukkit.getServer().getOnlinePlayers().forEach(other -> other.hidePlayer(player));
                 clear(player);
                 spectators.add(player.getUniqueId());
@@ -144,7 +150,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         }
         Bukkit.getServer().getOnlinePlayers().forEach(other -> other.showPlayer(player));
         send(player, "spectator-stopped-spectating");
-        spectatorsBoard.removeEntry(player.getName());
+        getSpectatorsBoard().removeEntry(player.getName());
         if (Main.version >= 14) player.setCollidable(true);
         spectators.remove(player.getUniqueId());
     }
@@ -155,7 +161,7 @@ public final class Spectate implements TabCompleter, CommandExecutor {
         player.setFlying(false);
         player.getInventory().clear();
         Bukkit.getServer().getOnlinePlayers().forEach(other -> other.showPlayer(player));
-        spectatorsBoard.removeEntry(player.getName());
+        getSpectatorsBoard().removeEntry(player.getName());
         if (Main.version >= 14) player.setCollidable(true);
         spectators.remove(player.getUniqueId());
     }

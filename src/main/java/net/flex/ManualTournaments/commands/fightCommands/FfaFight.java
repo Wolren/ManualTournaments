@@ -15,18 +15,20 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class FfaFight implements FightType {
+    public static final AtomicBoolean cancelled = new AtomicBoolean(false);
     private static final Set<Player> distinctFighters = new HashSet<>();
 
     @SneakyThrows
     @Override
     public void startFight(Player player, List<Player> fighters, String arenaName, Map<Team, Set<UUID>> teams, Scoreboard board) {
-        TeamFightListener listener = new TeamFightListener(this, teams, board);
+        TeamFightListener listener = new TeamFightListener(this, cancelled, teams, board);
         TemporaryListener temporaryListener = new TemporaryListener(frozen);
         Bukkit.getPluginManager().registerEvents(listener, Main.getPlugin());
         Bukkit.getPluginManager().registerEvents(temporaryListener, Main.getPlugin());
@@ -160,15 +162,15 @@ public class FfaFight implements FightType {
 
             public void run() {
                 frozen.add(fighterId);
-                player.setWalkSpeed(0.0F);
+                fighter.setWalkSpeed(0.0F);
                 if (countdownTime == 0) {
                     frozen.remove(fighterId);
-                    player.setWalkSpeed(0.2F);
+                    fighter.setWalkSpeed(0.2F);
                     playSound(fighter);
                     cancel();
                 } else if (cancelled.get()) {
                     frozen.clear();
-                    player.setWalkSpeed(0.2F);
+                    fighter.setWalkSpeed(0.2F);
                     cancel();
                 } else playNote(fighter);
 
@@ -183,17 +185,17 @@ public class FfaFight implements FightType {
 
     static void playSound(Player fighter) {
         if (Main.version >= 18) {
-            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+            fighter.playSound(fighter.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
         } else {
-            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
+            fighter.playNote(fighter.getEyeLocation(), Instrument.PIANO, Note.sharp(0, Note.Tone.G));
         }
     }
 
     static void playNote(Player fighter) {
         if (Main.version >= 18) {
-            fighter.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+            fighter.playSound(fighter.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         } else {
-            fighter.playNote(player.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
+            fighter.playNote(fighter.getEyeLocation(), Instrument.PIANO, Note.flat(1, Note.Tone.B));
         }
     }
 }

@@ -26,6 +26,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
@@ -36,6 +37,7 @@ import static net.flex.ManualTournaments.utils.SqlMethods.*;
 
 public class TeamFightListener implements Listener {
     public final FightType fight;
+    public final AtomicBoolean cancelled;
     public final Map<Team, Set<UUID>> teams;
     public double regeneratedTeam1 = 0;
     public double regeneratedTeam2 = 0;
@@ -46,8 +48,9 @@ public class TeamFightListener implements Listener {
     private final HashMap<Location, Material> blockStates = new HashMap<>();
     private final Scoreboard scoreboard;
 
-    public TeamFightListener(FightType fight, Map<Team, Set<UUID>> teams, Scoreboard board) {
+    public TeamFightListener(FightType fight, AtomicBoolean cancelled, Map<Team, Set<UUID>> teams, Scoreboard board) {
         this.fight = fight;
+        this.cancelled = cancelled;
         this.teams = teams;
         this.scoreboard = board;
     }
@@ -61,7 +64,7 @@ public class TeamFightListener implements Listener {
             event.setDroppedExp(0);
             event.setDeathMessage(null);
             if (!config.getBoolean("drop-on-death")) event.getDrops().clear();
-            if (!TeamFight.cancelled.get()) {
+            if (!cancelled.get()) {
                 if (killer != null && playerIsInTeam(killer.getUniqueId())) {
                     String replacePlayer = Objects.requireNonNull(config.getString("fight-death")).replace("{player}", player.getDisplayName());
                     String replaceKiller = replacePlayer.replace("{killer}", killer.getDisplayName());
@@ -243,7 +246,7 @@ public class TeamFightListener implements Listener {
             } else {
                 Location blockLocation = event.getBlock().getLocation();
                 if (!blockStates.containsKey(blockLocation)) {
-                    blockStates.put(blockLocation, Material.AIR);
+                    blockStates.put(blockLocation, event.getBlockReplacedState().getType());
                 }
             }
         }

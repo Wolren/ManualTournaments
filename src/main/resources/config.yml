@@ -29,6 +29,7 @@ fight-end-spawn:
   z:
   yaw:
   pitch:
+  world:
 fight-good-luck-enabled: true
 #If true fighters will be frozen at the beginning of the fight for countdown-time
 freeze-on-start: true

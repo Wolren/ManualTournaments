@@ -4,14 +4,19 @@ target/
 *.jar
 *.war
 build/
+dependency-reduced-pom.xml
 
 # Dependencies
 .gradle/
 build/
 
 # IDE
-.idea/
+.idea/*
+!.idea/runConfigurations/
+!.idea/artifacts/
+!.idea/artifacts/
 *.iml
+!/ManualTournaments.iml
 .vscode/
 *.swp
 *.swo
@@ -23,3 +28,7 @@ Thumbs.db
 
 # Logs
 *.log
+*.log.gz
+
+# Minecraft server — all runtime files
+server/

@@ -22,7 +22,7 @@ public final class EndspawnSettings implements SettingsShortCommand {
             if (preset != null) {
                 getLocation("fight-end-spawn.", player, preset);
                 send(player, "config-updated-successfully");
-                config.save(getCustomConfigFile());
+                getPresetConfig().save(getPresetConfigFile());
             }
         }
     }

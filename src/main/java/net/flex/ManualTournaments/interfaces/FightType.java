@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public interface FightType {
-    AtomicBoolean cancelled = new AtomicBoolean(false);
     @SneakyThrows
     void startFight(Player player, List<Player> fighters, String arenaName, Map<Team, Set<UUID>> teams, Scoreboard board);
     @SneakyThrows

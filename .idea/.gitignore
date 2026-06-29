@@ -1,8 +1,18 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+
 # Editor-based HTTP Client requests
 /httpRequests/
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+# User-specific configs
+/aws.xml
+/discord.xml
+/discord-ij.xml
+/uiDesigner.xml
+/sqldialects.xml
+/kotlinc.xml
+/jarRepositories.xml
+/libraries/

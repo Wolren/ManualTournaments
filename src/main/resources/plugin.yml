@@ -64,7 +64,6 @@ commands:
     permission: mt.spectate
     permission-message: "You don't have permission to use this command"
     usage: "Usage: /spectate"
-    default: true
   manualtournaments_queue:
     aliases:
       - mt_queue
@@ -73,7 +72,6 @@ commands:
     permission: mt.queue
     permission-message: "You don't have permission to use this command"
     usage: "Usage: /enlist"
-    default: true
 permissions:
   mt.arena:
     description: Allows for creating and managing arenas
@@ -101,4 +99,5 @@ permissions:
       mt.kit: true
       mt.settings: true
       mt.spectate: true
+      mt.reload: true
       mt.queue: true

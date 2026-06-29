@@ -19,12 +19,14 @@ import org.bukkit.scoreboard.Team;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class TeamArenaFight implements FightType {
+    public static final AtomicBoolean cancelled = new AtomicBoolean(false);
     private static final Set<Player> distinctFighters = new HashSet<>();
     public static Team team1, team2;
     public static File FightsConfigFile;
@@ -33,15 +35,12 @@ public class TeamArenaFight implements FightType {
 
     @SneakyThrows
     public void startFight(Player player, List<Player> fighters, String arenaName, Map<Team, Set<UUID>> teams, Scoreboard board) {
-        TeamFightListener listener = new TeamFightListener(this, teams, board);
+        TeamFightListener listener = new TeamFightListener(this, cancelled, teams, board);
         TemporaryListener temporaryListener = new TemporaryListener(frozen);
         Bukkit.getPluginManager().registerEvents(listener, Main.getPlugin());
         Bukkit.getPluginManager().registerEvents(temporaryListener, Main.getPlugin());
         Main.getPlugin().addFightListener(listener);
         Main.getPlugin().addTemporaryListener(temporaryListener);
-
-
-        Bukkit.getPluginManager().registerEvents(listener, Main.getPlugin());
         if (fighters.stream().anyMatch(Objects::isNull)) {
             send(player, "fighter-error");
             return;
@@ -67,7 +66,7 @@ public class TeamArenaFight implements FightType {
     }
 
     private static void clearBeforeFight(Scoreboard board) {
-        //board.getTeams().forEach(Team::unregister);
+        board.getTeams().forEach(Team::unregister);
         cancelled.set(false);
         distinctFighters.clear();
     }

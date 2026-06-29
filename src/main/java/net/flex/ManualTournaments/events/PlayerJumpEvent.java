@@ -55,14 +55,14 @@ public final class PlayerJumpEvent extends PlayerEvent implements Cancellable {
             double vy = player.getVelocity().getY();
             Material mat = player.getLocation().getBlock().getType();
             boolean isClimbing = mat == Material.LADDER || mat == Material.VINE;
-            if (vy > jump_vel_border && !isClimbing && !jumping.get(player)) {
+            if (vy > jump_vel_border && !isClimbing && !jumping.getOrDefault(player, false)) {
                 PlayerJumpEvent jumpEvent = new PlayerJumpEvent(player);
                 Bukkit.getServer().getPluginManager().callEvent(jumpEvent);
                 if (jumpEvent.isCancelled()) {
                     player.setVelocity(new Vector(player.getVelocity().getX(), 0, player.getVelocity().getZ()));
                 }
                 jumping.replace(player, true);
-            } else if (player.isOnGround() && jumping.get(player)) jumping.replace(player, false);
+            } else if (player.isOnGround() && jumping.getOrDefault(player, false)) jumping.replace(player, false);
         }
 
         @EventHandler
