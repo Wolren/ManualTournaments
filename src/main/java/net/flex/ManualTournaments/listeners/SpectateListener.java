@@ -108,7 +108,7 @@ public class SpectateListener implements Listener {
             player.setFlying(false);
             player.getInventory().clear();
             Bukkit.getServer().getOnlinePlayers().forEach(other -> other.showPlayer(player));
-            Spectate.spectatorsBoard.removeEntry(player.getName());
+            Spectate.getSpectatorsBoard().removeEntry(player.getName());
             if (Main.version >= 14) player.setCollidable(true);
             spectators.remove(player.getUniqueId());
         }
@@ -151,9 +151,7 @@ public class SpectateListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         if (spectators.contains(player.getUniqueId())) {
-            if (event.isLeftClick()) {
-                event.setCancelled(true);
-            }
+            event.setCancelled(true);
         }
     }
 

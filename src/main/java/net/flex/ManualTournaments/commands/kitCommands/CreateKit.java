@@ -27,7 +27,8 @@ public final class CreateKit implements KitCommand {
         if (!kitExists) {
             if (Objects.requireNonNull(config.getString("current-arena")).isEmpty()) {
                 config.set("current-kit", kitName);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
             }
             getKit(player, kitName);
             kitNames.add(kitName);

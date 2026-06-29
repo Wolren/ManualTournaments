@@ -19,32 +19,32 @@ import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class Fight implements CommandExecutor, TabCompleter {
-    public static Map<Team, Set<UUID>> teams = new HashMap<>();
     private final List<Player> fighters = new ArrayList<>();
-    public static Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
 
     @SneakyThrows
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
+        Player player = optional(sender);
+        if (player == null) return true;
         getKitConfig().load(getKitConfigFile());
         getArenaConfig().load(getArenaConfigFile());
-        getCustomConfig().load(getCustomConfigFile());
+        getPlugin().reloadConfig();
+        config = getPlugin().getConfig();
         fighters.clear();
         IntStream.range(1, args.length).mapToObj(i -> Bukkit.getPlayer(args[i])).filter(Objects::nonNull).forEach(fighters::add);
+        Map<Team, Set<UUID>> localTeams = new HashMap<>();
+        Scoreboard localBoard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
         if (args.length == 1) {
             if (args[0].equals("stop")) {
-                FightFactory.fight.stopFight();
-                FightFactory.fight = new DefaultFight();
+                FightFactory.stopAllFights();
             } else if (args[0].equals("queue")) {
-                FightType currentFight = new FightFactory().createFight(args[0], teams);
-                currentFight.startFight(player, Collections.emptyList(), null, teams, board);
+                FightType currentFight = new FightFactory().createFight(args[0], localTeams, player);
+                if (currentFight != null) currentFight.startFight(player, Collections.emptyList(), null, localTeams, localBoard);
             }
         }
-        else if (args.length > 2 && (FightFactory.fightTypesMap.containsKey(args[0].toUpperCase()) || args[0].equalsIgnoreCase("stop"))) {
-            FightType currentFight = new FightFactory().createFight(args[0], teams);
-            currentFight.startFight(player, fighters, null, teams, board);
+        else if (args.length > 2 && args[0].equalsIgnoreCase("team") || args[0].equalsIgnoreCase("ffa")) {
+            FightType currentFight = new FightFactory().createFight(args[0], localTeams, player);
+            if (currentFight != null) currentFight.startFight(player, fighters, null, localTeams, localBoard);
         } else send(player, "fight-usage");
         return true;
     }

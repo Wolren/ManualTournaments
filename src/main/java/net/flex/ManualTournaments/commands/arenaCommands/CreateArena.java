@@ -17,7 +17,8 @@ public final class CreateArena implements ArenaCommand {
         if (!arenaExists) {
             if (Objects.requireNonNull(config.getString("current-arena")).isEmpty())  {
                 config.set("current-arena", arenaName);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
             }
             getArenaConfig().set("Arenas." + arenaName, "");
             getArenaConfig().save(getArenaConfigFile());

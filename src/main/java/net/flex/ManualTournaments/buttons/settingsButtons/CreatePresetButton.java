@@ -24,7 +24,7 @@ public class CreatePresetButton extends ButtonBuilder {
             if (event.isLeftClick()) {
                 sender.closeInventory();
                 send(sender, "gui-preset-create-message");
-                SettingsGUI.isOpenerActive = true;
+                SettingsGUI.isOpenerActive.add(sender.getUniqueId());
             }
         });
     }

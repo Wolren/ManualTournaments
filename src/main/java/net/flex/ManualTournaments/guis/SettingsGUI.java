@@ -7,9 +7,8 @@ import net.flex.ManualTournaments.buttons.settingsButtons.PresetButton;
 import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.gui;
@@ -19,7 +18,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.config;
 public class SettingsGUI {
     public static Menu settingsMenu = gui.create(config.getString("gui-settings-menu-name"), 5);
     public static Map<String, Button> settingsMenuButtons = new HashMap<>();
-    public static boolean isOpenerActive = false;
+    public static Set<UUID> isOpenerActive = new HashSet<>();
     private static final ButtonDirector director = new ButtonDirector();
     public static void settingsGUI(Player sender) {
         settingsMenu.setToolbarBuilder((slot, page, type, menu) -> {

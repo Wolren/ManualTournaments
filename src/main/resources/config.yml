@@ -46,6 +46,85 @@ spectator-allowed-commands: []
 #Whether queue type of fights should be allowed
 queue-allow: true
 
+#Tournament match timeout in seconds (default 900 = 15 minutes)
+#When a tournament match exceeds this time, the player with more health wins by default
+#Set to 0 to disable timeout
+tournament-match-timeout: 900
+
+#Require confirmation for destructive tournament commands (delete, cancel, forceadvance)
+#Time in seconds before the pending confirmation expires
+#Set to 0 to disable confirmation requirement
+tournament-confirm-timeout: 10
+
+#Track tournament statistics (wins, losses, tournaments played) per player
+#Statistics are stored in tournaments_stats.yml
+#Requires tournament database mode or YAML storage
+tournament-stats-enabled: true
+
+#Database connection pool size (MySQL only, when mysql-enabled: true)
+#Maximum concurrent database connections
+tournament-database-pool-size: 4
+
+#Database connection timeout in milliseconds (MySQL only)
+tournament-database-connection-timeout: 5000
+
+#Tournament scoreboard update interval in seconds
+#How often the live scoreboard refreshes for participants
+#Higher values = less CPU, less responsive updates
+tournament-scoreboard-interval: 2
+
+#Tournament data save debounce delay in seconds
+#When data changes, the plugin waits this long before writing to disk/DB
+#Multiple changes within this window coalesce into one write
+#Higher values = less I/O, higher risk of data loss on crash
+tournament-save-debounce: 2
+
+#Scheduled tournament check interval in seconds
+#How often the plugin checks if a scheduled tournament should fire
+tournament-scheduler-interval: 30
+
+#Maximum number of block states tracked per fight
+#After this limit, new block changes are not tracked for reset
+#Prevents memory leaks during TNT-heavy or large-scale fights
+tournament-block-state-limit: 5000
+
+#Require specific permission to join tournaments
+#When true, players need mt.tournament.join.<name> to join a specific tournament
+#When false (default), mt.tournament.join is sufficient
+tournament-require-join-permission: false
+
+#Tournament messages
+#Used in match announcements and tournament broadcasts
+tournament-prefix: "&6[&e{name}&6] &7"
+tournament-match-start: "&7⚔ Match: &e{p1} &7vs &e{p2}"
+tournament-match-end: "&a{winner} &7defeated &c{loser}"
+tournament-match-forfeit: "&6Match forfeited - &e{player} &7was offline"
+tournament-match-timeout-broadcast: "&7Timeout - &e{player} &7wins by default"
+tournament-winner: "&6&l{player} &7wins &e{name}&7!"
+tournament-created: "&6[Tournament] &e{name} &7is now open! Join with &e/tournament join {name}"
+tournament-started: "&6[Tournament] &e{name} &7has started! {players} players, {rounds} rounds."
+tournament-cancelled: "&6[Tournament] &e{name} &7has been cancelled."
+tournament-paused: "&6[Tournament] &e{name} &7has been paused."
+tournament-resumed: "&6[Tournament] &e{name} &7has been resumed."
+tournament-winner-global: "&6[Tournament] &e{name} &7winner: &6&l{player}"
+
+#Tournament Schedules section
+#Scheduled tournaments auto-created and optionally auto-started at specified times.
+#Format: each schedule has a name, schedule time (HH:mm), arena, kit, autoStart flag.
+#tournament-schedules:
+#  daily-event:
+#    schedule: "18:00"
+#    maxPlayers: 16
+#    arena: "my_arena"
+#    kit: "my_kit"
+#    enabled: true
+#    autoStart: true
+#    announceMinutes:
+#      - 60
+#      - 30
+#      - 15
+#      - 5
+
 #Scoreboard section
 #Before starting the fight those have to be specified so that the plugin knows which one to pick
 current-kit: ""

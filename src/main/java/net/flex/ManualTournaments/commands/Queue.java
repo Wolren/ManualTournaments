@@ -19,8 +19,8 @@ public class Queue implements TabCompleter, CommandExecutor {
     public static List<Player> playerQueue = new ArrayList<>();
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null) return false;
-        else player = optional(sender);
+        Player player = optional(sender);
+        if (player == null) return true;
         if (args.length == 1 && config.getBoolean("queue-allow")) {
             if (args[0].equals("join")) {
                 if (!playerQueue.contains(player)) {

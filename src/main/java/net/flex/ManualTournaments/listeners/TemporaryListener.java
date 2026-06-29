@@ -38,7 +38,7 @@ public class TemporaryListener implements Listener {
         Player player = event.getPlayer();
         if (frozen.contains(player.getUniqueId())) {
             Location from = event.getFrom();
-            if (from.getX() != Objects.requireNonNull(event.getTo()).getX() || from.getY() != event.getTo().getY()) {
+            if (from.getX() != Objects.requireNonNull(event.getTo()).getX() || from.getY() != event.getTo().getY() || from.getZ() != event.getTo().getZ()) {
                 player.teleport(from);
             }
         }

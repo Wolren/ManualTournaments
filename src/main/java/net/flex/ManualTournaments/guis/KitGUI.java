@@ -7,10 +7,9 @@ import net.flex.ManualTournaments.buttons.kitButtons.KitButton;
 import net.flex.ManualTournaments.utils.gui.menu.Menu;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+
+import java.util.stream.IntStream;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
@@ -19,7 +18,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class KitGUI {
     public static Menu kitMenu = gui.create(getPlugin().getConfig().getString("gui-kit-menu-name"), 5);
     public static Map<String, Button> kitMenuButtons = new HashMap<>();
-    public static boolean isOpenerActive = false;
+    public static Set<UUID> isOpenerActive = new HashSet<>();
     public static ButtonDirector director = new ButtonDirector();
 
     public static void kitGUI(Player sender) {

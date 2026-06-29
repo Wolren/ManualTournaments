@@ -6,6 +6,7 @@ import net.flex.ManualTournaments.factories.ArenaFactory;
 import net.flex.ManualTournaments.factories.ArenaShortFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
 import org.bukkit.command.*;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,9 +20,10 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class Arena implements CommandExecutor, TabCompleter {
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        config.load(getCustomConfigFile());
+        Player player = optional(sender);
+        if (player == null) return true;
+        getPlugin().reloadConfig();
+        config = getPlugin().getConfig();
         getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) {
             new ArenaGUI().arenaGUI(player);

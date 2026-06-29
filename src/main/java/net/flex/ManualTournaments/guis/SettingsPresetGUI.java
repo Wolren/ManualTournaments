@@ -77,7 +77,8 @@ public class SettingsPresetGUI {
             config.set(buttonConfig, configValue);
             updateButtonIcon(setting, buttonConfig, trueIs, falseIs, context);
             menu.refreshInventory(sender);
-            config.save(getCustomConfigFile());
+            getPlugin().saveConfig();
+            config = getPlugin().getConfig();
         } else if (Main.presetNames.contains(context)) {
             String path = "Presets." + context + "." + buttonConfig;
             boolean configValue = !Main.getPresetConfig().getBoolean(path);

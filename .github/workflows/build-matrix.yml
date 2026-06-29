@@ -1,0 +1,42 @@
+name: Build Matrix
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  compile:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: paper
+            api-version: 1.21.11-R0.1-SNAPSHOT
+            java: 21
+            test: true
+          - profile: spigot
+            api-version: 1.21.1-R0.1-SNAPSHOT
+            java: 21
+            test: false
+          - profile: spigot
+            api-version: 1.21.3-R0.1-SNAPSHOT
+            java: 21
+            test: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+      - name: Compile with ${{ matrix.profile }} / ${{ matrix.api-version }}
+        run: >
+          mvn clean compile --no-transfer-progress
+          -P${{ matrix.profile }}
+          -Dapi.version=${{ matrix.api-version }}
+      - name: Run tests
+        if: matrix.test
+        run: mvn test --no-transfer-progress -Ppaper -Dapi.version=${{ matrix.api-version }}

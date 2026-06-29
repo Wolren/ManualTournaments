@@ -1,5 +1,6 @@
 package net.flex.ManualTournaments.events;
 
+import net.flex.ManualTournaments.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -79,11 +80,13 @@ public final class PlayerJumpEvent extends PlayerEvent implements Cancellable {
 
         @EventHandler
         public void onEnable(PluginEnableEvent event) {
+            if (event.getPlugin() != Main.getPlugin()) return;
             Bukkit.getOnlinePlayers().forEach(this::add);
         }
 
         @EventHandler
         public void onDisable(PluginDisableEvent event) {
+            if (event.getPlugin() != Main.getPlugin()) return;
             jumping.clear();
         }
 

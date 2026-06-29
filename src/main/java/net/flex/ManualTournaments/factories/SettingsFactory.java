@@ -34,7 +34,7 @@ public class SettingsFactory {
         if (value.equals("true") || value.equals("false")) {
             getPlugin().getConfig().set(configKey, value);
             send(player, "config-updated-successfully");
-            getPlugin().getConfig().save(getCustomConfigFile());
+            getPlugin().saveConfig();
         } else send(player, "config-options");
     }
 

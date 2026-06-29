@@ -4,8 +4,6 @@ import com.google.common.base.Preconditions;
 import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.buttons.Button;
-import net.flex.ManualTournaments.commands.Fight;
-import net.flex.ManualTournaments.commands.fightCommands.TeamFight;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -17,7 +15,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,11 +23,9 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.commands.Fight.teams;
 
 public class SharedComponents {
     public static FileConfiguration config = getPlugin().getConfig();
-    public static Player player = null;
 
     public static String message(String s) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getPlugin().getConfig().getString(s)));
@@ -92,18 +87,6 @@ public class SharedComponents {
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    public static String teamList(String teamName) {
-        Set<String> teamString = new HashSet<>();
-        for (Map.Entry<Team, Set<UUID>> entry : Fight.teams.entrySet()) {
-            if (entry.getKey().getName().equals(teamName)) {
-                for (UUID uuid : entry.getValue()) {
-                    teamString.add(Objects.requireNonNull(Bukkit.getOfflinePlayer(uuid)).getName());
-                }
-            }
-        }
-        return String.join(", ", teamString);
-    }
-
     public static void clear(Player player) {
         player.getInventory().clear();
         player.setHealth(20.0D);
@@ -112,25 +95,6 @@ public class SharedComponents {
         player.setFireTicks(0);
         if (Main.version >= 22) player.setAbsorptionAmount(0);
         for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
-    }
-
-    public static void removeEntry(Player player) {
-        for (Map.Entry<Team, Set<UUID>> entry : teams.entrySet()) {
-            Team team = entry.getKey();
-            Set<UUID> playerUUIDs = entry.getValue();
-            if (playerUUIDs.contains(player.getUniqueId())) {
-                if (team.getName().equals("1")) {
-                    TeamFight.team1.removeEntry(player.getName());
-                } else if (team.getName().equals("2")) {
-                    TeamFight.team2.removeEntry(player.getName());
-                }
-                break;
-            }
-        }
-    }
-
-    public static boolean playerIsInTeam(UUID player) {
-        return teams.values().stream().anyMatch(list -> list.contains(player));
     }
 
     public static void addEnchantment(Button button) {

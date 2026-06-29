@@ -17,7 +17,8 @@ public final class RemoveArena implements ArenaCommand {
         if (arenaExists) {
             if (Objects.requireNonNull(config.getString("current-arena")).equalsIgnoreCase(arenaName)) {
                 config.set("current-arena", null);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
             }
             getArenaConfig().set("Arenas." + arenaName, null);
             getArenaConfig().save(getArenaConfigFile());

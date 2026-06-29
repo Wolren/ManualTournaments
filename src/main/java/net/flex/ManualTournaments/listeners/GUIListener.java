@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.send;
@@ -22,21 +25,29 @@ public class GUIListener implements Listener {
         Player player = event.getPlayer();
         String message = event.getMessage();
         if (!message.startsWith("*")) return;
-        if (ArenaGUI.isOpenerActive && player.hasPermission("mt.arena")) {
+        if (ArenaGUI.isOpenerActive.contains(player.getUniqueId()) && player.hasPermission("mt.arena")) {
             handleArenaGUI(player, message);
             event.setCancelled(true);
-        } else if (KitGUI.isOpenerActive && player.hasPermission("mt.kit")) {
+        } else if (KitGUI.isOpenerActive.contains(player.getUniqueId()) && player.hasPermission("mt.kit")) {
             handleKitGUI(player, message);
             event.setCancelled(true);
-        } else if (SettingsGUI.isOpenerActive && player.hasPermission("mt.settings")) {
+        } else if (SettingsGUI.isOpenerActive.contains(player.getUniqueId()) && player.hasPermission("mt.settings")) {
             handleSettingsGUI(player, message);
             event.setCancelled(true);
         }
     }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        ArenaGUI.isOpenerActive.remove(uuid);
+        KitGUI.isOpenerActive.remove(uuid);
+        SettingsGUI.isOpenerActive.remove(uuid);
+    }
+
     private void handleArenaGUI(Player player, String message) {
         if (message.endsWith("cancel")) {
-            ArenaGUI.isOpenerActive = false;
+            ArenaGUI.isOpenerActive.remove(player.getUniqueId());
             send(player, "gui-arena-creation-cancelled");
         } else {
             String arenaName = message.replace("*", "");
@@ -47,7 +58,7 @@ public class GUIListener implements Listener {
 
     private void handleKitGUI(Player player, String message) {
         if (message.endsWith("cancel")) {
-            KitGUI.isOpenerActive = false;
+            KitGUI.isOpenerActive.remove(player.getUniqueId());
             send(player, "gui-kit-creation-cancelled");
         } else {
             String kitName = message.replace("*", "");
@@ -58,7 +69,7 @@ public class GUIListener implements Listener {
 
     private void handleSettingsGUI(Player player, String message) {
         if (message.endsWith("cancel")) {
-            SettingsGUI.isOpenerActive = false;
+            SettingsGUI.isOpenerActive.remove(player.getUniqueId());
             send(player, "gui-preset-creation-cancelled");
         } else {
             String presetName = message.replace("*", "");
@@ -67,4 +78,3 @@ public class GUIListener implements Listener {
         }
     }
 }
-

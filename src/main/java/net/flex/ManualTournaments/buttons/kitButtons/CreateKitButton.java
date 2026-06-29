@@ -24,7 +24,7 @@ public class CreateKitButton extends ButtonBuilder {
             if (event.isLeftClick()) {
                 sender.closeInventory();
                 send(sender, "gui-kit-create-message");
-                KitGUI.isOpenerActive = true;
+                KitGUI.isOpenerActive.add(sender.getUniqueId());
             }
         });
     }

@@ -5,9 +5,11 @@ import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Queue;
 import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
+import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
+import net.flex.ManualTournaments.utils.FightContext;
 import net.flex.ManualTournaments.utils.SharedComponents;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -16,21 +18,20 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.flex.ManualTournaments.Main.*;
-import static net.flex.ManualTournaments.commands.fightCommands.TeamFight.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class QueueFight implements FightType {
-    public static final AtomicBoolean cancelled = new AtomicBoolean(false);
-    private static final Set<Player> distinctFighters = new HashSet<>();
-    public static int duration;
+    private FightContext context;
+    private TeamFightListener listener;
 
     @SneakyThrows
     public void startFight(Player player, List<Player> fighters, String arenaName, Map<Team, Set<UUID>> teams, Scoreboard board) {
-        TeamFightListener listener = new TeamFightListener(this, cancelled, teams, board);
-        TemporaryListener temporaryListener = new TemporaryListener(frozen);
+        context = new FightContext(teams, board);
+        FightFactory.registerFight(this);
+        listener = new TeamFightListener(this, context);
+        TemporaryListener temporaryListener = new TemporaryListener(context.frozen);
         Bukkit.getPluginManager().registerEvents(listener, Main.getPlugin());
         Bukkit.getPluginManager().registerEvents(temporaryListener, Main.getPlugin());
         Main.getPlugin().addFightListener(listener);
@@ -41,14 +42,15 @@ public class QueueFight implements FightType {
             send(player, "fighter-error");
             return;
         }
-        distinctFighters.addAll(queueFighters);
-        if (distinctFighters.size() == queueFighters.size()) {
+        context.distinctFighters.addAll(queueFighters);
+        if (context.distinctFighters.size() == queueFighters.size()) {
             clearBeforeFight(board);
-            team1 = board.registerNewTeam("1");
-            team2 = board.registerNewTeam("2");
-            setBoard(team1, board);
-            setBoard(team2, board);
-            config.load(getCustomConfigFile());
+            context.team1 = board.registerNewTeam("1");
+            context.team2 = board.registerNewTeam("2");
+            setBoard(context.team1, board);
+            setBoard(context.team2, board);
+            getPlugin().reloadConfig();
+            config = getPlugin().getConfig();
             setupFighter(queueFighters, teams);
             if (config.getBoolean("count-fights")) countFights();
             if (config.getBoolean("create-fights-folder")) setFightsFolder();
@@ -59,10 +61,10 @@ public class QueueFight implements FightType {
         }
     }
 
-    private static void clearBeforeFight(Scoreboard board) {
+    private void clearBeforeFight(Scoreboard board) {
         board.getTeams().forEach(Team::unregister);
-        cancelled.set(false);
-        distinctFighters.clear();
+        context.cancelled.set(false);
+        context.distinctFighters.clear();
     }
 
     @SneakyThrows
@@ -71,10 +73,10 @@ public class QueueFight implements FightType {
         for (Player fighter : fighters) {
             fighter.setGameMode(GameMode.SURVIVAL);
             Spectate.stopWithoutKill(fighter);
-            Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? team1 : team2;
+            Team team = fighters.indexOf(fighter) < (fighters.size() / 2) ? context.team1 : context.team2;
             team.addEntry(fighter.getName());
             teams.computeIfAbsent(team, k -> new HashSet<>()).add(fighter.getUniqueId());
-            fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos" + (team == team1 ? "1" : "2") + ".", getArenaConfig()));
+            fighter.teleport(location("Arenas." + config.getString("current-arena") + ".pos" + (team == context.team1 ? "1" : "2") + ".", getArenaConfig()));
             GiveKit.setKit(fighter, config.getString("current-kit"));
             if (config.getBoolean("freeze-on-start")) {
                 freezeOnStart(fighter, fighter.getUniqueId());
@@ -93,9 +95,9 @@ public class QueueFight implements FightType {
 
     @SneakyThrows
     public void stopFight() {
-        Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
-        cancelled.set(true);
-        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
+        Bukkit.getServer().getOnlinePlayers().forEach(context::removeEntry);
+        context.cancelled.set(true);
+        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> context.playerIsInTeam(online.getUniqueId())).forEach(online -> {
             online.setWalkSpeed(0.2F);
             if (version <= 13) collidableReflection(online, true);
             if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
@@ -105,14 +107,16 @@ public class QueueFight implements FightType {
                 online.teleport(location(path, config));
             }
         });
-        if (config.getBoolean("create-fights-folder") && !FightsConfig.isSet("cancelled")) {
-            FightsConfig.set("cancelled", true);
-            FightsConfig.save(FightsConfigFile);
+        if (config.getBoolean("create-fights-folder") && context.fightsConfig != null && !context.fightsConfig.isSet("cancelled")) {
+            context.fightsConfig.set("cancelled", true);
+            context.fightsConfig.save(context.fightsConfigFile);
         }
+        if (listener != null) listener.triggerBlockResetAsync();
+        FightFactory.unregisterFight(this);
     }
 
     @Override
-    public boolean canStartFight(String type) {
+    public boolean canStartFight(String type, Player sender) {
         if (Main.kitNames.contains(config.getString("current-kit"))) {
             if (Main.arenaNames.contains(config.getString("current-arena"))) {
                 if (type.equalsIgnoreCase("queue")) {
@@ -123,44 +127,47 @@ public class QueueFight implements FightType {
                             boolean spectator = getArenaConfig().isSet(path + "spectator");
                             if (pos1 && pos2 && spectator) return true;
                             else {
-                                if (!pos1) send(player, "arena-lacks-pos1");
-                                if (!pos2) send(player, "arena-lacks-pos2");
-                                if (!spectator) send(player, "arena-lacks-spectator");
+                                if (!pos1) send(sender, "arena-lacks-pos1");
+                                if (!pos2) send(sender, "arena-lacks-pos2");
+                                if (!spectator) send(sender, "arena-lacks-spectator");
                             }
-                    } else send(player, "fight-requirements");
+                    } else send(sender, "fight-requirements");
                 }
-            } else send(player, "current-arena-not-set");
-        } else send(player, "current-kit-not-set");
+            } else send(sender, "current-arena-not-set");
+        } else send(sender, "current-kit-not-set");
         return false;
     }
 
     @SneakyThrows
     private void setFightsFolder() {
-        duration = 0;
-        TeamFightListener.stopper = true;
+        context.duration = 0;
+        context.stopper = true;
         new BukkitRunnable() {
             public void run() {
-                if (!TeamFightListener.stopper || cancelled.get()) cancel();
-                else duration++;
+                if (!context.stopper || context.cancelled.get()) cancel();
+                else context.duration++;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
-        createFightsFolder();
-        FightsConfig.set("team1", teamList("1"));
-        FightsConfig.set("team2", teamList("2"));
-        FightsConfig.set("damageTeam1", 0);
-        FightsConfig.set("damageTeam2", 0);
-        FightsConfig.set("regeneratedTeam1", 0);
-        FightsConfig.set("regeneratedTeam2", 0);
-        FightsConfig.set("arena", config.getString("current-arena"));
-        FightsConfig.set("kit", config.getString("current-kit"));
-        FightsConfig.set("duration", 0);
-        FightsConfig.set("winners", "");
-        FightsConfig.save(FightsConfigFile);
+        context.createFightsFolder();
+        context.fightsConfig.set("team1", context.teamList("1"));
+        context.fightsConfig.set("team2", context.teamList("2"));
+        context.fightsConfig.set("damageTeam1", 0);
+        context.fightsConfig.set("damageTeam2", 0);
+        context.fightsConfig.set("regeneratedTeam1", 0);
+        context.fightsConfig.set("regeneratedTeam2", 0);
+        context.fightsConfig.set("arena", config.getString("current-arena"));
+        context.fightsConfig.set("kit", config.getString("current-kit"));
+        context.fightsConfig.set("duration", 0);
+        context.fightsConfig.set("winners", "");
+        context.fightsConfig.save(context.fightsConfigFile);
     }
 
-    public final Set<UUID> frozen = new HashSet<>();
+    @Override
+    public FightContext getContext() {
+        return context;
+    }
 
-    static void countdownBeforeFight(List<Player> fighters) {
+    private void countdownBeforeFight(List<Player> fighters) {
         new BukkitRunnable() {
             int countdownTime = config.getInt("countdown-time");
 
@@ -172,7 +179,7 @@ public class QueueFight implements FightType {
                         }
                     }
                     cancel();
-                } else if (cancelled.get()) {
+                } else if (context.cancelled.get()) {
                     cancel();
                 } else {
                     for (Player fighter : fighters) {
@@ -189,23 +196,23 @@ public class QueueFight implements FightType {
     static void countFights() {
         int fightCount = config.getInt("fight-count");
         config.set("fight-count", ++fightCount);
-        config.save(getCustomConfigFile());
+        getPlugin().saveConfig();
     }
 
-    void freezeOnStart(Player fighter, UUID fighterId) {
+    private void freezeOnStart(Player fighter, UUID fighterId) {
         new BukkitRunnable() {
             int countdownTime = config.getInt("countdown-time");
 
             public void run() {
-                frozen.add(fighterId);
+                context.frozen.add(fighterId);
                 fighter.setWalkSpeed(0.0F);
                 if (countdownTime == 0) {
-                    frozen.remove(fighterId);
+                    context.frozen.remove(fighterId);
                     fighter.setWalkSpeed(0.2F);
                     playSound(fighter);
                     cancel();
-                } else if (cancelled.get()) {
-                    frozen.clear();
+                } else if (context.cancelled.get()) {
+                    context.frozen.clear();
                     fighter.setWalkSpeed(0.2F);
                     cancel();
                 } else playNote(fighter);
@@ -213,10 +220,6 @@ public class QueueFight implements FightType {
                 countdownTime--;
             }
         }.runTaskTimer(getPlugin(), 0L, 20L);
-    }
-
-    public boolean isPlayerFrozen(UUID playerId) {
-        return frozen.contains(playerId);
     }
 
     static void playSound(Player fighter) {

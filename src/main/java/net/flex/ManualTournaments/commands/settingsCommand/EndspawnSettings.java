@@ -15,7 +15,8 @@ public final class EndspawnSettings implements SettingsShortCommand {
         if (context.equals("default")) {
             getLocation("fight-end-spawn.", player, config);
             send(player, "config-updated-successfully");
-            config.save(getCustomConfigFile());
+            getPlugin().saveConfig();
+            config = getPlugin().getConfig();
         } else {
             String path = "Presets." + context + ".";
             ConfigurationSection preset = getPresetConfig().getConfigurationSection(path);

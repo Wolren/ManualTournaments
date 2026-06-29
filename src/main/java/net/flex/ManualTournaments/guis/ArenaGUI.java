@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.stream.IntStream;
+import java.util.UUID;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
@@ -16,7 +17,7 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class ArenaGUI {
     public static Menu arenaMenu = gui.create(config.getString("gui-arena-menu-name"), 5);
     public static Map<String, Button> arenaMenuButtons = new HashMap<>();
-    public static boolean isOpenerActive = false;
+    public static Set<UUID> isOpenerActive = new HashSet<>();
     public static ButtonDirector director = new ButtonDirector();
 
     public void arenaGUI(Player sender) {

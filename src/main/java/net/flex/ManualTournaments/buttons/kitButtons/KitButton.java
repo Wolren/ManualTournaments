@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Objects;
 
-import static net.flex.ManualTournaments.Main.getCustomConfigFile;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class KitButton extends ButtonBuilder {
@@ -27,7 +27,8 @@ public class KitButton extends ButtonBuilder {
                 .build()).withListener(event -> {
             if (event.isRightClick()) {
                 config.set("current-kit", name);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
                 refresh(sender, name);
             } else if (event.isLeftClick()) {
                 KitSettingsGUI.kitSettingsGUI(sender, name);

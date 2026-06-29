@@ -6,6 +6,7 @@ import net.flex.ManualTournaments.factories.SettingsFactory;
 import net.flex.ManualTournaments.factories.SettingsShortFactory;
 import net.flex.ManualTournaments.guis.SettingsGUI;
 import org.bukkit.command.*;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,9 +20,10 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public class Settings implements TabCompleter, CommandExecutor {
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        config.load(getCustomConfigFile());
+        Player player = optional(sender);
+        if (player == null) return true;
+        getPlugin().reloadConfig();
+        config = getPlugin().getConfig();
         getPresetConfig().load(getPresetConfigFile());
         if (args.length == 0) {
             SettingsGUI.settingsGUI(player);

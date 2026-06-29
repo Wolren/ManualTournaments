@@ -4,9 +4,11 @@ import lombok.SneakyThrows;
 import net.flex.ManualTournaments.Main;
 import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.commands.kitCommands.GiveKit;
+import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.interfaces.FightType;
 import net.flex.ManualTournaments.listeners.TeamFightListener;
 import net.flex.ManualTournaments.listeners.TemporaryListener;
+import net.flex.ManualTournaments.utils.FightContext;
 import net.flex.ManualTournaments.utils.SharedComponents;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -15,29 +17,29 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
 import static net.flex.ManualTournaments.Main.*;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class FfaFight implements FightType {
-    public static final AtomicBoolean cancelled = new AtomicBoolean(false);
-    private static final Set<Player> distinctFighters = new HashSet<>();
+    private FightContext context;
+    private TeamFightListener listener;
 
     @SneakyThrows
     @Override
     public void startFight(Player player, List<Player> fighters, String arenaName, Map<Team, Set<UUID>> teams, Scoreboard board) {
-        TeamFightListener listener = new TeamFightListener(this, cancelled, teams, board);
-        TemporaryListener temporaryListener = new TemporaryListener(frozen);
+        context = new FightContext(teams, board);
+        FightFactory.registerFight(this);
+        listener = new TeamFightListener(this, context);
+        TemporaryListener temporaryListener = new TemporaryListener(context.frozen);
         Bukkit.getPluginManager().registerEvents(listener, Main.getPlugin());
         Bukkit.getPluginManager().registerEvents(temporaryListener, Main.getPlugin());
         Main.getPlugin().addFightListener(listener);
         Main.getPlugin().addTemporaryListener(temporaryListener);
 
-        Main.getPlugin().addFightListener(listener);
-        distinctFighters.addAll(fighters);
-        if (distinctFighters.size() == fighters.size()) {
+        context.distinctFighters.addAll(fighters);
+        if (context.distinctFighters.size() == fighters.size()) {
             clearBeforeFight(board);
             IntStream.range(0, fighters.size()).forEach(i -> {
                 Player fighter = fighters.get(i);
@@ -53,8 +55,8 @@ public class FfaFight implements FightType {
 
     private void clearBeforeFight(Scoreboard board) {
         board.getTeams().forEach(Team::unregister);
-        cancelled.set(false);
-        distinctFighters.clear();
+        context.cancelled.set(false);
+        context.distinctFighters.clear();
     }
 
     @SneakyThrows
@@ -64,7 +66,8 @@ public class FfaFight implements FightType {
         teams.put(team, new HashSet<>(Collections.singleton(fighter.getUniqueId())));
         fighter.setGameMode(GameMode.SURVIVAL);
         Spectate.stopWithoutKill(fighter);
-        config.load(getCustomConfigFile());
+            getPlugin().reloadConfig();
+            config = getPlugin().getConfig();
         Location center = location("Arenas." + config.getString("current-arena") + ".pos1.", getArenaConfig());
         double radius = 3.0;
         double angle = 2 * Math.PI * index / total;
@@ -84,14 +87,14 @@ public class FfaFight implements FightType {
             team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         }
         Bukkit.getOnlinePlayers().forEach(online -> online.setScoreboard(board));
-        team.addEntry(fighter.getDisplayName());
+        team.addEntry(fighter.getName());
     }
 
     @Override
     public void stopFight() {
-        Bukkit.getServer().getOnlinePlayers().forEach(SharedComponents::removeEntry);
-        cancelled.set(true);
-        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> playerIsInTeam(online.getUniqueId())).forEach(online -> {
+        Bukkit.getServer().getOnlinePlayers().forEach(context::removeEntry);
+        context.cancelled.set(true);
+        Bukkit.getServer().getOnlinePlayers().stream().filter(online -> context.playerIsInTeam(online.getUniqueId())).forEach(online -> {
             online.setWalkSpeed(0.2F);
             if (version <= 13) collidableReflection(online, true);
             if (config.getBoolean("kill-on-fight-end")) online.setHealth(0);
@@ -101,10 +104,12 @@ public class FfaFight implements FightType {
                 online.teleport(location(path, config));
             }
         });
+        if (listener != null) listener.triggerBlockResetAsync();
+        FightFactory.unregisterFight(this);
     }
 
     @Override
-    public boolean canStartFight(String type) {
+    public boolean canStartFight(String type, Player sender) {
         if (Main.kitNames.contains(config.getString("current-kit"))) {
             if (Main.arenaNames.contains(config.getString("current-arena"))) {
                 if (type.equalsIgnoreCase("ffa")) {
@@ -113,18 +118,16 @@ public class FfaFight implements FightType {
                         boolean spectator = getArenaConfig().isSet(path + "spectator");
                         if (pos1 && spectator) return true;
                         else {
-                            if (!pos1) send(player, "arena-lacks-pos1");
-                            if (!spectator) send(player, "arena-lacks-spectator");
+                            if (!pos1) send(sender, "arena-lacks-pos1");
+                            if (!spectator) send(sender, "arena-lacks-spectator");
                         }
                 }
-            } else send(player, "current-arena-not-set");
-        } else send(player, "current-kit-not-set");
+            } else send(sender, "current-arena-not-set");
+        } else send(sender, "current-kit-not-set");
         return false;
     }
 
-    public final Set<UUID> frozen = new HashSet<>();
-
-    static void countdownBeforeFight(List<Player> fighters) {
+    private void countdownBeforeFight(List<Player> fighters) {
         new BukkitRunnable() {
             int countdownTime = config.getInt("countdown-time");
 
@@ -136,7 +139,7 @@ public class FfaFight implements FightType {
                         }
                     }
                     cancel();
-                } else if (cancelled.get()) {
+                } else if (context.cancelled.get()) {
                     cancel();
                 } else {
                     for (Player fighter : fighters) {
@@ -150,26 +153,26 @@ public class FfaFight implements FightType {
     }
 
     @SneakyThrows
-    static void countFights() {
+    private static void countFights() {
         int fightCount = config.getInt("fight-count");
         config.set("fight-count", ++fightCount);
-        config.save(getCustomConfigFile());
+        getPlugin().saveConfig();
     }
 
-    void freezeOnStart(Player fighter, UUID fighterId) {
+    private void freezeOnStart(Player fighter, UUID fighterId) {
         new BukkitRunnable() {
             int countdownTime = config.getInt("countdown-time");
 
             public void run() {
-                frozen.add(fighterId);
+                context.frozen.add(fighterId);
                 fighter.setWalkSpeed(0.0F);
                 if (countdownTime == 0) {
-                    frozen.remove(fighterId);
+                    context.frozen.remove(fighterId);
                     fighter.setWalkSpeed(0.2F);
                     playSound(fighter);
                     cancel();
-                } else if (cancelled.get()) {
-                    frozen.clear();
+                } else if (context.cancelled.get()) {
+                    context.frozen.clear();
                     fighter.setWalkSpeed(0.2F);
                     cancel();
                 } else playNote(fighter);
@@ -179,8 +182,9 @@ public class FfaFight implements FightType {
         }.runTaskTimer(getPlugin(), 0L, 20L);
     }
 
-    public boolean isPlayerFrozen(UUID playerId) {
-        return frozen.contains(playerId);
+    @Override
+    public FightContext getContext() {
+        return context;
     }
 
     static void playSound(Player fighter) {

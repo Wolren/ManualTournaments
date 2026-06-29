@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Objects;
 
-import static net.flex.ManualTournaments.Main.getCustomConfigFile;
+import static net.flex.ManualTournaments.Main.getPlugin;
 import static net.flex.ManualTournaments.utils.SharedComponents.*;
 
 public class ArenaButton extends ButtonBuilder {
@@ -26,7 +26,8 @@ public class ArenaButton extends ButtonBuilder {
                 .build()).withListener(event -> {
             if (event.isRightClick()) {
                 config.set("current-arena", name);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
                 refresh(sender, name);
             } else if (event.isLeftClick()) {
                 ArenaSettingsGUI.arenaSettingsGUI(sender, name);

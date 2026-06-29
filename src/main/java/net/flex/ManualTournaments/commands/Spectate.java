@@ -24,9 +24,9 @@ import static net.flex.ManualTournaments.utils.SharedComponents.*;
 public final class Spectate implements TabCompleter, CommandExecutor {
     public static Set<UUID> spectators = new HashSet<>();
     private static final Scoreboard board = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
-    private static Team spectatorsBoard;
+    public static Team spectatorsBoard;
 
-    private static Team getSpectatorsBoard() {
+    public static Team getSpectatorsBoard() {
         if (spectatorsBoard == null) {
             spectatorsBoard = board.registerNewTeam("spectators");
         }
@@ -35,9 +35,10 @@ public final class Spectate implements TabCompleter, CommandExecutor {
 
     @SneakyThrows
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String string, @NotNull String[] args) {
-        if (optional(sender) == null && !(sender instanceof ConsoleCommandSender)) return false;
-        else player = optional(sender);
-        config.load(getCustomConfigFile());
+        Player player = optional(sender);
+        if (player == null) return true;
+        getPlugin().reloadConfig();
+        config = getPlugin().getConfig();
         getArenaConfig().load(getArenaConfigFile());
         if (args.length == 0) {
             setSpectator(player);

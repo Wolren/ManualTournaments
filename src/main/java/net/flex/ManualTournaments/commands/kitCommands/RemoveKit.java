@@ -18,7 +18,8 @@ public final class RemoveKit implements KitCommand {
         if (kitExists) {
             if (Objects.requireNonNull(config.getString("current-kit")).equalsIgnoreCase(kitName)) {
                 config.set("current-kit", null);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
             }
             getKitConfig().set("Kits." + kitName, null);
             getKitConfig().save(getKitConfigFile());

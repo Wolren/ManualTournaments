@@ -1,6 +1,12 @@
 package net.flex.ManualTournaments;
 
-import net.flex.ManualTournaments.commands.*;
+import net.flex.ManualTournaments.commands.Arena;
+import net.flex.ManualTournaments.commands.Fight;
+import net.flex.ManualTournaments.commands.FightArena;
+import net.flex.ManualTournaments.commands.Kit;
+import net.flex.ManualTournaments.commands.Reload;
+import net.flex.ManualTournaments.commands.Settings;
+import net.flex.ManualTournaments.commands.Spectate;
 import net.flex.ManualTournaments.events.PlayerJumpEvent;
 import net.flex.ManualTournaments.factories.FightFactory;
 import net.flex.ManualTournaments.guis.ArenaGUI;
@@ -12,6 +18,13 @@ import net.flex.ManualTournaments.listeners.TemporaryListener;
 import net.flex.ManualTournaments.utils.UpdateChecker;
 import net.flex.ManualTournaments.utils.gui.GUI;
 import net.flex.ManualTournaments.expansions.PlaceholderHook;
+import net.flex.ManualTournaments.utils.tournament.TournamentCommand;
+import net.flex.ManualTournaments.utils.tournament.TournamentDatabase;
+import net.flex.ManualTournaments.utils.tournament.TournamentGUIListener;
+import net.flex.ManualTournaments.utils.tournament.TournamentListener;
+import net.flex.ManualTournaments.utils.tournament.TournamentManager;
+import net.flex.ManualTournaments.utils.tournament.TournamentScheduler;
+import net.flex.ManualTournaments.utils.tournament.TournamentScoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -24,8 +37,6 @@ import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 
-import static net.flex.ManualTournaments.utils.SharedComponents.playerIsInTeam;
-
 public class Main extends JavaPlugin {
     private static Main instance;
 
@@ -35,8 +46,8 @@ public class Main extends JavaPlugin {
     public static GUI gui;
     public static int version;
     public static Set<String> kitNames = new HashSet<>(), arenaNames = new HashSet<>(), presetNames = new HashSet<>();
-    private static File KitsConfigFile, ArenaConfigFile, PresetConfigFile, CustomConfigFile;
-    private static FileConfiguration KitsConfig, ArenaConfig, PresetConfig, CustomConfig;
+    private static File KitsConfigFile, ArenaConfigFile, PresetConfigFile;
+    private static FileConfiguration KitsConfig, ArenaConfig, PresetConfig;
     private final List<TeamFightListener> activeFightListeners = new ArrayList<>();
     private final List<TemporaryListener> activeTemporaryListeners = new ArrayList<>();
     private static final Map<String, Integer> versionMap = new HashMap<String, Integer>() {{
@@ -80,9 +91,7 @@ public class Main extends JavaPlugin {
         return PresetConfigFile;
     }
 
-    public static File getCustomConfigFile() {
-        return CustomConfigFile;
-    }
+
 
     public static FileConfiguration getKitConfig() {
         return KitsConfig;
@@ -96,9 +105,7 @@ public class Main extends JavaPlugin {
         return PresetConfig;
     }
 
-    public static FileConfiguration getCustomConfig() {
-        return CustomConfig;
-    }
+
 
     @Override
     public void onLoad() {
@@ -111,6 +118,9 @@ public class Main extends JavaPlugin {
         gui = new GUI(this);
         new UpdateChecker();
         initializeData();
+        TournamentManager.getInstance().initialize(getDataFolder());
+        TournamentScheduler.reload();
+        TournamentScheduler.start();
         setCommands();
         registerEvents();
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -119,14 +129,20 @@ public class Main extends JavaPlugin {
     }
 
     public void onDisable() {
-        Bukkit.getServer().getOnlinePlayers().stream().filter(player -> playerIsInTeam(player.getUniqueId())).forEach(player -> player.getInventory().clear());
-        FightFactory.fight.stopFight();
+        Bukkit.getServer().getOnlinePlayers().stream().filter(player -> FightFactory.isPlayerInAnyFight(player.getUniqueId())).forEach(player -> player.getInventory().clear());
+        FightFactory.stopAllFights();
         Bukkit.getServer().getOnlinePlayers().stream().filter(player -> Spectate.spectators.contains(player.getUniqueId())).forEach(Spectate::stopSpectator);
-        ArenaGUI.isOpenerActive = false;
-        KitGUI.isOpenerActive = false;
+        ArenaGUI.isOpenerActive.clear();
+        KitGUI.isOpenerActive.clear();
+        TournamentScoreboard.hideAll();
+        TournamentScheduler.stop();
+        TournamentManager.getInstance().flush();
+        TournamentDatabase.getInstance().close();
         for (TeamFightListener fightListener : activeFightListeners) {
             fightListener.triggerBlockResetAsync();
         }
+        activeFightListeners.clear();
+        activeTemporaryListeners.clear();
         instance = null;
         super.onDisable();
     }
@@ -151,7 +167,6 @@ public class Main extends JavaPlugin {
         createKitsConfig();
         createArenaConfig();
         createPresetConfig();
-        createCustomConfig();
         getConfig().options().copyDefaults(true);
         FileConfiguration Kits = YamlConfiguration.loadConfiguration(KitsConfigFile);
         FileConfiguration Arenas = YamlConfiguration.loadConfiguration(ArenaConfigFile);
@@ -176,7 +191,8 @@ public class Main extends JavaPlugin {
         commandsMap.put("manualtournaments_reload", new Reload());
         commandsMap.put("manualtournaments_settings", new Settings());
         commandsMap.put("manualtournaments_spectate", new Spectate());
-        commandsMap.put("manualtournaments_queue", new Queue());
+        commandsMap.put("manualtournaments_queue", new net.flex.ManualTournaments.commands.Queue());
+        commandsMap.put("manualtournaments_tournament", new TournamentCommand());
         commandsMap.forEach((command, executor) -> {
             Objects.requireNonNull(getCommand(command)).setExecutor(executor);
             Objects.requireNonNull(getCommand(command)).setTabCompleter((TabCompleter) executor);
@@ -188,6 +204,8 @@ public class Main extends JavaPlugin {
         pluginManager.registerEvents(new GUIListener(), this);
         pluginManager.registerEvents(new SpectateListener(), this);
         pluginManager.registerEvents(new PlayerJumpEvent.CallJumpEvent(), this);
+        pluginManager.registerEvents(new TournamentGUIListener(), this);
+        pluginManager.registerEvents(new TournamentListener(), this);
     }
 
     static String getNMSVersion() {
@@ -228,12 +246,5 @@ public class Main extends JavaPlugin {
         PresetConfig = YamlConfiguration.loadConfiguration(PresetConfigFile);
     }
 
-    private void createCustomConfig() {
-        CustomConfigFile = new File(getDataFolder(), "config.yml");
-        if (!CustomConfigFile.exists()) {
-            CustomConfigFile.getParentFile().mkdirs();
-            saveResource("config.yml", false);
-        }
-        CustomConfig = YamlConfiguration.loadConfiguration(CustomConfigFile);
-    }
+
 }

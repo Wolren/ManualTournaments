@@ -16,7 +16,8 @@ public final class CurrentKitSettings implements SettingsCommand {
         if (context.equals("default")) {
             if (kitNames.contains(value)) {
                 config.set("current-kit", value);
-                config.save(getCustomConfigFile());
+                getPlugin().saveConfig();
+                config = getPlugin().getConfig();
                 send(player, "config-updated-successfully");
             } else send(player, "kit-not-exists");
         } else {
