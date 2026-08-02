@@ -1,6 +1,6 @@
 # ManualTournaments
 
-[![License](https://img.shields.io/github/license/Wolren/ManualTournaments)](LICENSE)
+[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments/commits)
 [![Issues](https://img.shields.io/github/issues/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments/issues)
 [![Repo size](https://img.shields.io/github/repo-size/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments)
