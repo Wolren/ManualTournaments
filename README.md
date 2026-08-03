@@ -1,14 +1,19 @@
+<div align="center">
+
 # ManualTournaments
 
-[![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments/commits)
-[![Issues](https://img.shields.io/github/issues/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments/issues)
-[![Repo size](https://img.shields.io/github/repo-size/Wolren/ManualTournaments)](https://github.com/Wolren/ManualTournaments)
-[![Java](https://img.shields.io/badge/Java-21-orange?logo=java)](pom.xml)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.8--1.21-green?logo=minecraft)](https://minecraft.net)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Wolren/ManualTournaments/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Wolren/ManualTournaments)
+Spigot/Paper plugin for organizing manual fights and automated single-elimination tournaments. Create arenas, configure kits, run team fights or full bracket tournaments with prizes, scheduling, and MySQL persistence.
 
-ManualTournaments is a Spigot/Paper plugin for organizing manual fights and automated single-elimination tournaments. Create arenas, configure kits, and run team fights or full bracket tournaments with prizes, scheduling, and MySQL persistence.
+[![License][license-badge]][license-url]
+[![Last commit][commit-badge]][commits-url]
+[![Issues][issues-badge]][issues-url]
+[![Code size][size-badge]][repo-url]
+[![Java][java-badge]][pom-url]
+[![Minecraft][mc-badge]][mc-url]
+[![CI][ci-badge]][ci-url]
+[![Scorecard][scorecard-badge]][scorecard-url]
+
+</div>
 
 ## Features
 
@@ -29,6 +34,18 @@ ManualTournaments is a Spigot/Paper plugin for organizing manual fights and auto
 - **Interactive GUIs** - arena, kit, settings, and bracket management
 - **1.8 to 1.21 support** - across all listed Minecraft versions
 
+## Architecture
+
+```mermaid
+graph LR
+    A["/tournament create"] --> B["Tournament"]
+    B --> C["Bracket"]
+    C --> D["Matches"]
+    D --> E["Winner"]
+    E --> F["Prizes"]
+    B --> G["MySQL / YAML"]
+```
+
 ## Installation
 
 1. Download the JAR from the [releases page](https://github.com/Wolren/ManualTournaments/releases)
@@ -41,6 +58,7 @@ No external dependencies required. PlaceholderAPI is optional.
 ## Quick Setup
 
 ### GUI
+
 ```
 /arena gui     - create and manage arenas
 /kit gui       - create and manage kits
@@ -48,6 +66,7 @@ No external dependencies required. PlaceholderAPI is optional.
 ```
 
 ### Manual
+
 1. `/arena create (name)` - create an arena
 2. `/arena pos1 (name)` - set team 1 spawn
 3. `/arena pos2 (name)` - set team 2 spawn
@@ -64,6 +83,7 @@ Example: `/fight team p1 p2 p3 p4` creates 2v2 (p1+p2 vs p3+p4).
 ## Tournament System
 
 ### Quick start
+
 ```
 /tournament create myEvent 16 myArena myKit       - 16 player solo tournament
 /tournament create myEvent 16 myArena myKit 2      - 2v2 tournament (8 teams)
@@ -151,6 +171,7 @@ All tournament chat messages are customizable via config.yml with placeholders:
 `{name}`, `{player}`, `{winner}`, `{loser}`, `{p1}`, `{p2}`, `{players}`, `{rounds}`
 
 ### MySQL Setup
+
 ```yaml
 mysql-enabled: true
 mysql:
@@ -158,6 +179,7 @@ mysql:
   username: root
   password: ""
 ```
+
 Then run `/tournament reload` and optionally `/tournament migrate` to move existing data.
 Paper ships a compatible JDBC driver. Falls back to YAML automatically if unavailable.
 
@@ -188,22 +210,18 @@ Other plugins can listen for tournament lifecycle:
 
 ## Building
 
-Requires JDK 21 and IntelliJ IDEA (bundled Maven).
+Requires JDK 21.
 
 ```bash
-cd ManualTournaments
-JAVA_HOME="path/to/jdk-21" \
-"path/to/IntelliJ/plugins/maven/lib/maven3/bin/mvn" \
-  clean package
+JAVA_HOME="path/to/jdk-21" mvn clean package
 ```
 
-The shaded JAR is at `target/ManualTournaments-1.5.jar`.
+The shaded JAR is at `target/ManualTournaments-1.5.1.jar`.
 
 ### Running tests
+
 ```bash
-JAVA_HOME="path/to/jdk-21" \
-"path/to/IntelliJ/plugins/maven/lib/maven3/bin/mvn" \
-  test
+JAVA_HOME="path/to/jdk-21" mvn test
 ```
 
 31 tests covering bracket logic, team generation, serialization, and edge cases.
@@ -217,8 +235,55 @@ The plugin supports Minecraft 1.8 through 1.21 on Spigot and Paper. Some feature
 - **`/kit unbreakable`** - before 1.11 does not set items to unbreakable
 - **Freeze during countdown** - optimized for newer versions
 
+## Tech stack
+
+| Tool | Purpose |
+|---|---|
+| Java 21 | Language and build target |
+| Spigot / Paper API | Server APIs |
+| Maven | Build tool |
+| HikariCP | MySQL connection pool |
+| PlaceholderAPI | Placeholder expansion (optional) |
+| JUnit 5 + MockBukkit | Testing |
+
+## Limitations
+
+- MySQL storage needs Paper's bundled JDBC driver; other servers fall back to YAML automatically.
+- Some behaviors vary by Minecraft version (see Version Support).
+- Bracket generation is single-elimination only.
+- Per-tournament join permission is opt-in via config.
+
 ## Links
 
-- [Spigot page](https://www.spigotmc.org/resources/manualtournaments.XXXXX/)
+- [Spigot page](https://www.spigotmc.org/resources/manual-tournaments.105850/)
 - [Issue tracker](https://github.com/Wolren/ManualTournaments/issues)
 - [License](LICENSE)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md).
+
+## License
+
+PolyForm Noncommercial 1.0.0 - free for noncommercial use; commercial use and monetary gain require explicit written approval from the author. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+[license-badge]: https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue
+[license-url]: LICENSE
+[commit-badge]: https://img.shields.io/github/last-commit/Wolren/ManualTournaments
+[commits-url]: https://github.com/Wolren/ManualTournaments/commits
+[issues-badge]: https://img.shields.io/github/issues/Wolren/ManualTournaments
+[issues-url]: https://github.com/Wolren/ManualTournaments/issues
+[size-badge]: https://img.shields.io/github/languages/code-size/Wolren/ManualTournaments
+[repo-url]: https://github.com/Wolren/ManualTournaments
+[java-badge]: https://img.shields.io/badge/Java-21-orange?logo=java
+[pom-url]: pom.xml
+[mc-badge]: https://img.shields.io/badge/Minecraft-1.8--1.21-green?logo=minecraft
+[mc-url]: https://minecraft.net
+[ci-badge]: https://github.com/Wolren/ManualTournaments/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/Wolren/ManualTournaments/actions/workflows/ci.yml
+[scorecard-badge]: https://api.securityscorecards.dev/projects/github.com/Wolren/ManualTournaments/badge
+[scorecard-url]: https://securityscorecards.dev/viewer/?uri=github.com/Wolren/ManualTournaments
